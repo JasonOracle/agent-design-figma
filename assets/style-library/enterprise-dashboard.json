@@ -12,7 +12,7 @@
     "textColors": ["#303133", "#606266", "#909399", "#C0C4CC"],
     "stroke": "#E4E7ED",
     "chartColors": ["#5470C6", "#91CC75", "#FAC858", "#FC8452", "#EE6666"],
-    "typography": "系统栈（PingFang SC / Microsoft YaHei + Inter 数字）/ 字阶 26-32-16-24-14-20-13-20-12-18-11-16",
+    "typography": "系统栈（降级链 PingFang SC → Microsoft YaHei → Inter 兜底，按链依次探测；数字一律 Inter）/ 字阶 26-32-16-24-14-20-13-20-12-18-11-16",
     "spacing": "8pt 网格 (4/8/12/16/24/32)，卡片内 padding 16",
     "radius": "2/4/6",
     "shadow": "0 1px 4px rgba(0,0,0,0.06)"

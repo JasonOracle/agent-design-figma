@@ -1,6 +1,8 @@
 # design-style-library.md — Style Preset 手册
 
-三套首批 Preset。JSON 正本在 `assets/style-library/`，本文件是设计意图与适用边界的说明。**Preset 是 L1 的一切推导基线，修改 Preset = 修改 Skill 本身，需走版本变更。**
+四套 Preset。JSON 正本在 `assets/style-library/`，本文件是设计意图与适用边界的说明。**Preset 是 L1 的一切推导基线，修改 Preset = 修改 Skill 本身，需走版本变更。**
+
+> 字体统一约定：Preset 的 `typography` 写的是**降级链**，不是单一族名。Windows 的 Figma 没有 PingFang SC / SF Pro，`loadFontAsync` 会直接抛错。L3 必须按链依次探测，首个成功者胜出，并把实际生效的字体回填 build log（见 `bridge-ops.md` §4.2）。
 
 ## A. premium-saas
 
@@ -40,6 +42,20 @@
 - **字体**：标题用 DIN/带科技感数字字体（数字等宽），正文系统栈；最小字号 14px（远距可读）。
 - **适用**：交通/政务/能源/园区的监控与指挥场景。
 - **禁用**：纯白大面积区块、浅色主题、营销文案、动效堆砌（单屏动效 ≤2 处）。
+
+## D. web-marketing
+
+对标：Apple 产品页 / Stripe 首页 / Linear 首页 / Notion 首页。
+
+- **设计意图**：单页讲完一件事，靠**节奏**而不是信息量取胜。纵向区块流（Hero → 价值主张 → 功能 → 社会证明 → CTA → 页脚），每个区块只承担一个叙事任务。
+- **色彩**：墨色（#111827）打底 + **单一品牌色**承重。品牌色允许大面积使用（Hero 底色、色带、CTA），但全站只用一个品牌色；其余交给黑白灰与大图。用户给了品牌色就整体替换 `primaryColor`。
+- **大留白与纵向节奏**：区块垂直间距 96–160px；内容最大宽度 1200px；桌面水平 padding ≥64px、移动 ≥24px。**层级靠字号与留白，不靠投影。**
+- **字阶跨度大**：Hero 56–72px、区标题 28–36px、正文 16–18px。Hero 可用 medium–semibold，正文一律 regular。
+- **Radius 8/12/16**（Hero 图与大卡可 20–24 作例外，须在 DS Spec 里显式声明）。
+- **图片占位**：营销页是唯一大量用图的 Preset。走 `bridge-ops.md` 的 `toPaint` 半透明填充 + 矢量占位块，**不要**伪造图片。
+- **适用**：品牌官网、产品落地页、活动页、发布页。
+- **禁用**：侧边导航、后台式密集信息、数据表格、系统原生控件感、等权模块平铺（无层级）、多品牌色混用、自动轮播、弹窗抢注意力。
+- **与 premium-saas 的分界**：`premium-saas` 服务**订阅制产品界面**（含登录/定价/工作台，密度 sparse 但仍是"用产品"）；`web-marketing` 服务**营销叙事页**（无工作台、无表单后台、只有转化路径）。同一个项目两者并存时按网页分别推导，不要混成一个 Brief。
 
 ## Preset JSON 结构约定
 

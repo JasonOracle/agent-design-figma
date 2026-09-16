@@ -12,7 +12,7 @@
     "textColors": ["#E6F1FF", "#8FB3D9", "#5A7CA6"],
     "stroke": "#1E3A5F",
     "chartColors": ["#00D4FF", "#3D7EFF", "#2EE6A6", "#FFB547", "#FF5C5C"],
-    "typography": "标题 DIN/科技数字字体（数字等宽），正文系统栈 / 最小 14px / 数字 20-26px 强调",
+    "typography": "标题 DIN/科技数字字体（数字等宽，缺失则回退 Inter），正文系统栈（降级链 PingFang SC → Microsoft YaHei → Inter 兜底，按链依次探测）/ 最小 14px / 数字 20-26px 强调",
     "spacing": "8pt 网格，面板间距 16-24px，面板内 padding 16",
     "radius": "2/4",
     "shadow": "0 0 8px rgba(0,212,255,0.6)（仅关键指标与地图热区）"

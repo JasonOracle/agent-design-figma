@@ -10,19 +10,31 @@
       "required": ["name", "industry", "targetUser", "platform"],
       "properties": {
         "name":       { "type": "string", "description": "产品名，未给出时按行业生成占位名并标注 assumption" },
-        "industry":   { "type": "string", "enum": ["教育", "医疗", "政务", "交通", "金融", "美业", "电商", "通用"] },
+        "industry":   { "type": "string", "enum": ["教育", "医疗", "政务", "交通", "金融", "美业", "快消", "电商", "通用"] },
         "targetUser": { "type": "string", "description": "目标用户一句话画像" },
         "platform":   { "type": "string", "enum": ["web-admin", "web-site", "mobile-app", "big-screen"] }
       }
     },
     "designDirection": {
       "type": "object",
-      "required": ["style", "keywords", "reference", "avoid"],
+      "required": ["style", "keywords", "reference", "avoid", "avoidOverrides"],
       "properties": {
-        "style":     { "type": "string", "enum": ["premium-saas", "enterprise-dashboard", "gov-digital-screen"], "description": "命中的 Style Preset id" },
+        "style":     { "type": "string", "enum": ["premium-saas", "enterprise-dashboard", "gov-digital-screen", "web-marketing"], "description": "命中的 Style Preset id" },
         "keywords":  { "type": "array", "items": { "type": "string" }, "minItems": 3, "description": "设计关键词（中文优先）" },
         "reference": { "type": "array", "items": { "type": "string" }, "description": "对标产品/设计语言，如 Apple / Stripe / Element Plus" },
-        "avoid":     { "type": "array", "items": { "type": "string" }, "description": "明确禁止的设计元素，如 渐变/玻璃拟态/3D" }
+        "avoid":     { "type": "array", "items": { "type": "string" }, "description": "生效中的禁用元素清单：Preset avoid 基线，剔除被用户显式点名覆盖的项" },
+        "avoidOverrides": {
+          "type": "array",
+          "description": "用户显式点名、已从 avoid 剔除的项。无覆盖时输出空数组以表明已仲裁（见 design-intelligence.md §⑧）",
+          "items": {
+            "type": "object",
+            "required": ["item", "reason"],
+            "properties": {
+              "item":   { "type": "string", "description": "必须原样出自该 Preset 的 avoid 列表" },
+              "reason": { "type": "string", "description": "固定格式：用户显式要求：<原文片段>" }
+            }
+          }
+        }
       }
     },
     "informationArchitecture": {
@@ -54,9 +66,9 @@
       "required": ["colorMood", "primaryColor", "background", "typography", "spacing", "radius"],
       "properties": {
         "colorMood":    { "type": "string", "description": "色彩情绪一句话，如 冷静专业蓝紫 / 深空科技蓝" },
-        "primaryColor": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$", "description": "必须出自 Style Preset 或行业映射表" },
+        "primaryColor": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$", "description": "出处优先级：用户显式品牌色 > 行业映射表 > Style Preset" },
         "background":   { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
-        "typography":   { "type": "string", "description": "字体族+字阶摘要，如 Inter / 26-32-16-14-13-12-11" },
+        "typography":   { "type": "string", "description": "字体降级链+字阶摘要，如 Inter（PingFang SC → Microsoft YaHei → Inter 兜底）/ 26-32-16-14-13-12-11。单一族名不合格——Windows 无 PingFang SC" },
         "spacing":      { "type": "string", "description": "间距基数，如 8pt 网格 (4/8/12/16/24/32)" },
         "radius":       { "type": "string", "description": "圆角档位，如 4/6/8 或 2/4/6" }
       }

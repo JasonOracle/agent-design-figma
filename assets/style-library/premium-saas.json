@@ -12,7 +12,7 @@
     "textColors": ["#111827", "#6B7280", "#9CA3AF"],
     "stroke": "#E5E7EB",
     "chartColors": ["#5A5CF0", "#10B981", "#F59E0B", "#EF4444", "#6366F1"],
-    "typography": "Inter / SF Pro（中文 PingFang SC）/ 字阶 26-32-16-14-13-12-11，标题 medium 不用 bold",
+    "typography": "Inter（首选，跨平台恒可用）/ SF Pro（中文降级链 PingFang SC → Microsoft YaHei → Inter 兜底；Windows 无 PingFang SC，必须按链依次探测）/ 字阶 26-32-16-14-13-12-11，标题 medium 不用 bold",
     "spacing": "8pt 网格，区块间距 48-80px，页面水平 padding ≥80px",
     "radius": "4/6/8",
     "shadow": "0 1px 2px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04)"
