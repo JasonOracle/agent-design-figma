@@ -65,9 +65,19 @@
     "_meta": {
       "type": "object",
       "properties": {
-        "reviewer":   { "type": "string", "description": "审查执行者（agent 版本/模式）" },
+        "reviewer":   { "type": "string", "description": "审查执行者（agent 版本/模式）；须写明本次证据档位 structured-only 或 structured+vision" },
         "reviewedAt": { "type": "string", "description": "ISO 8601" },
         "inputs":     { "type": "array", "items": { "type": "string" }, "description": "审查依据的产物路径（brief/dsspec/build-ids/export-manifest）" }
+      }
+    },
+    "_evidence": {
+      "type": "object",
+      "description": "三维视觉维（Consistency/Commercial/Usability）的证据档位声明（visual-critic.md §1.6）。通用档恒产出；增益档（能读图）为附加，不得替代通用档",
+      "required": ["mode"],
+      "properties": {
+        "mode":              { "type": "string", "enum": ["structured-only", "structured+vision"], "description": "本次评审用的档位。structured-only = 环境不能读图，仅结构化回读" },
+        "unassessed":        { "type": "array", "items": { "type": "string" }, "description": "本环境无法评估的检查项，须逐条列明（如「Commercial §1.4 商业产品相似度 40%：需读图并置比对」）。空数组才允许声称该维完整评估——禁止把未评估项当通过" },
+        "visionObservations":{ "type": "array", "items": { "type": "string" }, "description": "增益档观察，每条须写「看到了什么 + 对应节点或区域 + 影响哪一维」；mode=structured-only 时须为空数组" }
       }
     }
   }
