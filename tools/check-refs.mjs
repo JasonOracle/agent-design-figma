@@ -23,6 +23,10 @@
  *     所以真文件 `manifest.json`（2 段）不会被误豁免。
  *   · 角度占位符 —— `<skill 根目录>/tools/runtime-check.mjs`、`<readback.json>` 里的尖括号段先剥掉，
  *     占位符不是文件；剥完以 `/` 开头的路径按仓库根锚定。
+ *   · 后缀式提及 —— 以 `.` 开头、不含 `/`、且全仓库找不到同名的 token（如 「不是 `.dsspec.json`」）
+ *     是**扩展名/后缀模式**的写法，不是文件名。真 dotfile（`.gitignore` 之类）存在时会走
+ *     basename 命中，所以这条只对"查不到的"生效——**代价是漏掉 dotfile 的拼写错误**，这个取舍是有意的：
+ *     一个在正常散文上反复误报的校验器，用户会直接关掉它，那比漏报更糟。
  *
  * 写文档的约定（否则会被本工具如实抓出）：
  *   要举例时用**占位符**（`node <skill>/tools/xxx.mjs`、`<readback.json>`）或改用叙述，
@@ -124,6 +128,8 @@ const isDotPath = (t) => {
   const seg = t.split(".");
   return seg.length >= 3 && DOTPATH_ROOTS.has(seg[0]);
 };
+/** 后缀式提及：以 `.` 开头、无 `/`（如 `.dsspec.json` 这种"扩展名"写法）。真 dotfile 会走 basename 命中。 */
+const isSuffixMention = (t) => !t.includes("/") && t.startsWith(".");
 
 /** 剥掉角度占位符段：`<skill 根目录>/tools/x.mjs` → `/tools/x.mjs` */
 const stripPlaceholders = (line) => line.replace(/<[^<>\n]{0,48}>/g, "");
@@ -170,6 +176,7 @@ const dangling = [];
 const resolved = [];
 let exemptRuntime = 0;
 let exemptDotpath = 0;
+let exemptSuffix = 0;
 let refCount = 0;
 
 for (const doc of files.filter((f) => f.endsWith(".md")).sort()) {
@@ -201,6 +208,10 @@ for (const doc of files.filter((f) => f.endsWith(".md")).sort()) {
         exemptDotpath++;
         continue;
       }
+      if (isSuffixMention(ref) && !fileSet.has(ref) && !baseMap.has(path.posix.basename(ref))) {
+        exemptSuffix++;
+        continue;
+      }
       refCount++;
       const r = resolveRef(ref, doc);
       if (r.ok) resolved.push({ doc, line: ln, ref, how: r.how, hit: r.hit });
@@ -227,7 +238,7 @@ for (const d of dangling) console.log(`  FAIL  ${d.doc}:${d.line}  →  ${d.ref}
 
 console.log(bar);
 console.log(`  扫描文档 ${scanned.length} 篇（跳过开发者内部文档 ${skippedDocs.length} 篇：${skippedDocs.join("、") || "无"}）`);
-console.log(`  引用总数 ${refCount} ｜ 已解析 ${resolved.length} ｜ 豁免 运行时=${exemptRuntime} 点路径=${exemptDotpath} ｜ 悬空 ${dangling.length}`);
+console.log(`  引用总数 ${refCount} ｜ 已解析 ${resolved.length} ｜ 豁免 运行时=${exemptRuntime} 点路径=${exemptDotpath} 后缀=${exemptSuffix} ｜ 悬空 ${dangling.length}`);
 
 if (dangling.length) {
   console.log(`\n结果：${dangling.length} FAIL —— 文档引用了不存在的文件，必须修掉或补豁免理由`);

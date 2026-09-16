@@ -8,9 +8,9 @@
  * 做法：在临时目录里造两个样本仓库，把「应该被抓」和「不该误报」的引用逐条喂进去，
  * 断言 check-refs.mjs 的**输出与退出码**都符合预期。
  *
- * 覆盖 9 类引用形态：
+ * 覆盖 10 类引用形态：
  *   应报（悬空）3：命令式缺脚本 · 裸名全局无同名 · 相对路径缺文件
- *   应豁免     6：真实路径 · basename 兜底 · glob · 运行时产物 · 点路径 · 角度占位符
+ *   应豁免     7：真实路径 · basename 兜底 · glob · 运行时产物 · 点路径 · 角度占位符 · 后缀式提及
  *   另有 1 类「整篇跳过」：开发者内部文档（`<版本号>-*.md`）允许引用包外文件
  *
  * 用法：node tools/check-refs-mutation.mjs
@@ -54,6 +54,7 @@ write(
     "8 点路径豁免：`tokens.radius.md`",
     "9 角度占位符剥除：`node <skill 根目录>/tools/ok.mjs`",
     "10 二段点路径是真文件：`manifest.json`",
+    "11 后缀式提及（扩展名，不是文件）：`.dsspec.json`",
   ].join("\n") + "\n",
 );
 // 开发者内部文档：允许引用包外文件，整篇跳过
@@ -74,12 +75,13 @@ check(bad.length === 3, `样本A 恰好报 3 条悬空（实际 ${bad.length}：
 for (const ref of ["tools/run.mjs", "ghost.md", "references/missing.md"]) {
   check(bad.some((b) => b.endsWith(ref) || b === ref), `样本A 抓到应报项 ${ref}`);
 }
-for (const ref of ["references/real.md", "ok.mjs", "references/*.md", ".vibe/runtime-capability.json", "tokens.radius.md", "manifest.json"]) {
+for (const ref of ["references/real.md", "ok.mjs", "references/*.md", ".vibe/runtime-capability.json", "tokens.radius.md", "manifest.json", ".dsspec.json"]) {
   check(!bad.some((b) => b.includes(ref)), `样本A 未误报豁免项 ${ref}`);
 }
 check(!outA.includes("never-exists.md") && !outA.includes("tools/zzz.py"), "样本A 开发者内部文档（9.9-plan.md）整篇跳过");
 check(/运行时=1/.test(outA), "样本A 运行时豁免计数 = 1（规则真的生效，不是空转）");
 check(/点路径=1/.test(outA), "样本A 点路径豁免计数 = 1");
+check(/后缀=1/.test(outA), "样本A 后缀式提及豁免计数 = 1（规则真的生效，不是空转）");
 
 /* ---------------- 样本 B：干净样本（反向用例） ---------------- */
 
