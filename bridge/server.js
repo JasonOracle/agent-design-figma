@@ -50,6 +50,11 @@ const MAX_TIMEOUT = Number(arg("maxTimeout", 600000));  // stage builds can outl
 const MAX_WAIT = 60000;
 const PLUGIN_STALE_MS = 45000;                  // after this we consider the plugin gone
 const HISTORY_MAX = 50;
+const DEFAULT_CHUNK = 40;                       // ops per plugin `run` (see POST /v1/batch)
+const MAX_CHUNK = 200;
+// Params that may carry a batch reference ("@last" / "$name") instead of a real
+// node id. Must stay in sync with ID_KEYS in figma-plugin/code.js.
+const BATCH_REF_KEYS = ["id", "parentId", "childId", "nodeId", "componentId", "targetId", "from"];
 
 /* --- token -------------------------------------------------------- */
 
@@ -259,6 +264,53 @@ function deliverResult(id, ok, data, error) {
 }
 
 /* ------------------------------------------------------------------ */
+/* batch planning                                                     */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Does any step point at an EARLIER step instead of a real node id?
+ *
+ * The plugin's `run` keeps a `named` map and a `lastCreatedId` that live for
+ * the duration of ONE call, so splitting steps across two calls silently
+ * breaks every "$name" / "@last" reference ("unknown batch reference").
+ * Only node-reference params are inspected - a step whose *text content* is
+ * "$9.99" is not a reference and must not force a single chunk.
+ */
+function usesBatchRefs(steps) {
+  for (const s of steps) {
+    const params = (s && s.params) || {};
+    for (const key of BATCH_REF_KEYS) {
+      const v = params[key];
+      if (v === "@last" || (typeof v === "string" && v.startsWith("$"))) return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Slice steps into chunks, each of which becomes ONE plugin `run` call.
+ *
+ * Why chunking matters: a 296-op page build is 296 HTTP long-poll roundtrips
+ * (each one a full poll/execute/result cycle) and takes 1-2 minutes of wall
+ * clock that is almost entirely waiting, not drawing. Grouped, the same build
+ * is ~8 roundtrips.
+ *
+ * Why it is all-or-nothing when references are present: a chunk boundary
+ * resets the reference namespace, so any batch that chains nodes together has
+ * to run as one unit. That is the honest trade - you cannot have chunked
+ * progress reporting and cross-chunk references at the same time.
+ */
+function planChunks(steps, size) {
+  if (usesBatchRefs(steps)) return { chunks: [{ base: 0, steps }], referenced: true };
+  if (steps.length <= size) return { chunks: [{ base: 0, steps }], referenced: false };
+  const chunks = [];
+  for (let i = 0; i < steps.length; i += size) {
+    chunks.push({ base: i, steps: steps.slice(i, i + size) });
+  }
+  return { chunks, referenced: false };
+}
+
+/* ------------------------------------------------------------------ */
 /* HTTP                                                               */
 /* ------------------------------------------------------------------ */
 
@@ -358,6 +410,15 @@ const handleRequest = async (req, res) => {
       host: HOST,
       port: PORT,
       tokenRequired: true,
+      endpoints: {
+        command: "POST /v1/command   { op, params, timeoutMs?, allowOfflineQueue? }",
+        batch: "POST /v1/batch     { steps:[{op,params}], chunkSize?, onError?:'abort'|'continue' }",
+        history: "GET  /v1/history?n=20",
+        poll: "GET  /v1/poll?client=.. (plugin only)",
+        result: "POST /v1/result?client=.. (plugin only)",
+        hello: "POST /v1/hello   (plugin only)",
+      },
+      batch: { defaultChunkSize: DEFAULT_CHUNK, maxChunkSize: MAX_CHUNK },
       plugin: pluginStatus(),
       queue: queue.length,
       inflight: inflight.size,
@@ -471,6 +532,81 @@ const handleRequest = async (req, res) => {
       log(`command ${body.op} failed: ${code} ${e.message}`);
       return sendErr(res, http, code, e.message, e.partial ? { partial: e.partial } : undefined);
     }
+  }
+
+  /* ---- caller: many ops, few roundtrips ---- */
+  if (route === "POST /v1/batch") {
+    let body;
+    try { body = await readBody(req); } catch (e) { return sendErr(res, 400, e.code || "BAD_BODY", e.message); }
+    const steps = Array.isArray(body.steps) ? body.steps : (Array.isArray(body.ops) ? body.ops : null);
+    if (!steps || steps.length === 0) {
+      return sendErr(res, 400, "BAD_BODY", "`steps` must be a non-empty array of {op, params}");
+    }
+    for (let i = 0; i < steps.length; i++) {
+      const s = steps[i];
+      if (!s || typeof s.op !== "string") {
+        return sendErr(res, 400, "BAD_BODY", `steps[${i}].op must be a string`);
+      }
+      if (s.op === "run") {
+        return sendErr(res, 400, "BAD_BODY", `steps[${i}].op must not be "run" - /v1/batch already batches; pass the steps flat`);
+      }
+    }
+    const size = Math.min(Math.max(Number(body.chunkSize) || DEFAULT_CHUNK, 1), MAX_CHUNK);
+    const onError = body.onError === "continue" ? "continue" : "abort";
+    const timeoutMs = Math.min(Math.max(Number(body.timeoutMs) || DEFAULT_TIMEOUT, 1000), MAX_TIMEOUT);
+    const plan = planChunks(steps, size);
+    const startedAt = Date.now();
+    const results = [];
+    let chunksRun = 0;
+    let failedAt = null;
+
+    log(`batch  ${steps.length} step(s) in ${plan.chunks.length} chunk(s) of <=${size} (onError=${onError})`);
+    for (let c = 0; c < plan.chunks.length; c++) {
+      const { base, steps: chunk } = plan.chunks[c];
+      try {
+        const data = await submitAndWait("run", { ops: chunk }, timeoutMs, body.allowOfflineQueue === true);
+        for (const r of (data && data.ops) || []) {
+          results.push({ step: base + r.step, op: r.op, ok: r.ok !== false, data: r.data, error: r.error });
+        }
+        chunksRun++;
+      } catch (e) {
+        // The plugin's `run` fails fast and hands back the steps that DID land,
+        // so a failed batch still reports exactly how far the canvas got - the
+        // caller can resume from `failedAt.step` instead of rebuilding blind.
+        for (const r of e.partial || []) {
+          results.push({ step: base + r.step, op: r.op, ok: r.ok !== false, data: r.data, error: r.error });
+        }
+        const failedIndex = base + ((e.partial && e.partial.length) || 0);
+        failedAt = {
+          chunk: c,
+          step: failedIndex,
+          op: steps[failedIndex] ? steps[failedIndex].op : null,
+          code: e.code || "ERROR",
+          error: e.message,
+        };
+        log(`batch  chunk ${c + 1}/${plan.chunks.length} failed at step ${failedIndex}: ${failedAt.code} ${failedAt.error}`);
+        if (onError !== "continue") break;
+      }
+    }
+
+    return send(res, 200, {
+      ok: failedAt === null,
+      status: failedAt === null ? "ok" : (results.length > 0 ? "partial" : "failed"),
+      steps: steps.length,
+      chunks: plan.chunks.length,
+      chunksRun,
+      executed: results.length,
+      remaining: steps.length - results.length - (failedAt ? 1 : 0),
+      results,
+      failedAt,
+      elapsedMs: Date.now() - startedAt,
+      referenced: plan.referenced,
+      note: plan.referenced
+        ? "batch uses $name/@last references, so it ran as a single chunk (references cannot span chunks)"
+        : (failedAt && onError === "continue"
+          ? "onError=continue: the rest of the failed chunk was skipped, later chunks still ran"
+          : undefined),
+    });
   }
 
   /* ---- caller: history ---- */
