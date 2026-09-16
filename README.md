@@ -106,6 +106,7 @@ node ~/.workbuddy/skills/agent-design-figma/tools/qa-plugin.mjs
 - `figma-plugin/` — Figma 插件（导入用，含 manifest / code.js / ui.html）
 - `references/bridge-ops.md` — **写通道 op 权威清单**（36 个 op、参数形状、批量语法、错误码、毛玻璃配方）
 - `references/design-system.md` — **L2 契约**（Brief→DS Spec 推导：五类 Token / 白名单派生 / 组件决策矩阵 / 状态矩阵 / 四平台布局模板）
+- `references/acceptance-criteria.md` — **D1 硬验收标准**（先定档再判 + 「零人工补丁 / 零失效引用 / 零目测评分」三条各自的机械闸门 / 命令表 + 留痕模板 + 三档归因 + 如实列出的盲区）
 - `references/` — 设计智能规则（行业映射 / 风格库 / 视觉审查 / 映射规则 / 运行模式判定）
 - `tools/runtime-check.mjs` — 运行环境自检探针（L0）
 - `tools/qa-plugin.mjs` — 插件回归测试（离线跑，覆盖四种 effect 类型与读回语义）

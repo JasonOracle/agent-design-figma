@@ -99,6 +99,7 @@
 | §6 出口契约（L5 Export Gate）/ #41·42·43 | `qa-export.mjs`(935) · `qa-export-mutation.mjs`(56) | ✅ 已建 |
 | §L0 安装契约（安装即用）/ #45·46·47·48 | `qa-install.mjs`(96) · `qa-install-mutation.mjs`(78) | ✅ 已建 |
 | §7-35 文档引用 | `check-refs.mjs` · `check-refs-mutation.mjs`(18) | ✅ 已建 |
+| §D1 交付验收（三条标准的机械判据与留痕） | `references/acceptance-criteria.md` —— **编排**上面这些闸门，零新增判定 | ✅ 已定稿 |
 | §2 Plugin API（运行时语义）/ §5 环境 / §6 协作 | —— | 📏 纪律，无自动拦截 |
 
 **没被工具守卫的部分，不要假装它被守卫了。**（本 Skill 第一价值观：未跑的层不得假装跑过。）

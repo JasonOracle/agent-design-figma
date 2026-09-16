@@ -173,6 +173,29 @@ Prompt → L1 Brief → L2 DS Spec → L3 Figma Build → L4 Critic（≥8 PASS�
 
 `assets/examples/`：`example-saas.json`（SaaS 教育后台）、`example-health.json`（AI 发型 App，美业健康类）、`example-highway.json`（河南高速智慧养护大屏）。Agent 生成新 Brief 前应先读对应行业示例对齐粒度。
 
+## 交付验收（D1）
+
+跑完一次完整链路后，按 `references/acceptance-criteria.md` 逐闸门验收。它把 D1 的三条**承诺**（零人工补丁 / 零失效引用 / 零目测评分）换成**机械判据**——理由是行为承诺无法验收：跑完之后产物上没有痕迹证明执行者当时守没守规矩。
+
+- **先定档再判**：`node tools/runtime-check.mjs` 定出 `FULL_MODE` / `READ_ONLY_MODE` / `OFFLINE_MODE`，三档可判范围不同；**低档不得冒充高档**（离线档产物不得出现 `liveBuild` / `nodeId` 已回读 / `figmaFileKey` 非 `null`）。
+- **H1 零人工补丁**的判据不是「手有没碰过文件」（不可观测），而是**产物里每个数字要么算得出、要么指得出源**——这条恰好是 C1 / C3 上线时抓到「被编造的数字」用的同一组断言。
+- **H2 零失效引用**分三个时刻：写文档时 `node tools/check-refs.mjs`；发计划前 `node tools/precheck.mjs <plan>`（真 `code.js` 当契约）；有图时再加 `--live`。无图环境下 **记「未核对」，不得折算为通过**。
+- **H3 零目测评分**：L4 每份报告过 `node tools/qa-critic.mjs`（QA4 证据判形状 / QA6 有 `critical` 禁止 PASS / QA7 `structured-only` 下 `unassessed` 必须非空 / QA8 引用的量与 Spec 对得上），Color 维另过 `node tools/contrast-audit.mjs`。
+- **留痕**：验收记录表要**粘贴工具输出的汇总行与退出码**——「通过」两个字不算留痕，因为一个永远返回 0 的脚本也能让人写出「通过」。
+
+一次跑完全部闸门（`<run>` = 本次构建的产物目录）：
+
+```bash
+node tools/runtime-check.mjs
+node tools/qa-install.mjs
+node tools/qa-l2.mjs       --spec <run>/dsspec.json --brief <run>/brief.json
+node tools/contrast-audit.mjs    <run>/dsspec.json
+node tools/precheck.mjs <run>/build-plan.json
+node tools/qa-critic.mjs --report <run>/critic-report.json --brief <run>/brief.json --spec <run>/dsspec.json
+node tools/qa-export.mjs --manifest <run>/export-manifest.json
+node tools/check-refs.mjs
+```
+
 ## 实测不变量（动手前先读）
 
 `references/lessons.md` —— 48 条实测踩坑验证过的不变量（协议 / Plugin API / 数据流 / 测试 / 环境 / 协作）。**L3 写画布前、L4 回读前，以及每一次「这次为什么翻车」的归因，都先查这里**：多数翻车不是新问题，是踩过的坑换了个壳。文中标注了哪些已被工具守卫（⚙️）、哪些仍只能靠纪律（📏）——**没被守卫的部分不得假装被守卫**。

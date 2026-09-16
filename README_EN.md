@@ -106,6 +106,7 @@ Runs through the four effect types and node read-back semantics using a strict F
 - `figma-plugin/` — Figma plugin (for import, includes manifest / code.js / ui.html)
 - `references/bridge-ops.md` — **Authoritative list of write channel ops** (36 ops, parameter shapes, batch syntax, error codes, frosted glass recipes)
 - `references/design-system.md` — **L2 Contract** (Brief→DS Spec derivation: five types of Tokens / whitelist derivation / component decision matrix / state matrix / 4-platform layout templates)
+- `references/acceptance-criteria.md` — **D1 hard acceptance criteria** (determine the runtime tier first; a machine gate for each of "no manual patching / no dead references / no eyeballed scoring"; command table + evidence template + three-way attribution + blind spots stated in the open)
 - `references/` — Design intelligence rules (industry mapping / style libraries / visual critique / mapping rules / runtime mode determination)
 - `tools/runtime-check.mjs` — Runtime environment self-check probe (L0)
 - `tools/qa-plugin.mjs` — Plugin regression test (runs offline, covers four effect types and read-back semantics)
