@@ -167,7 +167,7 @@ Prompt → L1 Brief → L2 DS Spec → L3 Figma Build → L4 Critic（≥8 PASS�
 
 注：FULL_MODE 下 `figmaRead` **同样是 true**——Bridge 自带 `get-page-summary` / `get-node` / `export-node` 读能力（见 `details.readSources`）。读能力不是"只有 MCP 才算"，别把它误读成环境残缺。
 
-铁律：未跑的层不得假装跑过（交付物标注 mode 与降级原因）；探针只读，零新协议、零 Bridge/Plugin 修改。安装指南：`SETUP.md`（普通用户 5 分钟上手），架构边界：`README.md`。安装体验走查：按 `SETUP.md` Step 1–3 实走一遍 + 跑 runtime-check 自检。
+铁律：未跑的层不得假装跑过（交付物标注 mode 与降级原因）；探针只读，零新协议、零 Bridge/Plugin 修改。安装指南：`SETUP.md`（普通用户 5 分钟上手），架构边界：`README.md`。**安装体验不许目测**：改用 `node tools/qa-install.mjs` 出安装契约校验（三模式真跑对照 Capability Matrix / 只读承诺 / cwd 无关性 / 四方文档的提示语逐字复算 / 端口与 token 事实），它会真起一份 bridge 走一遍；`SETUP.md` Step 1–3 的人工实走仍要做，但**结论以脚本为准**。
 
 ## few-shot 示例
 
@@ -175,5 +175,5 @@ Prompt → L1 Brief → L2 DS Spec → L3 Figma Build → L4 Critic（≥8 PASS�
 
 ## 实测不变量（动手前先读）
 
-`references/lessons.md` —— 44 条实测踩坑验证过的不变量（协议 / Plugin API / 数据流 / 测试 / 环境 / 协作）。**L3 写画布前、L4 回读前，以及每一次「这次为什么翻车」的归因，都先查这里**：多数翻车不是新问题，是踩过的坑换了个壳。文中标注了哪些已被工具守卫（⚙️）、哪些仍只能靠纪律（📏）——**没被守卫的部分不得假装被守卫**。
+`references/lessons.md` —— 48 条实测踩坑验证过的不变量（协议 / Plugin API / 数据流 / 测试 / 环境 / 协作）。**L3 写画布前、L4 回读前，以及每一次「这次为什么翻车」的归因，都先查这里**：多数翻车不是新问题，是踩过的坑换了个壳。文中标注了哪些已被工具守卫（⚙️）、哪些仍只能靠纪律（📏）——**没被守卫的部分不得假装被守卫**。
 

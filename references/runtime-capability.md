@@ -49,7 +49,7 @@ Skill 在执行任何层之前，必须先知道"这个环境能跑多远"。本
 |---|---|---|---|---|
 | **FULL_MODE** | ✅ | ✅（Bridge 自带读能力） | L1 → L2 → L3 → L4 → L5 | 正常流程 |
 | **READ_ONLY_MODE** | ❌ | ✅ | L1 → L2 → **Build Plan JSON**（不执行） | "当前环境只有读取能力，需要安装 Figma Bridge 才能自动绘制" |
-| **OFFLINE_MODE** | ❌ | ❌ | 仅设计资产：Brief / DS Spec / Build Plan | "未检测到 Figma 连接能力，仅可生成设计资产" |
+| **OFFLINE_MODE** | ❌ | ❌ | 仅设计资产：Brief / DS Spec / Build Plan | "未检测到 Figma 连接能力，仅可生成设计资产（Brief / DS Spec / Build Plan）" |
 
 ## 4. 逐层降级规则
 

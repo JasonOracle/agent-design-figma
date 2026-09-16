@@ -119,12 +119,15 @@ node ~/.workbuddy/skills/agent-design-figma/tools/qa-plugin.mjs
 - `tools/qa-critic-mutation.mjs` — 对 qa-critic 的变异测试（51 条断言：注入 30+ 类已知缺陷 + 一次全报 + `--strict` 升档 + 自带样例零告警门禁）
 - `tools/qa-export.mjs` — **L5 出口闸门**（935 条断言，QA1–QA9：内置最小 draft-07 校验器对清单做**真 Schema 校验** / 导出物存在 / node id 可回读 / 映射完整 / **token `value` 快照复算 + `source` 继承** / 无孤儿 + Export Gate 自洽 / 冻结禁区零修改 / **身份一致** / **可追溯性**）。首次运行即发现 32 处产物与其声明的 DS Spec 对不上，并修掉 Schema 里一处「描述说允许、语义不允许」的条件分支（`if/then` 只能叠加，放宽必须写在 `else`）
 - `tools/qa-export-mutation.mjs` — 对 qa-export 的变异测试（56 条断言：注入 30+ 类已知缺陷 + Schema 条件分支正反两例 + 基线零告警 + 冻结态「核不了必须说核不了」+ 无 `.git` 路径）
+- `tools/qa-export-mutation.mjs` — 对 qa-export 的变异测试（56 条断言：注入 30+ 类已知缺陷 + Schema 条件分支正反两例 + 基线零告警 + 冻结态「核不了必须说核不了」+ 无 `.git` 路径）
+- `tools/qa-install.mjs` — **安装契约校验（L0，96 条断言）**：三模式端到端真跑（真 bridge + mock 插件 + 假 home，逐态对照 Capability Matrix）· 探针只读承诺与 cwd 无关性（行为验证）· 四方文档的用户可见提示语**逐字复算**（不比对「关键词是否出现」，而是拿探针实跑输出当事实源）· 端口五处一致 / localhost 拼写 / `::1` 绑定 / token 路径与跨重启持久性。首次运行即发现 canonical 文档把 OFFLINE 提示截短（与探针实际输出不符）
+- `tools/qa-install-mutation.mjs` — 对 qa-install 的变异测试（78 条断言：搭自包含「假安装包」夹具，注入 30 类缺陷 + 基线零告警 + 一次报全部 + `--no-behavior`/`--quiet` 降级路径 + 软档命中非零）。**它抓出过本工具自己的三个错**：缺文件时崩成堆栈、`includes(名字)` 被注释喂饱、以及一条「一直绿但其实从没测到东西」的用例
 - `tools/precheck.mjs` — **构建计划开工前预检**（L3）：把你的 op 序列离线过一遍真 `code.js`，一次报出全部静态错误（未知 op / 缺必填 / 参数类型 / 颜色格式 / 效果字段被静默丢弃）；`--live` 可再核对画布已有 id
 - `tools/precheck-mutation.mjs` — 对 precheck 的变异测试（63 条断言：注入 13 类错误 + 36 op 全通跑 + B2 在线核对端到端）
 - `tools/figma-harness.mjs` — 离线加载真 `code.js` 的共享装置（严格效果桩 + 效果字段两侧契约），供 qa-plugin 与 precheck 共用
 - `tools/check-refs.mjs` — 文档引用校验（扫随包 `.md`，命令式引用与反引号路径逐条落地判定，悬空则非零退出）
 - `tools/check-refs-mutation.mjs` — 对 check-refs 的变异测试（造含已知错误的样本仓库，断言能抓错且不误报）
-- `references/lessons.md` — **实测不变量 44 条**（协议 / Plugin API / 数据流 / 测试 / Windows 环境 / 协作；标注哪些已被工具守卫、哪些只能靠纪律）
+- `references/lessons.md` — **实测不变量 48 条**（协议 / Plugin API / 数据流 / 测试 / Windows 环境 / 协作；标注哪些已被工具守卫、哪些只能靠纪律）
 - `assets/examples/example-health.ops.json` — 一份真实的 L3 构建计划样例（42 步），可直接喂给 `precheck.mjs`
 - `assets/style-library/` — 四套 Style Preset（企业后台 / 政务大屏 / 品牌官网 / 现代 SaaS）
 - `assets/templates/` — 各类交付物的 JSON Schema
