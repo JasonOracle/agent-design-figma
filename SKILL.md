@@ -1,6 +1,6 @@
 ---
 name: agent-design-figma
-description: AI UI Designer 五层设计增强 Skill 的 L1 Design Intelligence 层。把一句自然语言需求（如"设计一个现代 SaaS 教育管理后台"）确定性转换为结构化 Design Brief JSON：关键词→风格库匹配、行业映射、信息架构生成、Token 推导、组件预期清单。输出可直接交给 L2 Design System Generation / L3 Figma Generation 消费。触发场景：用户用一句话要求设计 App / 后台 / 大屏 / 网站，需要先把模糊需求规格化。
+description: AI UI Designer 五层设计增强 Skill（L0–L5 全链路）。用一句话把自然语言设计需求变成真正画进 Figma 的界面：L0 运行能力探测 → L1 Design Brief 规格化（关键词→风格库匹配、行业映射、信息架构生成、Token 推导、组件预期清单）→ L2 设计系统生成 → L3 自动绘制进 Figma → L4 五维视觉审查与自动修复（最多 3 轮）→ L5 导出 PNG/SVG 与交付清单。触发场景：① 一句话要求设计 App / 后台 / 大屏 / 网站 / SaaS / dashboard / 落地页 / 移动端界面（如"设计一个现代 SaaS 教育管理后台"、"design an AI health app home screen"）；② 要把模糊需求规格化成 Design Brief / 设计系统 / Design Token；③ 要对已有设计稿或截图做审查、评分、评审；④ 要导出 Figma 交付物（PNG / SVG / 组件与 Token 映射清单）。英文触发词：SaaS, dashboard, admin console, IOC, command center, premium, landing page, mobile app, design system, design brief, visual critique, design review, export Figma assets。降级是显式的：桥接或插件不可用时只产出设计文档三件套，并诚实标注未执行层（FULL_MODE / READ_ONLY_MODE / OFFLINE_MODE）。
 ---
 
 # AI UI Designer — L1 Design Intelligence Layer
@@ -8,6 +8,8 @@ description: AI UI Designer 五层设计增强 Skill 的 L1 Design Intelligence 
 ## 定位
 
 五层架构中的第一层：**把模糊的自然语言需求规格化为可执行的设计契约**。本层不做任何 Figma 操作（L3 职责）、不生成组件（L2 职责）、不评分（L4 职责）。
+
+> 本文件是技能的唯一入口，L1 五步是主流程；L0 运行能力探测、L4 视觉评审、L5 导出交付同样在本文件内规定，见下文对应章节（执行任何层之前都必须先过 L0）。
 
 ```
 User Prompt（自然语言）
