@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * agnet-design-figma Bridge - local bridge server
+ * agent-design-figma Bridge - local bridge server
  * ==================================================================
  *   WorkBuddy / CLI  ──HTTP──▶  Bridge  ──long-poll──▶  Figma plugin UI
  *                                                          │ postMessage
@@ -194,7 +194,7 @@ function submitAndWait(op, params, timeoutMs, allowOfflineQueue) {
   if (!allowOfflineQueue && stale > PLUGIN_STALE_MS) {
     const err = new Error(
       !client
-        ? "No Figma plugin is connected. Open Figma Desktop, run \"agnet-design-figma Bridge (Dev)\" from Plugins > Development, and wait for the panel to show 'connected'."
+        ? "No Figma plugin is connected. Open Figma Desktop, run \"agent-design-figma Bridge (Dev)\" from Plugins > Development, and wait for the panel to show 'connected'."
         : `Figma plugin has not polled for ${Math.round(stale / 1000)}s - it looks closed or crashed. Re-run the plugin and retry.`
     );
     err.code = "PLUGIN_OFFLINE";
@@ -353,7 +353,7 @@ const handleRequest = async (req, res) => {
   /* ---- public health (no token; contains no secrets) ---- */
   if (route === "GET /health" || route === "GET /") {
     return send(res, 200, {
-      service: "agnet-design-figma-bridge",
+      service: "agent-design-figma-bridge",
       ok: true,
       host: HOST,
       port: PORT,
@@ -491,13 +491,13 @@ function start() {
   server.listen(PORT, HOST, () => {
     console.log("");
     console.log("  ┌───────────────────────────────────────────────────────────┐");
-    console.log("  │  agnet-design-figma Bridge  -  local Figma write channel  │");
+    console.log("  │  agent-design-figma Bridge  -  local Figma write channel  │");
     console.log("  └───────────────────────────────────────────────────────────┘");
     log(`listening on http://${HOST}:${PORT}  (loopback only, token required)`);
     log(`token: ${TOKEN}`);
     log(`token file: ${TOKEN_FILE}`);
     console.log("");
-    console.log("  Next: in Figma Desktop -> Plugins > Development > agnet-design-figma Bridge (Dev)");
+    console.log("  Next: in Figma Desktop -> Plugins > Development > agent-design-figma Bridge (Dev)");
     console.log("        the plugin panel should turn green (connected).");
     console.log("");
   });

@@ -1,5 +1,5 @@
 /**
- * agnet-design-figma Bridge - Figma plugin MAIN THREAD (Plugin API realm)
+ * agent-design-figma Bridge - Figma plugin MAIN THREAD (Plugin API realm)
  * ------------------------------------------------------------------
  * This file runs inside Figma's plugin sandbox and is the ONLY place
  * allowed to call the Figma Plugin API (figma.createFrame, etc.).
@@ -21,7 +21,7 @@ figma.showUI(__html__, {
   width: UI_WIDTH,
   height: UI_HEIGHT,
   themeColors: true,
-  title: "agnet-design-figma Bridge",
+  title: "agent-design-figma Bridge",
 });
 
 /* ------------------------------------------------------------------ */
@@ -401,7 +401,7 @@ const handlers = {
   /** Health / liveness probe from the bridge. */
   async ping() {
     return {
-      plugin: "agnet-design-figma Bridge (Dev)",
+      plugin: "agent-design-figma Bridge (Dev)",
       page: figma.currentPage.name,
       pageId: figma.currentPage.id,
       editorType: figma.editorType,

@@ -45,7 +45,7 @@
 <body>
   <header>
     <span id="dot" class="dot"></span>
-    <h1>agnet-design-figma Bridge</h1>
+    <h1>agent-design-figma Bridge</h1>
     <span id="status">booting…</span>
   </header>
 
@@ -64,7 +64,7 @@
 
 <script>
 /* ------------------------------------------------------------------ *
- * agnet-design-figma Bridge - Figma plugin UI iframe
+ * agent-design-figma Bridge - Figma plugin UI iframe
  *
  * This iframe is the only part of the plugin that has network access.
  * It never touches the Plugin API itself: it long-polls the local
@@ -163,7 +163,7 @@ async function resolveBase() {
       var res = await fetchWithTimeout(candidate + "/health", { method: "GET" }, 2500);
       if (res.ok) {
         var body = await res.json();
-        if (body && body.service === "agnet-design-figma-bridge") return candidate;
+        if (body && body.service === "agent-design-figma-bridge") return candidate;
       }
       tried.push(candidate + " -> HTTP " + res.status);
     } catch (e) {
@@ -232,7 +232,7 @@ async function register() {
   await postJson("/v1/hello", {
     clientId: state.clientId,
     label: "figma-plugin-ui",
-    info: { page: state.page, plugin: "agnet-design-figma Bridge (Dev)", editorType: "figma" },
+    info: { page: state.page, plugin: "agent-design-figma Bridge (Dev)", editorType: "figma" },
   });
   state.registered = true;
 }

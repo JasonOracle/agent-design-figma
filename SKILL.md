@@ -1,5 +1,5 @@
 ---
-name: agnet-design-figma
+name: agent-design-figma
 description: AI UI Designer 五层设计增强 Skill 的 L1 Design Intelligence 层。把一句自然语言需求（如"设计一个现代 SaaS 教育管理后台"）确定性转换为结构化 Design Brief JSON：关键词→风格库匹配、行业映射、信息架构生成、Token 推导、组件预期清单。输出可直接交给 L2 Design System Generation / L3 Figma Generation 消费。触发场景：用户用一句话要求设计 App / 后台 / 大屏 / 网站，需要先把模糊需求规格化。
 ---
 

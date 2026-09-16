@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * runtime-check.mjs — agnet-design-figma 运行时能力探针
+ * runtime-check.mjs — agent-design-figma 运行时能力探针
  *
  * 职责：只读探测，不做任何写操作，不创建新通信协议，不修改 Bridge / Plugin。
  *   A. Figma 写能力  = Figma Plugin Bridge 可达 且 插件已连接（GET /health 公开端点）
@@ -22,7 +22,7 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const BRIDGE_URL = process.env.AGNET_BRIDGE_URL || "http://127.0.0.1:45677";
+const BRIDGE_URL = process.env.AGENT_BRIDGE_URL || "http://127.0.0.1:45677";
 const args = process.argv.slice(2);
 const outFlag = args.includes("--out") ? args[args.indexOf("--out") + 1] : null;
 const noWrite = args.includes("--no-write");
@@ -47,7 +47,7 @@ async function probeBridge() {
     return { reachable: false, pluginConnected: false, url: BRIDGE_URL };
   }
   const j = res.body;
-  const isBridge = j.service === "agnet-design-figma-bridge" && j.ok === true;
+  const isBridge = j.service === "agent-design-figma-bridge" && j.ok === true;
   return {
     reachable: isBridge,
     pluginConnected: isBridge && j.plugin?.connected === true,

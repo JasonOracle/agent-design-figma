@@ -11,17 +11,17 @@
 
 ## Step 1 — 安装 Skill（≈1 分钟，只需一次）
 
-把本仓库放到技能目录，并让**文件夹名为 `agnet-design-figma`**：
+把本仓库放到技能目录，并让**文件夹名为 `agent-design-figma`**：
 
 ```bash
-git clone git@github.com:JasonOracle/agnet-design-figma.git ~/.workbuddy/skills/agnet-design-figma
+git clone git@github.com:JasonOracle/agent-design-figma.git ~/.workbuddy/skills/agent-design-figma
 ```
 
 - Windows 的技能目录是 `%USERPROFILE%\.workbuddy\skills\`
 - 不用 git 也可以：下载仓库 ZIP → 解压 → 把整个文件夹放进技能目录
 - 若你用的 IDE 系工具读取 `.codebuddy/skills/`，两个目录各放一份即可
 
-验证：对 Agent 说"帮我检查 agnet-design-figma 是否安装"，或直接进入 Step 4 试一句。
+验证：对 Agent 说"帮我检查 agent-design-figma 是否安装"，或直接进入 Step 4 试一句。
 
 ## Step 2 — 配置 Figma（≈3 分钟，只需一次）
 
@@ -37,7 +37,7 @@ git clone git@github.com:JasonOracle/agnet-design-figma.git ~/.workbuddy/skills/
 
    零依赖，无需 `npm install`，只需要 Node.js ≥ 18。启动后**保持这个终端窗口开着**，它会打印一行 `token: xxxx…`，复制它。
    （Bridge 只监听本机回环地址 127.0.0.1:45677，不对外网开放。）
-4. **连接插件**：在 Figma 中打开任意设计文件 → Plugins → Development → **agnet-design-figma Bridge (Dev)** → 把 token 粘贴进插件面板 → Connect。面板显示已连接即成功。
+4. **连接插件**：在 Figma 中打开任意设计文件 → Plugins → Development → **agent-design-figma Bridge (Dev)** → 把 token 粘贴进插件面板 → Connect。面板显示已连接即成功。
 
 > 为什么需要 token：Bridge 只监听本机回环地址，token 防止其他本地进程误用你的 Figma 连接。每次重启 Bridge token 保持不变（存放在运行目录下自动生成的 `.vibe/token` 文件中）。
 
@@ -98,7 +98,7 @@ FULL_MODE 下你会依次得到：`design-brief.json` → `design-system-spec.js
 | 探针 `figmaWrite: false` 但端口通 | `/health` 的 `plugin.connected` 为 false = 插件未连接，重跑插件并 Connect |
 | 提示端口已被占用 | 已有一个 Bridge 在跑（可能开了多个终端）；关掉多余的，或换端口启动 |
 | `Cannot find module .../bridge/server.js` | 你没在仓库根目录执行。先 `cd` 到含 `bridge/` 的目录，或写绝对路径 |
-| 修改了插件代码不生效 | Figma 插件不会热更新：Plugins → Development → 重新运行 agnet-design-figma Bridge (Dev) |
-| 端口冲突 | `AGNET_BRIDGE_URL` 环境变量可改探针目标；Bridge 端口见其启动日志 |
+| 修改了插件代码不生效 | Figma 插件不会热更新：Plugins → Development → 重新运行 agent-design-figma Bridge (Dev) |
+| 端口冲突 | `AGENT_BRIDGE_URL` 环境变量可改探针目标；Bridge 端口见其启动日志 |
 | 找不到 `figma-plugin/` 目录 | 确认放进技能目录的是**完整仓库文件夹**（含 figma-plugin / bridge / tools / assets / references），而不是只拷了 `SKILL.md` |
 | Figma 导入插件报错 | 确认选的是 `figma-plugin/manifest.json`，且 `code.js` / `ui.html` 与它同一目录 |

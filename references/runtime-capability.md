@@ -8,7 +8,7 @@ Skill 在执行任何层之前，必须先知道"这个环境能跑多远"。本
 
 | 能力 | 探测方式 | 判定为 ✅ 的条件 |
 |---|---|---|
-| **Figma 写能力** | `GET {BRIDGE_URL}/health`（公开端点，无 token、无副作用，复用现有 Bridge，零协议新增） | `service === "agnet-design-figma-bridge"` 且 `plugin.connected === true` |
+| **Figma 写能力** | `GET {BRIDGE_URL}/health`（公开端点，无 token、无副作用，复用现有 Bridge，零协议新增） | `service === "agent-design-figma-bridge"` 且 `plugin.connected === true` |
 | **Figma 读能力** | 读 `~/.workbuddy/mcp.json`，存在**未 disabled** 且名称/参数含 `figma` 的已知读取型 MCP（figma-context / figma-developer-mcp / framelink） | 至少一个匹配 |
 
 约束（硬性）：

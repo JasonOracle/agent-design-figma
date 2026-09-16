@@ -1,4 +1,4 @@
-# agnet-design-figma · AI UI 设计技能
+# agent-design-figma · AI UI 设计技能
 
 一句话：**你只说"设计一个 AI 医疗 App 首页"，它自动完成从设计定位到 Figma 成稿再到质量审查与交付文件的全过程。**
 
@@ -19,10 +19,10 @@
 **1. 把本仓库放进技能目录**
 
 ```bash
-git clone git@github.com:JasonOracle/agnet-design-figma.git ~/.workbuddy/skills/agnet-design-figma
+git clone git@github.com:JasonOracle/agent-design-figma.git ~/.workbuddy/skills/agent-design-figma
 ```
 
-Windows 对应 `%USERPROFILE%\.workbuddy\skills\`；不熟悉 git 也可以直接下载 ZIP，解压后把整个文件夹放进该目录，文件夹名保持 `agnet-design-figma`。
+Windows 对应 `%USERPROFILE%\.workbuddy\skills\`；不熟悉 git 也可以直接下载 ZIP，解压后把整个文件夹放进该目录，文件夹名保持 `agent-design-figma`。
 （部分 IDE 系工具读取的是 `.codebuddy/skills/`，两个目录都放一份最省事。）
 
 **2. 在仓库根目录启动本地桥接程序**（零依赖，无需 npm install）
@@ -81,7 +81,7 @@ Skill 是设计大脑，只产出 JSON 契约与构建计划；对 Figma 的实�
 
 ## English
 
-**agnet-design-figma** is an AI UI design skill: describe the screen you want in one sentence (product type + page + vibe), and it runs the whole pipeline for you — design brief → design system → **automatically drawing the page into your Figma file** → automated visual critique (5 dimensions, self-repair up to 3 rounds) → PNG / SVG / export manifest.
+**agent-design-figma** is an AI UI design skill: describe the screen you want in one sentence (product type + page + vibe), and it runs the whole pipeline for you — design brief → design system → **automatically drawing the page into your Figma file** → automated visual critique (5 dimensions, self-repair up to 3 rounds) → PNG / SVG / export manifest.
 
 Requirements: Node.js ≥ 18 (no npm install needed — the bundled bridge uses only Node built-ins) and Figma Desktop for the drawing step. Works in Chinese; industry semantics (healthcare / government / education / enterprise dashboard) are built in.
 
