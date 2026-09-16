@@ -113,12 +113,14 @@ Runs through the four effect types and node read-back semantics using a strict F
 - `tools/qa-l2.mjs` — L2 Output validation (four items: Schema / no unknown colors in Token / coverage and quantity / DS single source of truth); can validate any output (`--spec` + `--brief`)
 - `tools/qa-l2-mutation.mjs` — Mutation test for qa-l2 (injects known errors item by item to ensure the validation actually alarms — prevents "fake validations that always PASS")
 - `tools/layout-audit.mjs` — L4 Layout audit (gap / alignment / scales / out of bounds / touch targets, based on get-node measured coordinates)
+- `tools/contrast-audit.mjs` — L4 Color-dimension contrast audit: recomputes the WCAG ratio for the "text × surface" matrix from the DS Spec tokens, and compares **every hand-written number** in `accessibility.contrast` against the recomputation (on first run, 9 of the 13 claimed values in the bundled examples did not match)
+- `tools/contrast-audit-mutation.mjs` — Mutation test for contrast-audit (36 cases: injects 9 error classes + boundary values / non-white backgrounds / non-hex values, asserting it catches errors without false positives)
 - `tools/precheck.mjs` — **Pre-flight check before build plan execution** (L3): runs your op sequence offline through the real `code.js`, reports all static errors at once (unknown op / missing required fields / param types / color formats / effect fields silently dropped); `--live` can further cross-check existing ids on the canvas
 - `tools/precheck-mutation.mjs` — Mutation test for precheck (63 assertions: injects 13 types of errors + full run of 36 ops + B2 online end-to-end cross-check)
 - `tools/figma-harness.mjs` — Shared harness for offline loading of real `code.js` (strict effect stub + effect field bi-directional contract), shared by qa-plugin and precheck
 - `tools/check-refs.mjs` — Document reference validation (scans bundled `.md` files, verifies imperative references and backtick paths line by line, exits non-zero if dangling)
 - `tools/check-refs-mutation.mjs` — Mutation test for check-refs (creates a sample repo with known errors, asserts it catches errors without false positives)
-- `references/lessons.md` — **35 empirically measured invariants** (protocol / Plugin API / data flow / testing / Windows environment / collaboration; marks which are guarded by tools and which rely purely on discipline)
+- `references/lessons.md` — **38 empirically measured invariants** (protocol / Plugin API / data flow / testing / Windows environment / collaboration; marks which are guarded by tools and which rely purely on discipline)
 - `assets/examples/example-health.ops.json` — A real L3 build plan example (42 steps), can be fed directly to `precheck.mjs`
 - `assets/style-library/` — Four Style Presets (Enterprise Backend / Gov Dashboard / Brand Website / Modern SaaS)
 - `assets/templates/` — JSON Schemas for various deliverables

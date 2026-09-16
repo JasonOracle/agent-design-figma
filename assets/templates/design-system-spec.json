@@ -201,7 +201,7 @@
       "type": "object",
       "required": ["contrast", "minFontSize", "touchTarget", "focusRing"],
       "properties": {
-        "contrast":    { "type": "array", "items": { "type": "string" }, "description": "逐条 前景/背景 对比值与结论，如 text.primary on surface.card = 12.6:1 PASS" },
+        "contrast":    { "type": "array", "items": { "type": "string" }, "description": "逐条 前景/背景 对比值与结论，如 text.primary on surface.card = 13.0:1 PASS；标签词表 PASS(≥4.5) / PASS-LARGE(≥3, 仅大字号) / FAIL-TEXT(<3)。数字须由 tools/contrast-audit.mjs 复算，不得手写估计" },
         "minFontSize": { "$ref": "#/definitions/tokenValue" },
         "touchTarget": { "$ref": "#/definitions/tokenValue" },
         "focusRing":   { "$ref": "#/definitions/tokenValue" },

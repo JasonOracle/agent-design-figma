@@ -326,7 +326,7 @@ KPI Tile → GIS Center → Monitoring Panels；数据即装饰，动效每屏 �
 | `components` | §9 componentPlan | 判定结果 + briefRefs + states |
 | `layout` | §11 layoutPlan | pattern / frameBaseline / pages[].zones |
 | `responsive` | 平台规则 | baseline / breakpoints / rules |
-| `accessibility` | AC 规则 | contrast 逐条结论 / minFontSize / touchTarget / focusRing |
+| `accessibility` | AC 规则 | contrast 逐条结论（数字须由 `tools/contrast-audit.mjs` 复算，标签 PASS ≥4.5 / PASS-LARGE ≥3 / FAIL-TEXT <3）/ minFontSize / touchTarget / focusRing |
 | `sourceMapping` | §4.3 | presetId / rulesUsed / briefOverrides / existingDsRefs / assumptions |
 
 **可选字段 `buildPlan`**：L2 预估的构建批次视图（`estOps` 上限 30 由 Schema `maximum` 强制）。**真正的批次规模以 L3 运行期 readback 为准**，本字段仅作交接参考。

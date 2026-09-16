@@ -161,9 +161,9 @@
   },
   "accessibility": {
     "contrast": [
-      "text.primary #303133 on surface.card #FFFFFF = 12.6:1 PASS（正文）",
-      "text.regular #606266 on surface.card #FFFFFF = 7.0:1 PASS（正文）",
-      "text.secondary #909399 on surface.card #FFFFFF = 4.2:1 PASS-LARGE（仅辅助信息，禁用于 14px 以下正文）",
+      "text.primary #303133 on surface.card #FFFFFF = 13.0:1 PASS（正文）",
+      "text.regular #606266 on surface.card #FFFFFF = 6.1:1 PASS（正文）",
+      "text.secondary #909399 on surface.card #FFFFFF = 3.1:1 PASS-LARGE（仅辅助信息，禁用于 14px 以下正文）",
       "brand.primary #5A5CF0 on surface.card #FFFFFF = 5.0:1 PASS（可作文字色与控件色）",
       "status.warning #FAC858 on surface.card #FFFFFF = 1.6:1 FAIL-TEXT（禁止作文字色，仅作色块/边框/图标底）"
     ],

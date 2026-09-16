@@ -42,7 +42,7 @@ Figma Export PNG / 结构化 READBACK
 |---|---|---|
 | Token 使用率 | 全页扫描 fills/strokes，unknownColors = 0（白名单 = L2 tokens 全量 + #FFFFFF/#000000） | 35% |
 | 主色比例 | primary 面积占比 5%–15%（<5% 品牌感弱，>15% 视觉疲劳）；深色大屏放宽至 3%–20% | 20% |
-| 对比度 | text.primary/regular on surface ≥ 4.5:1（WCAG AA）；caption ≥ 3:1 | 20% |
+| 对比度 | text.primary/regular on surface ≥ 4.5:1（WCAG AA）；caption ≥ 3:1。比值一律由 `tools/contrast-audit.mjs` 复算，**禁手写估计** | 20% |
 | 状态色规范 | success/warning/danger/info 只出现在语义场景，不得挪作装饰 | 15% |
 | unknownColors | 每出现 1 处非白名单色：本项计 0 且必须出 issue（severity=high） | 一票扣 |
 

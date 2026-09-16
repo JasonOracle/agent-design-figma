@@ -124,10 +124,10 @@
   },
   "accessibility": {
     "contrast": [
-      "text.primary #E6F1FF on background.page #0A1A3C = 14.4:1 PASS（标题/正文）",
-      "text.regular #8FB3D9 on surface.card #0F2547 = 6.5:1 PASS（面板正文）",
-      "text.secondary #5A7CA6 on surface.card #0F2547 = 3.3:1 FAIL-TEXT（仅装饰性标签，禁用于数据正文）",
-      "brand.primary #00D4FF on background.page #0A1A3C = 9.5:1 PASS（数据高亮）",
+      "text.primary #E6F1FF on background.page #0A1A3C = 15.0:1 PASS（标题/正文）",
+      "text.regular #8FB3D9 on surface.card #0F2547 = 7.0:1 PASS（面板正文）",
+      "text.secondary #5A7CA6 on surface.card #0F2547 = 3.5:1 PASS-LARGE（仅装饰性标签，禁用于数据正文）",
+      "brand.primary #00D4FF on background.page #0A1A3C = 9.7:1 PASS（数据高亮）",
       "远距可读红线：3m 视距下正文字号 ≥14px、关键指标数字 ≥20px（preset avoid + typography 红线）"
     ],
     "minFontSize": { "value": 14, "source": "rule:TY-3(preset avoid 禁 <14px，高于常规 11/12 下限)" },

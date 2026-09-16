@@ -121,6 +121,7 @@ Export PNG / 结构化 READBACK → 五维评分（Layout/Color/Consistency/Comm
 ```
 
 - **布局审计不许目测**：Layout 维的 gap / 对齐 / 档位 / 越界 / 触控一律用 `node tools/layout-audit.mjs <readback.json> --baseline <WxH>` 出违规清单（基于 get-node 实测坐标，可复现、可回归），不要现写临时代码算坐标。读取时用 `get-node {depth:2~3, detail:true}` 取全子树——回读若只有不带几何的子级，工具会明确提示深审不可用。
+- **对比度不许手写**：Color 维的 WCAG 比值、以及 DS Spec `accessibility.contrast` 里已经写下的每个数字，一律用 `node tools/contrast-audit.mjs <spec.json>` 复算。它做两件事：① 从 tokens 推导「文本 × 表面」矩阵给出精确比值与 AA/AAA 档位；② 把每条**声称值**与复算结果逐条比对，并交叉验证声称里写的 hex 与 token 实际值是否一致。**手写的对比度数字不可信**——随包三份样例首次复算即发现 13 条里 9 条与 WCAG 公式不符（偏差 0.17~1.64）。判定用未舍入原值（`4.478` 显示成 `4.5` 也不许当通过）。
 - 评分模型与 Loop 规则：`references/visual-critic.md`
 - issue → 层路由与回写约束（CR-1~5）：`references/critic-mapping.md`
 - Report Schema：`assets/templates/critic-report.json`（evidence 必填、targetLayer ∈ L1/L2/L3）
@@ -173,5 +174,5 @@ Prompt → L1 Brief → L2 DS Spec → L3 Figma Build → L4 Critic（≥8 PASS�
 
 ## 实测不变量（动手前先读）
 
-`references/lessons.md` —— 36 条实测踩坑验证过的不变量（协议 / Plugin API / 数据流 / 测试 / 环境 / 协作）。**L3 写画布前、L4 回读前，以及每一次「这次为什么翻车」的归因，都先查这里**：多数翻车不是新问题，是踩过的坑换了个壳。文中标注了哪些已被工具守卫（⚙️）、哪些仍只能靠纪律（📏）——**没被守卫的部分不得假装被守卫**。
+`references/lessons.md` —— 38 条实测踩坑验证过的不变量（协议 / Plugin API / 数据流 / 测试 / 环境 / 协作）。**L3 写画布前、L4 回读前，以及每一次「这次为什么翻车」的归因，都先查这里**：多数翻车不是新问题，是踩过的坑换了个壳。文中标注了哪些已被工具守卫（⚙️）、哪些仍只能靠纪律（📏）——**没被守卫的部分不得假装被守卫**。
 
