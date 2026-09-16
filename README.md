@@ -70,10 +70,13 @@ node ~/.workbuddy/skills/agent-design-figma/tools/qa-plugin.mjs
 - `bridge/server.js` — 本地桥接程序（零依赖，Figma 自动绘制的写通道；含 `POST /v1/batch` 批量通道）
 - `figma-plugin/` — Figma 插件（导入用，含 manifest / code.js / ui.html）
 - `references/bridge-ops.md` — **写通道 op 权威清单**（36 个 op、参数形状、批量语法、错误码、毛玻璃配方）
+- `references/design-system.md` — **L2 契约**（Brief→DS Spec 推导：五类 Token / 白名单派生 / 组件决策矩阵 / 状态矩阵 / 四平台布局模板）
 - `references/` — 设计智能规则（行业映射 / 风格库 / 视觉审查 / 映射规则 / 运行模式判定）
 - `tools/runtime-check.mjs` — 运行环境自检探针（L0）
 - `tools/qa-plugin.mjs` — 插件回归测试（离线跑，覆盖四种 effect 类型与读回语义）
 - `tools/qa-bridge.mjs` — Bridge 端到端测试（起真实服务 + mock 插件，覆盖批量通道）
+- `tools/qa-l2.mjs` — L2 产出校验（四项：Schema / Token 无未知色 / 覆盖与数量 / DS 单源）；可校验任意产物（`--spec` + `--brief`）
+- `tools/qa-l2-mutation.mjs` — 对 qa-l2 的变异测试（逐项注入已知错误，确认校验真的会报警——防「永远 PASS 的假校验」）
 - `tools/layout-audit.mjs` — L4 布局审计（gap / 对齐 / 档位 / 越界 / 触控，基于 get-node 实测坐标）
 - `assets/style-library/` — 四套 Style Preset（企业后台 / 政务大屏 / 品牌官网 / 现代 SaaS）
 - `assets/templates/` — 各类交付物的 JSON Schema
