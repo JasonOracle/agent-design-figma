@@ -162,3 +162,8 @@ Prompt → L1 Brief → L2 DS Spec → L3 Figma Build → L4 Critic（≥8 PASS�
 ## few-shot 示例
 
 `assets/examples/`：`example-saas.json`（SaaS 教育后台）、`example-health.json`（AI 发型 App，美业健康类）、`example-highway.json`（河南高速智慧养护大屏）。Agent 生成新 Brief 前应先读对应行业示例对齐粒度。
+
+## 实测不变量（动手前先读）
+
+`references/lessons.md` —— 35 条实测踩坑验证过的不变量（协议 / Plugin API / 数据流 / 测试 / 环境 / 协作）。**L3 写画布前、L4 回读前，以及每一次「这次为什么翻车」的归因，都先查这里**：多数翻车不是新问题，是踩过的坑换了个壳。文中标注了哪些已被工具守卫（⚙️）、哪些仍只能靠纪律（📏）——**没被守卫的部分不得假装被守卫**。
+

@@ -78,6 +78,9 @@ node ~/.workbuddy/skills/agent-design-figma/tools/qa-plugin.mjs
 - `tools/qa-l2.mjs` — L2 产出校验（四项：Schema / Token 无未知色 / 覆盖与数量 / DS 单源）；可校验任意产物（`--spec` + `--brief`）
 - `tools/qa-l2-mutation.mjs` — 对 qa-l2 的变异测试（逐项注入已知错误，确认校验真的会报警——防「永远 PASS 的假校验」）
 - `tools/layout-audit.mjs` — L4 布局审计（gap / 对齐 / 档位 / 越界 / 触控，基于 get-node 实测坐标）
+- `tools/check-refs.mjs` — 文档引用校验（扫随包 `.md`，命令式引用与反引号路径逐条落地判定，悬空则非零退出）
+- `tools/check-refs-mutation.mjs` — 对 check-refs 的变异测试（造含已知错误的样本仓库，断言能抓错且不误报）
+- `references/lessons.md` — **实测不变量 35 条**（协议 / Plugin API / 数据流 / 测试 / Windows 环境 / 协作；标注哪些已被工具守卫、哪些只能靠纪律）
 - `assets/style-library/` — 四套 Style Preset（企业后台 / 政务大屏 / 品牌官网 / 现代 SaaS）
 - `assets/templates/` — 各类交付物的 JSON Schema
 - `assets/examples/` — 三个行业的完整示例（企业后台 / 医疗 App / 政务大屏）
