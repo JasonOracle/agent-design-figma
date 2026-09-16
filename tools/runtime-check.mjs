@@ -9,7 +9,8 @@
  *                      存在启用的 Figma MCP（figma-context / figma-developer-mcp / framelink 等）
  *
  * 输出 runtime-capability.json：
- *   { figmaRead, figmaWrite, executor, mode, details, checkedAt }
+ *   { version, figmaRead, figmaWrite, executor, mode, details, checkedAt }
+ *   version 读自技能根目录的 VERSION 文件（路径由本脚本自身定位，不受 cwd 影响）
  *
  * mode 判定（Skill 消费的唯一契约）：
  *   FULL_MODE      写✅          → L1→L2→L3→L4→L5 全链路
@@ -93,6 +94,15 @@ function probeMcpRead() {
   return { available: configured, servers: found, configPath: usedPath };
 }
 
+/** C. 版本：读技能根目录的 VERSION（路径由本脚本自身定位，不受 cwd 影响） */
+function readVersion() {
+  try {
+    return fs.readFileSync(fileURLToPath(new URL("../VERSION", import.meta.url)), "utf8").trim() || null;
+  } catch {
+    return null; // 老版本可能没有 VERSION 文件，不因此让探针失败
+  }
+}
+
 const bridge = await probeBridge();
 const mcp = probeMcpRead();
 
@@ -112,6 +122,7 @@ const readSources = [
 const mode = figmaWrite ? "FULL_MODE" : figmaRead ? "READ_ONLY_MODE" : "OFFLINE_MODE";
 
 const capability = {
+  version: readVersion(),
   figmaRead,
   figmaWrite,
   executor: figmaWrite ? "figma-plugin-bridge" : null,

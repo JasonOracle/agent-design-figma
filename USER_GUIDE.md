@@ -59,7 +59,7 @@ Skill 在你的 Figma 文件里新建页面并自动绘制（分批执行，每�
 |---|---|---|
 | `design-brief.json` | 设计定位（风格/行业/平台/约束） | 评审方向 |
 | `design-system-spec.json` | 设计系统全量定义 | 设计/开发对接 |
-| `build-plan.json` | Figma 构建计划（分批、操作数） | 了解生成过程 |
+| DS Spec 的 `buildPlan` 字段 | Figma 构建计划（分批、操作数） | 了解生成过程 |
 | Figma 页面 | 成品画布 | 设计稿本体 |
 | `critic-report.json` | 五维评分 + 问题 + 修复记录 | 质量追溯 |
 | `export-manifest.json` | 交付清单与三层映射 | 开发落地 |

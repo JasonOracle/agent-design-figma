@@ -87,7 +87,7 @@ manualNote: "装饰层无参数化价值；前端用 CSS 渐变/SVG 实现入口
 约束：
 1. **不重命名、不换算**：value 原样导出（px 不转 rem，换算属实现层职责并记录在 layoutRules）；
 2. **source 必须随行**：token 映射条目继承 DS Spec 的 source 前缀（preset:/brief:/rule:/derived:/existing-ds:），derived 值导出的是**重算后的最终值**；
-3. QA5 会沿 `dsToken` 点路径回溯 DS Spec 原文验证存在性，并校验 cssVariable 命名规则。
+3. QA5：沿 `dsToken` 点路径回溯 DS Spec 原文核对存在性，并校验 cssVariable 命名规则（逐条核对，本 Skill 不随包附带校验脚本）。
 
 ## 6. Layout → Implementation Rules（mapping.layoutRules）
 

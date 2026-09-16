@@ -21,6 +21,7 @@ Skill 在执行任何层之前，必须先知道"这个环境能跑多远"。本
 
 ```json
 {
+  "version": "1.2.0-dev",
   "figmaRead": true,
   "figmaWrite": true,
   "executor": "figma-plugin-bridge",
@@ -36,6 +37,7 @@ Skill 在执行任何层之前，必须先知道"这个环境能跑多远"。本
 }
 ```
 
+- `version`：读自技能根目录的 `VERSION` 文件，用于确认当前跑的是哪个版本（`-dev` 后缀 = 开发中未发布）。**每个交付物都应带上它**，这样"这份稿子是哪个版本画的"永远可答。
 - `mode` 枚举锁死：`FULL_MODE | READ_ONLY_MODE | OFFLINE_MODE`
 - `executor`：仅写能力存在时为 `"figma-plugin-bridge"`，否则 `null`
 - `details.readSources`：读能力的实际来源清单（bridge / mcp），用于解释"为什么 FULL_MODE 也是 figmaRead:true"
@@ -52,7 +54,7 @@ Skill 在执行任何层之前，必须先知道"这个环境能跑多远"。本
 ## 4. 逐层降级规则
 
 - **L1 / L2**：三模式全部可跑（纯知识层，不碰 Figma）。
-- **L3 Build Plan**：三模式全部产出 `build-plan.json`；仅 FULL_MODE 将其交给 Adapter 执行。
+- **L3 Build Plan**：三模式全部产出 Build Plan（当前作为 DS Spec 的 `buildPlan` 字段，不单独出文件）；仅 FULL_MODE 将其交给 Adapter 执行。
 - **L4 Critic**：仅 FULL_MODE 可跑。READ_ONLY 下若仅有读 MCP 且用户提供了 Figma 文件链接，允许对**已存在**的页面做只读审查，但不得谎称为生成后审查。
 - **L5 Export**：仅 FULL_MODE。其余模式输出 export-manifest 的 `design-phase` 规划态（复用 Export Gate 既有语义：criticScore 缺失 ⇒ 不放行 live-build）。
 - **诚实铁律**：任何模式都不得假装执行了被降级的层；未跑的层在交付物中标注 `"mode": "<mode>"` 与降级原因。

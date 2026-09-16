@@ -121,7 +121,7 @@ Round 3  最终评分 → 终审报告
 | CL-5 | 每轮修复后必须**重新审查受影响页**并记录 history（各轮 average），禁止只修不评 |
 | CL-6 | 修复动作必须走 critic-mapping.md 路由，禁止跨层私改（如绕过 L2 直接在 L3 改死色值） |
 
-Report 中 `_loop` 字段记录轮次与历史均分，QA 校验 `round ≤ 3`。
+Report 中 `_loop` 字段记录轮次与历史均分，出口检查须确认 `round ≤ 3`。
 
 ## 4. 审查执行方式
 
@@ -136,4 +136,4 @@ Report 中 `_loop` 字段记录轮次与历史均分，QA 校验 `round ≤ 3`�
 
 - 输入依赖：L3 的 export（PNG/SVG）+ build-ids 快照 + L2 DS Spec（白名单/档位/触控红线）
 - 输出去向：`critic-mapping.md` 路由 → L1（designDirection/visualSystem）/ L2（token/组件规格）/ L3（Build Plan/节点重建）
-- 回写后重走受影响层的 stage gate；L2 回写必须重跑 DS Spec QA 脚本
+- 回写后重走受影响层的 stage gate；L2 回写必须重跑 L2 出口检查（DS Spec 逐条核对）

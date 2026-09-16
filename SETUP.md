@@ -69,6 +69,7 @@ node ~/.workbuddy/skills/agent-design-figma/tools/runtime-check.mjs
 
 ```json
 {
+  "version": "1.2.0-dev",
   "figmaRead": true,
   "figmaWrite": true,
   "executor": "figma-plugin-bridge",
