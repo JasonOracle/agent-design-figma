@@ -1,8 +1,18 @@
 # agent-design-figma · AI UI 设计技能
 
+[English Version](README_EN.md)
+
 一句话：**你只说"设计一个 AI 医疗 App 首页"，它自动完成从设计定位到 Figma 成稿再到质量审查与交付文件的全过程。**
 
 安装后你只需要告诉 AI 你想设计什么——行业风格、配色、字体、组件、页面结构，全部由 Skill 自动推导；生成结果会经过自动视觉审查，不达标会自动修复并复检。
+
+## 项目背景与渊源
+
+本项目脱胎于我的全链路开源实验项目 —— [JasonOracle/figma-agent-bridge](https://github.com/JasonOracle/figma-agent-bridge)（旨在探索 AI Agent 从设计系统构建、整页高保真设计，到前端代码还原的全链路自动化）。
+
+在原本的 `figma-agent-bridge` 项目中，我成功构建了一条让 AI 直接操作真实 Figma 画布的本地通道。为了让这套强大的“AI 设计大脑”能够被更广泛地复用，我将其中最核心的 **自动化 UI 设计技能（Skill）** 提炼出来，经过深度优化与封装，独立封装为当前的 `agent-design-figma` 项目。
+
+它专注于解决一个核心场景：**赋予大模型专业的 UI 设计认知与跨端落地能力**。你可以将它作为独立组件，无缝接入你自己的 AI 助理或 Agent 开发流中，零门槛获得一条开箱即用的自动化设计流水线。
 
 ## 它能做什么
 
@@ -13,6 +23,31 @@
 | "设计一个企业后台 Dashboard" | 同上，自动套用企业级中后台风格 |
 
 支持中文行业语义（医疗 / 政务 / 教育 / 企业后台等），配色与风格来自内置行业映射规则，不随机、不套模板。
+
+## 实际生成效果展示
+
+以下是新用户安装 Skill 后，只需简单一句话指令，由大模型全自动生成并渲染到 Figma 的真实效果文件展示。
+
+**Figma 客户端真实画布渲染效果：**
+
+<div align="center">
+  <img src="./assets/demo-outputs/figma-workspace.png" width="100%" alt="Figma Workspace Screenshot" />
+</div>
+<br/>
+
+**生成的高清页面细节（含首页、产品、关于我们等）：**
+
+<div align="center">
+  <img src="./assets/demo-outputs/home@2x.png" width="48%" alt="Home Page Generation" />
+  <img src="./assets/demo-outputs/about@2x.png" width="48%" alt="About Page Generation" />
+</div>
+<br/>
+<div align="center">
+  <img src="./assets/demo-outputs/products@2x.png" width="48%" alt="Products Page Generation" />
+  <img src="./assets/demo-outputs/story@2x.png" width="48%" alt="Story Page Generation" />
+</div>
+
+*注：以上页面从产品结构规划、文案生成、设计系统搭建到 Figma 节点渲染，全程由 Agent 零人工干预自动完成。*
 
 ## 安装（3 步）
 
@@ -78,9 +113,13 @@ node ~/.workbuddy/skills/agent-design-figma/tools/qa-plugin.mjs
 - `tools/qa-l2.mjs` — L2 产出校验（四项：Schema / Token 无未知色 / 覆盖与数量 / DS 单源）；可校验任意产物（`--spec` + `--brief`）
 - `tools/qa-l2-mutation.mjs` — 对 qa-l2 的变异测试（逐项注入已知错误，确认校验真的会报警——防「永远 PASS 的假校验」）
 - `tools/layout-audit.mjs` — L4 布局审计（gap / 对齐 / 档位 / 越界 / 触控，基于 get-node 实测坐标）
+- `tools/precheck.mjs` — **构建计划开工前预检**（L3）：把你的 op 序列离线过一遍真 `code.js`，一次报出全部静态错误（未知 op / 缺必填 / 参数类型 / 颜色格式 / 效果字段被静默丢弃）；`--live` 可再核对画布已有 id
+- `tools/precheck-mutation.mjs` — 对 precheck 的变异测试（63 条断言：注入 13 类错误 + 36 op 全通跑 + B2 在线核对端到端）
+- `tools/figma-harness.mjs` — 离线加载真 `code.js` 的共享装置（严格效果桩 + 效果字段两侧契约），供 qa-plugin 与 precheck 共用
 - `tools/check-refs.mjs` — 文档引用校验（扫随包 `.md`，命令式引用与反引号路径逐条落地判定，悬空则非零退出）
 - `tools/check-refs-mutation.mjs` — 对 check-refs 的变异测试（造含已知错误的样本仓库，断言能抓错且不误报）
-- `references/lessons.md` — **实测不变量 35 条**（协议 / Plugin API / 数据流 / 测试 / Windows 环境 / 协作；标注哪些已被工具守卫、哪些只能靠纪律）
+- `references/lessons.md` — **实测不变量 36 条**（协议 / Plugin API / 数据流 / 测试 / Windows 环境 / 协作；标注哪些已被工具守卫、哪些只能靠纪律）
+- `assets/examples/example-health.ops.json` — 一份真实的 L3 构建计划样例（42 步），可直接喂给 `precheck.mjs`
 - `assets/style-library/` — 四套 Style Preset（企业后台 / 政务大屏 / 品牌官网 / 现代 SaaS）
 - `assets/templates/` — 各类交付物的 JSON Schema
 - `assets/examples/` — 三个行业的完整示例（企业后台 / 医疗 App / 政务大屏）
@@ -102,13 +141,5 @@ Skill 每次启动会用 `tools/runtime-check.mjs` 探测环境，自动选择�
 Skill 是设计大脑，只产出 JSON 契约与构建计划；对 Figma 的实际读写由你环境里的现有通道完成（本仓库自带的插件 + 本地桥接程序，或市场已有的 Figma MCP）。**本 Skill 不开发、不替代任何 MCP。**
 
 ---
-
-## English
-
-**agent-design-figma** is an AI UI design skill: describe the screen you want in one sentence (product type + page + vibe), and it runs the whole pipeline for you — design brief → design system → **automatically drawing the page into your Figma file** → automated visual critique (5 dimensions, self-repair up to 3 rounds) → PNG / SVG / export manifest.
-
-Requirements: Node.js ≥ 18 (no npm install needed — the bundled bridge uses only Node built-ins) and Figma Desktop for the drawing step. Works in Chinese; industry semantics (healthcare / government / education / enterprise dashboard) are built in.
-
-Quick start: `git clone` this repo into your skills directory, run `node bridge/server.js`, import `figma-plugin/manifest.json` into Figma, paste the token. Then just say *"design an AI health app home screen"*.
 
 MIT licensed.

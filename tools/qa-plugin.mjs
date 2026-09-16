@@ -10,78 +10,26 @@
  * 这个脚本用"像 Figma 一样严格"的校验桩把这类问题挡在提交之前。
  *
  * 做法：用 vm 加载真实的 figma-plugin/code.js（源码一字不改），只注入一个受控的
- * `figma` 桩，然后直接调用它内部的 handlers。
+ * `figma` 桩，然后直接调用它内部的 handlers。装置见 `tools/figma-harness.mjs`
+ * （与 `tools/precheck.mjs` 共用同一份桩与效果字段白名单——那份白名单是安全关键
+ * 常量，粘贴第二份将来必然腐坏成两份不一致）。
  * 零依赖：只用 node 内置模块。
  */
-import fs from "node:fs";
 import path from "node:path";
-import vm from "node:vm";
 import assert from "node:assert/strict";
 import { fileURLToPath } from "node:url";
+import { loadPlugin } from "./figma-harness.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const SRC = path.join(ROOT, "figma-plugin", "code.js");
-const src = fs.readFileSync(SRC, "utf8");
 
-/* ---- 桩：Figma 对效果对象的真实 key 白名单 ---- */
-const ALLOWED_KEYS = {
-  DROP_SHADOW: ["type", "color", "offset", "radius", "spread", "visible", "blendMode"],
-  INNER_SHADOW: ["type", "color", "offset", "radius", "spread", "visible", "blendMode"],
-  LAYER_BLUR: ["type", "radius", "visible"],
-  BACKGROUND_BLUR: ["type", "radius", "visible"],
-};
-
-let seq = 0;
-function makeNode(type, props = {}) {
-  const node = {
-    id: props.id || `n${++seq}`,
-    name: props.name || type,
-    type,
-    width: 100,
-    height: 100,
-    x: 0,
-    y: 0,
-    parent: null,
-    ...props,
-  };
-  if (props.children) {
-    node.children = props.children;
-    for (const c of props.children) c.parent = node;
-  }
-  let effects = [];
-  Object.defineProperty(node, "effects", {
-    get: () => effects,
-    set(v) {
-      for (const e of v) {
-        const allowed = ALLOWED_KEYS[e.type];
-        if (!allowed) throw new Error(`Unknown effect type: ${e.type}`);
-        const bad = Object.keys(e).filter((k) => !allowed.includes(k));
-        if (bad.length) throw new Error(`Unrecognized key(s) in object: ${bad.map((b) => `'${b}'`).join(", ")}`);
-      }
-      effects = v;
-    },
-  });
-  return node;
-}
-
-const nodes = new Map();
-const page = makeNode("PAGE", { id: "page:1", name: "Page 1" });
-page.children = [];
-
-const figmaStub = {
-  showUI() {},
-  ui: { onmessage: null, postMessage() {} },
-  currentPage: page,
-  viewport: { scrollAndZoomIntoView() {} },
-  async getNodeByIdAsync(id) { return nodes.get(id) || null; },
-};
-
-const ctx = vm.createContext({ figma: figmaStub, __html__: "<html></html>", console });
-vm.runInContext(src + "\n;globalThis.__handlers = handlers; globalThis.__nodeInfo = nodeInfo; globalThis.__execute = execute; globalThis.__opNames = OP_NAMES;", ctx);
-const handlers = ctx.__handlers;
-const nodeInfo = ctx.__nodeInfo;
-const execute = ctx.__execute;
-const opNames = ctx.__opNames;
+/* ---- 装置：真源码 + 严格桩（effect 的 key 白名单就住在装置里）---- */
+const harness = loadPlugin();
+const handlers = harness.handlers;
+const nodeInfo = harness.nodeInfo;
+const execute = harness.execute;
+const opNames = harness.opNames;
+const nodes = harness.nodes;
+const makeNode = (type, props) => harness.makeNode(type, props);
 
 let pass = 0;
 const failures = [];

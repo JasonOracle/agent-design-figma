@@ -101,12 +101,16 @@ if (specArg || briefArg) {
     console.error(`目录不存在：${dir}`);
     process.exit(2);
   }
+  // 正向形状筛选：`example-<不含点的名字>.json` 才是 Brief。
+  // 别写成「example- 开头且不是 .dsspec.json」这种反向排除法——目录里一旦出现
+  // **新的兄弟文件类型**（如 example-health.ops.json 这种 L3 构建计划样例），
+  // 它会把这个非 Brief 当 Brief，再报出「同名 Spec 缺失」这种莫名其妙的失败。踩过。
   const briefFiles = fs
     .readdirSync(dir)
-    .filter((n) => n.startsWith("example-") && n.endsWith(".json") && !n.endsWith(".dsspec.json"))
+    .filter((n) => /^example-[^.]+\.json$/.test(n))
     .sort();
   if (!briefFiles.length) {
-    console.error(`目录内没有 example-*.json：${dir}`);
+    console.error(`目录内没有 example-<名字>.json（Brief）：${dir}`);
     process.exit(2);
   }
   for (const f of briefFiles) {
