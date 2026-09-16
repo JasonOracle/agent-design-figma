@@ -44,7 +44,9 @@ git clone https://github.com/JasonOracle/agent-design-figma.git ~/.codebuddy/ski
    （Bridge 只监听本机回环地址 127.0.0.1:45677，不对外网开放。）
 4. **连接插件**：在 Figma 中打开任意设计文件 → Plugins → Development → **agent-design-figma Bridge (Dev)** → 把 token 粘贴进插件面板 → Connect。面板显示已连接即成功。
 
-> 为什么需要 token：Bridge 只监听本机回环地址，token 防止其他本地进程误用你的 Figma 连接。每次重启 Bridge token 保持不变（存放在**仓库目录**下自动生成的 `.vibe/token` 文件中，与你在哪个目录敲命令无关）。
+> 为什么需要 token：Bridge 只监听本机回环地址，token 防止其他本地进程误用你的 Figma 连接。默认启动方式下 token 跨重启保持不变（存放在**仓库目录**下自动生成的 `.vibe/token` 文件中，与你在哪个目录敲命令无关）。
+>
+> ⚠️ **以启动日志打印的 token 为准**。若启动时带了 `--token <值>` 或环境变量 `VIBE_TOKEN`（测试/临时隔离场景才会用到），该值**直接生效但不写入 `.vibe/token`**——此时文件里是旧值，照它连会失败。日常使用不需要这两个参数。
 
 ### Windows / macOS 差异
 

@@ -311,6 +311,26 @@ await expectCase(
   "绑定到仓库目录而非 cwd"
 );
 await expectCase(
+  "bridge 在 --token 路径上也落盘（与「以启动日志为准」的文档承诺冲突）",
+  (d) =>
+    patch(
+      d,
+      "bridge/server.js",
+      'if (typeof fromArg === "string" && fromArg.length >= 8) return fromArg;',
+      'if (typeof fromArg === "string" && fromArg.length >= 8) { fs.mkdirSync(path.dirname(TOKEN_FILE), { recursive: true }); fs.writeFileSync(TOKEN_FILE, fromArg, { mode: 0o600 }); return fromArg; }'
+    ),
+  "不得把该值写入 .vibe/token",
+  [] // 必须带行为段：该断言要真起 bridge 才跑得到
+);
+await expectCase(
+  "文档删掉「以启动日志为准」的告警（用户会照旧 .vibe/token 取值而 401）",
+  (d) => {
+    const t = readF(d, "SETUP.md");
+    writeF(d, "SETUP.md", t.replace(/^> ⚠️ \*\*以启动日志打印的 token 为准\*\*.*$/m, ""));
+  },
+  "都写明「以启动日志为准」"
+);
+await expectCase(
   "manifest.main 指向不存在的文件",
   (d) => patch(d, "figma-plugin/manifest.json", '"main": "code.js"', '"main": "missing.js"'),
   "manifest.main 指向存在的 code.js"

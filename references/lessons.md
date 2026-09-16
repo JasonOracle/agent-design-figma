@@ -85,6 +85,12 @@
 
 48. **用例「通过」可能是因为它根本没测到东西，而变异测试是唯一能发现这件事的手段**：`qa-install` 的「bridge 可达但插件未连」用例一直是绿的，但把探针的 `figmaWrite` 改成 `bridge.reachable` 之后**它还是绿的**。根因是装置把 `url` 返回成了含 `/health` 的完整 URL，探针去请求 `/health/health` 得 404，一路退化成「没有 bridge」——这条用例在「连不上」的假象里通过，从来没真的走到那个分支。**判据：变异之后仍然绿的用例，比变异之后变红的用例更值得看。** ⚙️（`qa-install-mutation.mjs` 抓出）
 
+49. **「在启动时打印的值」不等于「被持久化的值」**：bridge 的 `loadOrCreateToken()` 有**四条返回路径，只有最后一条会写 `.vibe/token`**——`--token` 参数与环境变量 `VIBE_TOKEN` 都是**直接返回、不落盘**。于是用 `--token` 启动时，文档承诺的「`.vibe/token` 就是当前 token」**不成立**，照文档取值必然 401。**判据：凡文档声称「A 与 B 是同一个值」，就必须验证**所有**产生 A 的路径都同步了 B，而不只验默认路径。**（`qa-install` QA7 的「token 跨重启持久性」只跑了默认路径，故漏掉此分支；`qa-bridge.mjs` 恰是用 `--token` 起的，两处各自看都对、合起来才暴露。）📏 → ⚙️（2026-09-16 真实环境实测发现；同日补上 QA7 断言与 2 条变异用例后转为已守卫）
+
+50. **行为型断言若起不来进程，绝不能静默降级成「装置缺口」**：给 #49 补断言时，`tokenFileAfterArgToken()` 把 bridge 脚本路径写成了 `<TMP>/skill/bridge/server.js`，而夹具实际只把 bridge 副本放在 `<TMP>/bridge/`——脚本不存在 → 进程起不来 → 返回 `null` → 走 `gap()` 分支。**结果是：断言一条都没跑，而输出里只有一行人畜无害的「装置缺口」，汇总仍是全绿。** 抓出它的是变异测试（注入「`--token` 也落盘」后依然全绿）。**判据：装置缺口可以有，但必须能区分「环境起不来」与「夹具路径本身就错了」——后者是装置自己的缺陷，必须判 FAIL。** 已在 `qa-install` QA7 加一条装置自检断言。 ⚙️（`qa-install.mjs` + 2 条变异用例）
+
+51. **「读到空值」和「读到真实值」在断言里长得一样，只有把值打进断言消息才能分辨**：同一次修复中，修正路径前后的断言**都是绿的**（`res.value !== dictToken` 恒真——读到 `null` 或读到别的 token 都满足）。差别只在断言消息里：修之前打「实际 文件不存在」，修之后打「实际 "fd64bb91…"」——**前者说明这条断言什么都没测**。**判据：凡断言依赖一个外部取值，就把该值打进消息里**，让"恒真"与"真的验过"在输出上可区分。这与 #40「痕迹判定要判形状」、#48「变异后仍绿的用例更值得看」同源。 ⚙️（`qa-install.mjs` QA7 的 `--token` 断言）
+
 ---
 
 ## 附：本仓库的守卫覆盖
@@ -97,7 +103,7 @@
 | §3 设计（L4 证据与评分）/ #40 | `qa-critic.mjs`(134) · `qa-critic-mutation.mjs`(51) | ✅ 已建 |
 | §2 Plugin API（静态预检） | `precheck.mjs` · `precheck-mutation.mjs`(66) · `figma-harness.mjs` | ✅ 已建 |
 | §6 出口契约（L5 Export Gate）/ #41·42·43 | `qa-export.mjs`(935) · `qa-export-mutation.mjs`(56) | ✅ 已建 |
-| §L0 安装契约（安装即用）/ #45·46·47·48 | `qa-install.mjs`(96) · `qa-install-mutation.mjs`(78) | ✅ 已建 |
+| §L0 安装契约（安装即用）/ #45·46·47·48·49·50·51 | `qa-install.mjs`(100) · `qa-install-mutation.mjs`(82) | ✅ 已建 |
 | §7-35 文档引用 | `check-refs.mjs` · `check-refs-mutation.mjs`(18) | ✅ 已建 |
 | §D1 交付验收（三条标准的机械判据与留痕） | `references/acceptance-criteria.md` —— **编排**上面这些闸门，零新增判定 | ✅ 已定稿 |
 | §2 Plugin API（运行时语义）/ §5 环境 / §6 协作 | —— | 📏 纪律，无自动拦截 |

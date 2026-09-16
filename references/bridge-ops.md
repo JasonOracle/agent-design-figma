@@ -10,7 +10,14 @@
 
 ## 1. 通信契约
 
-Bridge 是本地回环 HTTP 服务（默认 `127.0.0.1:45677`，`--port` 可改），只绑回环，不接受局域网访问。除 `/health` 外**每个请求都要带 token**：`?token=<token>` 或请求头 `x-vibe-token`。token 在启动 Bridge 时打印，也存在 `<repo>/.vibe/token`。
+Bridge 是本地回环 HTTP 服务（默认 `127.0.0.1:45677`，`--port` 可改），只绑回环，不接受局域网访问。除 `/health` 外**每个请求都要带 token**：`?token=<token>` 或请求头 `x-vibe-token`。token 在启动 Bridge 时打印，默认也存在 `<repo>/.vibe/token`。
+
+> **取 token 的正确姿势：以启动日志打印的那一行为准。**
+> `.vibe/token` 只在**未指定 token** 时才会被写入/读取。若启动时带了 `--token <值>` 或设了
+> 环境变量 `VIBE_TOKEN`（`loadOrCreateToken()` 的前两条返回路径），它们**直接生效且不落盘**
+> ——此时 `.vibe/token` 里是**上一次的旧值**，照它取值会 401。`--token` / `VIBE_TOKEN` 是为
+> **测试与临时隔离实例**设计的（各 QA 脚本都这么起，正是为了不污染你的 `.vibe/token`）。
+> 见 `references/lessons.md` #49。
 
 | 端点 | 用途 |
 |---|---|

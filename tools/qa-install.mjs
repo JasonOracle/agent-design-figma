@@ -559,14 +559,21 @@ check((docText["references/bridge-ops.md"] ?? "").includes(".vibe/token"), "QA7 
 
 // token 的位置必须被绑定到「仓库目录」而不是「运行目录/cwd」——bridge 用 __dirname 上溯取 ROOT，
 // 说成「运行目录」会让人以为它跟着 cwd 走，从别处启动时对行为产生错误预期。
+// 判形状而非判行：只看**真正在陈述 token 文件位置**的那些行（即把该路径当主语说「在/位于 X」），
+// 而不是任何顺带提到它的句子——否则「`--token` 不写入 `.vibe/token`」这类讨论落盘行为的句子
+// 会被误判成「没绑定到仓库目录」（2026-09-16 补 #49 断言时自己踩到）。
 const tokenLines = [];
 for (const [f, t] of Object.entries(docText)) {
   for (const line of t.split("\n")) if (line.includes(".vibe/token")) tokenLines.push({ file: f, line });
 }
-const unbound = tokenLines.filter(({ line }) => !/仓库|\brepo\b|skill 根|技能目录/.test(line)).map((x) => x.file);
+const isLocationClaim = (line) => /(在|位于|存在|存放|落在|保存)[^。；]{0,12}`\.vibe\/token`/.test(line);
+const unbound = tokenLines
+  .filter(({ line }) => isLocationClaim(line) && !/仓库|\brepo\b|skill 根|技能目录/.test(line))
+  .map((x) => x.file);
+const locationClaims = tokenLines.filter(({ line }) => isLocationClaim(line));
 check(
-  tokenLines.length > 0 && unbound.length === 0,
-  `QA7 提到 .vibe/token 的文档都把它绑定到仓库目录而非 cwd（未绑定：${none(unbound)}）`
+  locationClaims.length > 0 && unbound.length === 0,
+  `QA7 陈述 token 文件位置的行都绑定到仓库目录而非 cwd（共 ${locationClaims.length} 处，未绑定：${none(unbound)}）`
 );
 
 check(read(".gitignore").includes(".vibe/"), "QA7 .gitignore 忽略 .vibe/（否则 token 会被提交进仓库）");
@@ -604,6 +611,99 @@ async function bridgeTokenOnce() {
   }
   child.kill();
   return null;
+}
+
+// `loadOrCreateToken()` 有四条返回路径，**只有最后一条会写 .vibe/token**：
+//   --token <值>  → 直接返回，不落盘
+//   VIBE_TOKEN    → 直接返回，不落盘
+//   已有文件       → 读取，不写
+//   都没有         → 生成 + 落盘   ← 唯一会写的路径
+// 所以用 --token 启动时，文档若声称「.vibe/token 就是当前 token」即为**过度声称**：
+// 照它取值必然 401（2026-09-16 真实环境实测踩到）。这里把该分支锁住：
+// 断言「带 --token 启动不会把该值写进 .vibe/token」，并断言文档已写明以启动日志为准。
+if (!NO_BEHAVIOR) {
+  const dictToken = "deadbeefdeadbeefdeadbeefdeadbeef";
+  const res = await tokenFileAfterArgToken(dictToken);
+  if (res === null) {
+    // 装置缺口 —— 但要能区分「bridge 起不来」与「bridge 副本不存在（夹具本身错了）」，
+    // 后者属于**装置自己的缺陷**，不该被当成环境性降级混过去。
+    if (!fs.existsSync(path.join(TMP, "bridge", "server.js"))) {
+      check(false, "QA7 装置自检：<TMP>/bridge/server.js 副本存在（否则 token 行为检查恒被跳过）");
+    } else {
+      gap("QA7「--token 不落盘」行为检查未跑成（bridge 未能在临时目录起来）");
+    }
+  } else {
+    check(
+      res.value !== dictToken,
+      `QA7 带 --token 启动时不得把该值写入 .vibe/token（实际 ${res.value === null ? "文件不存在" : JSON.stringify(res.value)}）`
+    );
+    // 该路径连文件都不写（`--token` 直接 return，走不到落盘那一步）；
+    // 若文件恰好已存在（先前默认启动留下的），它必须**保持原值**而不是被覆盖。
+    check(
+      res.value === null || res.value.length >= 8,
+      `QA7 带 --token 启动不破坏已存在的 token 文件（${res.value === null ? "本就不存在，符合预期" : `${res.value.length} 字符`}）`
+    );
+  }
+}
+
+// 文档告警是**纯静态**检查，与行为段无关，必须恒跑。
+// （曾错放进上面的 `if (!NO_BEHAVIOR)` 里——那是 lessons #47「降级开关连坐」的同一个坑：
+//  `--no-behavior` 一开，最值钱的文档一致性检查就静默消失，而汇总看着仍诚实。）
+{
+  const tokenDocSources = [
+    ["SETUP.md", read("SETUP.md")],
+    ["references/bridge-ops.md", docText["references/bridge-ops.md"] ?? ""],
+  ];
+  const notWarned = tokenDocSources.filter(([, t]) => !/以启动日志|启动日志打印|以.*打印.*为准/.test(t)).map(([f]) => f);
+  check(
+    notWarned.length === 0,
+    `QA7 提到 token 取值的文档都写明「以启动日志为准」（未写明：${none(notWarned)}）`
+  );
+}
+
+// 带 --token 起一份 bridge，读该实例的 `.vibe/token` 状态。
+// 路径必须与 `bridgeTokenOnce` 一致：脚本在 `<TMP>/bridge/server.js`，
+// 其 ROOT 由 `__dirname` 上溯一位 = `<TMP>`，故 token 落在 `<TMP>/.vibe/token`。
+// （曾误写成 `<TMP>/skill/bridge/...` 与 `<TMP>/skill/.vibe/token` —— 那里根本没有 bridge 副本，
+//  进程起不来 → 返回 null → 走 gap() 静默跳过，断言"通过"但其实什么都没测。
+//  这正是 lessons #48「变异后仍绿的用例更值得看」与 #47「降级连坐」的同一个坑。）
+// 返回 `{ value }`：value = 文件内容，null 表示文件不存在。
+async function tokenFileAfterArgToken(given) {
+  const port = await freePort();
+  const script = path.join(TMP, "bridge", "server.js");
+  const tokenFile = path.join(TMP, ".vibe", "token");
+  if (!fs.existsSync(script)) return null;
+  const child = spawn(process.execPath, [script, "--port", String(port), "--token", given], {
+    cwd: path.join(TMP, "skill"), // 故意用一个不相干的 cwd，顺带证明 token 路径与 cwd 无关
+    env: { ...process.env, VIBE_PORT: String(port) },
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+  let buf = "";
+  child.stdout.on("data", (d) => (buf += d));
+  child.stderr.on("data", (d) => (buf += d));
+  let up = false;
+  for (let i = 0; i < 50; i++) {
+    await sleep(100);
+    // 等到它真的把 --token 认下来（启动日志会回显该 token 的前缀）
+    if (buf.includes(given.slice(0, 8))) {
+      up = true;
+      break;
+    }
+    if (child.exitCode !== null) break;
+  }
+  if (!up) {
+    child.kill();
+    return null;
+  }
+  let value = null;
+  try {
+    value = fs.readFileSync(tokenFile, "utf8").trim();
+  } catch {
+    value = null;
+  }
+  child.kill();
+  await sleep(150);
+  return { value };
 }
 
 // manifest 与 SETUP 让用户选的插件名一致；main/ui 指向的文件真实存在
