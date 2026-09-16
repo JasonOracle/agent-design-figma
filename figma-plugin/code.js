@@ -151,11 +151,18 @@ function nodeInfo(node, opts) {
   if (typeof node.children !== "undefined") {
     info.childCount = node.children.length;
     if (depth > 0) {
-      info.children = node.children.map((c) => (
-        o.detail
-          ? nodeInfo(c, { depth: depth - 1, detail: true })
-          : { id: c.id, name: c.name, type: c.type }
-      ));
+      info.children = node.children.map((c) => {
+        if (o.detail) return nodeInfo(c, { depth: depth - 1, detail: true });
+        // `depth` has to work on its own. It used to be ignored unless
+        // `detail:true` came along, so get-node {depth:2} answered with
+        // children-only shells whose grandchildren were never in the payload -
+        // a layout audit then burned an extra roundtrip per node to find that
+        // out, and large pages made that the dominant cost. depth:1 keeps the
+        // original light shape (id/name/type) so existing callers see no
+        // payload growth.
+        if (depth > 1) return nodeInfo(c, { depth: depth - 1, detail: false });
+        return { id: c.id, name: c.name, type: c.type };
+      });
     }
   }
   Object.assign(info, styleInfo(node));
@@ -961,9 +968,21 @@ const handlers = {
    * ---------------------------------------------------------------- */
 
   /**
-   * Drop shadow or layer blur. A soft card shadow is what separates a premium
-   * light-mode UI from a flat one, and there is no other way to write it.
+   * Drop shadow, inner shadow or blur. A soft card shadow is what separates a
+   * premium light-mode UI from a flat one, and BACKGROUND_BLUR is the only way
+   * to write a frosted-glass surface - there is no other op for either.
+   *
    * Accepts a `shadow` shorthand, a raw `effects` array, `blur`, or clear:true.
+   *
+   * Field shape is type-dependent ON PURPOSE. Figma validates the effect object
+   * strictly and rejects the WHOLE assignment on any unknown key, so a
+   * LAYER_BLUR carrying a `color` fails with:
+   *   "Unrecognized key(s) in object: 'color'"
+   * That single field used to kill every glassmorphism build at its third op,
+   * because the flagship surface of a premium UI is exactly where a
+   * BACKGROUND_BLUR gets written. Shadow types therefore get
+   * color/offset/radius/spread/blendMode; blur types get type/radius/visible
+   * and nothing else.
    */
   async "set-effects"({ id, shadow, effects, blur, clear }) {
     const node = await getNode(id);
@@ -978,17 +997,14 @@ const handlers = {
       node.effects = effects.map((raw, i) => {
         const e = raw || {};
         const type = normEnum(e.type, ["DROP_SHADOW", "INNER_SHADOW", "LAYER_BLUR", "BACKGROUND_BLUR"], `effects[${i}].type`);
-        const paint = toPaint(e.color !== undefined ? e.color : "#000000");
-        const alpha = e.opacity !== undefined ? num(e.opacity, 0.08, "opacity")
-          : (paint.opacity !== undefined ? paint.opacity : 1);
-        const eff = {
-          type,
-          color: { r: paint.color.r, g: paint.color.g, b: paint.color.b, a: Math.max(0, Math.min(1, alpha)) },
-          visible: e.visible !== false,
-        };
+        const eff = { type, visible: e.visible !== false };
         if (type === "DROP_SHADOW" || type === "INNER_SHADOW") {
+          const paint = toPaint(e.color !== undefined ? e.color : "#000000");
+          const alpha = e.opacity !== undefined ? num(e.opacity, 0.08, "opacity")
+            : (paint.opacity !== undefined ? paint.opacity : 1);
+          eff.color = { r: paint.color.r, g: paint.color.g, b: paint.color.b, a: Math.max(0, Math.min(1, alpha)) };
           eff.offset = { x: num(e.x, 0, "x"), y: num(e.y, 1, "y") };
-          eff.radius = num(e.blur, 2, "blur");
+          eff.radius = num(e.blur !== undefined ? e.blur : e.radius, 2, "blur");
           eff.spread = num(e.spread, 0, "spread");
           eff.blendMode = "NORMAL";
         } else {
