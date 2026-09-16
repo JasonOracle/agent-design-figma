@@ -2,6 +2,9 @@
 .vibe/
 runtime-capability.json
 
+# 本仓库开发期的工作目录（记忆 / 临时夹具），不属于交付内容
+.workbuddy/
+
 # 依赖 / 编辑器
 node_modules/
 package-lock.json

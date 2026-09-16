@@ -16,14 +16,19 @@
 
 ## 安装（3 步）
 
-**1. 把本仓库放进技能目录**
+**1. 把本仓库放进技能目录**（挑你的工具实际读取的那一个，不确定就两个都放）
 
 ```bash
-git clone git@github.com:JasonOracle/agent-design-figma.git ~/.workbuddy/skills/agent-design-figma
+# WorkBuddy —— Windows 对应 %USERPROFILE%\.workbuddy\skills\
+git clone https://github.com/JasonOracle/agent-design-figma.git ~/.workbuddy/skills/agent-design-figma
+
+# CodeBuddy / 部分 IDE 系工具读的是这一个 —— Windows 对应 %USERPROFILE%\.codebuddy\skills\
+git clone https://github.com/JasonOracle/agent-design-figma.git ~/.codebuddy/skills/agent-design-figma
 ```
 
-Windows 对应 `%USERPROFILE%\.workbuddy\skills\`；不熟悉 git 也可以直接下载 ZIP，解压后把整个文件夹放进该目录，文件夹名保持 `agent-design-figma`。
-（部分 IDE 系工具读取的是 `.codebuddy/skills/`，两个目录都放一份最省事。）
+不熟悉 git 也可以下载 ZIP（仓库页 → Code → Download ZIP），解压后把整个文件夹放进对应目录，**文件夹名保持 `agent-design-figma`**。
+
+> 上面一律用 HTTPS。SSH 地址（`git@github.com:`）需要先配好 SSH key，没配会直接失败。
 
 **2. 在仓库根目录启动本地桥接程序**（零依赖，无需 npm install）
 
@@ -42,22 +47,35 @@ Figma Desktop → Plugins → Development → Import plugin from manifest… →
 自检（≈10 秒，确认环境就绪）：
 
 ```bash
-node tools/runtime-check.mjs
+node ~/.workbuddy/skills/agent-design-figma/tools/runtime-check.mjs
 ```
 
-期望看到 `"mode": "FULL_MODE"`。
+期望看到 `"mode": "FULL_MODE"`，且 `figmaRead` 与 `figmaWrite` **都是 `true`**——读能力不只来自 MCP，Bridge 自带 `get-page-summary` / `get-node` / `export-node`。任意工作目录都能跑，结果落在技能目录下的 `.vibe/runtime-capability.json`。
+
+**写通道自检**（离线，不需要 Figma，≈1 秒）：
+
+```bash
+node ~/.workbuddy/skills/agent-design-figma/tools/qa-plugin.mjs
+```
+
+用严格的 Figma 校验桩跑一遍四种 effect 类型与节点读回语义。全绿才说明 `BACKGROUND_BLUR`（毛玻璃的唯一实现路径）在插件当前版本上真的可用——这正是本版修掉的一个 P0 事故，现在有回归测试兜着。
 
 > 不装 Figma 插件也能用：Skill 会输出完整设计文档（定位 / 设计系统 / 构建计划），只是不会自动画进 Figma。
 
 ## 目录
 
-- `SKILL.md` — Agent 执行手册（设计流水线规则）
+- `SKILL.md` — Agent 执行手册（L0–L5 设计流水线规则）
 - `SETUP.md` — 安装指南（普通用户视角，5 分钟）
 - `USER_GUIDE.md` — 使用教程（第一次运行全流程走查）
-- `bridge/server.js` — 本地桥接程序（零依赖，Figma 自动绘制的写通道）
+- `bridge/server.js` — 本地桥接程序（零依赖，Figma 自动绘制的写通道；含 `POST /v1/batch` 批量通道）
 - `figma-plugin/` — Figma 插件（导入用，含 manifest / code.js / ui.html）
+- `references/bridge-ops.md` — **写通道 op 权威清单**（36 个 op、参数形状、批量语法、错误码、毛玻璃配方）
+- `references/` — 设计智能规则（行业映射 / 风格库 / 视觉审查 / 映射规则 / 运行模式判定）
 - `tools/runtime-check.mjs` — 运行环境自检探针（L0）
-- `references/` — 设计智能规则（行业映射 / 视觉审查 / 映射规则 / 运行模式判定）
+- `tools/qa-plugin.mjs` — 插件回归测试（离线跑，覆盖四种 effect 类型与读回语义）
+- `tools/qa-bridge.mjs` — Bridge 端到端测试（起真实服务 + mock 插件，覆盖批量通道）
+- `tools/layout-audit.mjs` — L4 布局审计（gap / 对齐 / 档位 / 越界 / 触控，基于 get-node 实测坐标）
+- `assets/style-library/` — 四套 Style Preset（企业后台 / 政务大屏 / 品牌官网 / 现代 SaaS）
 - `assets/templates/` — 各类交付物的 JSON Schema
 - `assets/examples/` — 三个行业的完整示例（企业后台 / 医疗 App / 政务大屏）
 
@@ -67,8 +85,8 @@ Skill 每次启动会用 `tools/runtime-check.mjs` 探测环境，自动选择�
 
 | 模式 | 条件 | 执行范围 |
 |---|---|---|
-| **FULL_MODE** | Figma 插件已连接 | 全流程：设计 → 自动绘制 → 审查 → 导出 |
-| **READ_ONLY_MODE** | 只有 Figma 读取类 MCP | 设计文档 + 构建计划；提示"当前环境只有读取能力，需要安装 Figma Bridge 才能自动绘制" |
+| **FULL_MODE** | Figma 插件已连接 | 全流程：设计 → 自动绘制 → 审查 → 导出（读能力由 Bridge 自带） |
+| **READ_ONLY_MODE** | Bridge 未连，但有 Figma 读取类 MCP | 设计文档 + 构建计划；提示"当前环境只有读取能力，需要安装 Figma Bridge 才能自动绘制" |
 | **OFFLINE_MODE** | 均无 | 仅生成设计文档三件套，诚实标注未执行 |
 
 任何模式都**不会假装执行**——没跑的步骤会明确说没跑。

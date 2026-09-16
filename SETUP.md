@@ -14,12 +14,17 @@
 把本仓库放到技能目录，并让**文件夹名为 `agent-design-figma`**：
 
 ```bash
-git clone git@github.com:JasonOracle/agent-design-figma.git ~/.workbuddy/skills/agent-design-figma
+# WorkBuddy
+git clone https://github.com/JasonOracle/agent-design-figma.git ~/.workbuddy/skills/agent-design-figma
+
+# CodeBuddy / 部分 IDE 系工具读的是这一个
+git clone https://github.com/JasonOracle/agent-design-figma.git ~/.codebuddy/skills/agent-design-figma
 ```
 
-- Windows 的技能目录是 `%USERPROFILE%\.workbuddy\skills\`
+- Windows 的技能目录是 `%USERPROFILE%\.workbuddy\skills\`（CodeBuddy 系为 `%USERPROFILE%\.codebuddy\skills\`）
+- 不确定你的工具读哪个？**两个都放一份，最省事**
 - 不用 git 也可以：下载仓库 ZIP → 解压 → 把整个文件夹放进技能目录
-- 若你用的 IDE 系工具读取 `.codebuddy/skills/`，两个目录各放一份即可
+- 上面用 HTTPS 而非 SSH：`git@github.com:` 需要先配好 SSH key，没配会直接失败
 
 验证：对 Agent 说"帮我检查 agent-design-figma 是否安装"，或直接进入 Step 4 试一句。
 
@@ -46,7 +51,7 @@ git clone git@github.com:JasonOracle/agent-design-figma.git ~/.workbuddy/skills/
 | 事项 | Windows | macOS |
 |---|---|---|
 | 启动 Bridge | 同为 `node bridge/server.js`（需 Node.js ≥18） | 相同 |
-| Skill 目录 | `%USERPROFILE%\.workbuddy\skills\` | `~/.workbuddy/skills/` |
+| Skill 目录 | `%USERPROFILE%\.workbuddy\skills\`（CodeBuddy 系为 `.codebuddy\skills\`） | `~/.workbuddy/skills/`（同上，另有 `~/.codebuddy/skills/`） |
 | 首次运行 Bridge | 若防火墙弹窗，选择"允许（仅专用网络）" | 若弹窗，选择"允许" |
 | 终端 | PowerShell / CMD / Git Bash 均可 | Terminal / iTerm |
 
@@ -54,10 +59,10 @@ git clone git@github.com:JasonOracle/agent-design-figma.git ~/.workbuddy/skills/
 
 ## Step 3 — 自检（≈10 秒）
 
-在仓库根目录执行：
+任何工作目录下都可以执行（路径指向你放技能的地方）：
 
 ```
-node tools/runtime-check.mjs
+node ~/.workbuddy/skills/agent-design-figma/tools/runtime-check.mjs
 ```
 
 期望输出：
@@ -71,8 +76,19 @@ node tools/runtime-check.mjs
 }
 ```
 
-- `READ_ONLY_MODE`：只有读取能力，需要安装 Figma Bridge 才能自动绘制（回到 Step 2）
-- `OFFLINE_MODE`：未检测到 Figma 连接能力（Bridge 未启动或插件未连接）
+- `FULL_MODE` 下 `figmaRead` **也是 true**——读能力不只来自 MCP，Bridge 自带 `get-page-summary` / `get-node` / `export-node`（见输出的 `details.readSources`）。看到 `figmaRead: true` 是正常的，不是误报。
+- `READ_ONLY_MODE`：Bridge 未连，但环境里有 Figma 读取类 MCP，只能出设计文档 + 构建计划（回到 Step 2 装 Bridge）
+- `OFFLINE_MODE`：未检测到任何 Figma 连接能力（Bridge 未启动或插件未连接）
+
+结果同时落在技能目录的 `.vibe/runtime-capability.json`。
+
+**写通道自检**（可选，离线，≈1 秒）：
+
+```
+node ~/.workbuddy/skills/agent-design-figma/tools/qa-plugin.mjs
+```
+
+全绿说明 `BACKGROUND_BLUR`（毛玻璃的唯一实现路径）在当前插件版本上可用。这个脚本是修过的一个真实 P0 事故的回归测试。
 
 ## Step 4 — 首次运行（≈1 分钟）
 
