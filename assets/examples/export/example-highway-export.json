@@ -1,0 +1,358 @@
+{
+  "project": "河南高速智慧养护决策平台",
+  "version": "0.9.0-design",
+  "source": {
+    "brief": "assets/examples/example-highway.json",
+    "dsSpec": "assets/examples/example-highway.dsspec.json",
+    "figmaFileKey": null,
+    "rootNodeIds": []
+  },
+  "exports": {
+    "png": [],
+    "svg": [],
+    "figmaJson": {
+      "path": null,
+      "nodeCount": 0,
+      "contents": [
+        "node-tree",
+        "geometry",
+        "auto-layout",
+        "component-instance",
+        "token-reference"
+      ],
+      "note": "规划切片清单：深色大屏需额外包含 glow 效果参数与地图瓦片占位层"
+    },
+    "designSpec": {
+      "brief": "assets/examples/example-highway.json",
+      "dsSpec": "assets/examples/example-highway.dsspec.json",
+      "buildPlan": null,
+      "criticReport": "assets/examples/example-highway/critic-report.json"
+    }
+  },
+  "mapping": {
+    "components": [
+      {
+        "figmaComponent": "DS/Screen/TitleBar",
+        "dsName": "TitleBar",
+        "class": "B-composite",
+        "frontendComponent": "DsScreenHeader",
+        "props": [
+          "title <- 主标题（TY 32 档，规划）",
+          "clock <- 时间组件",
+          "status <- 系统状态灯组"
+        ],
+        "variants": [
+          "default"
+        ],
+        "notes": "标题+时间+状态三段组合，宽度 FILL"
+      },
+      {
+        "figmaComponent": "DS/DataDisplay/KpiTile",
+        "dsName": "KpiTile",
+        "class": "A-direct",
+        "frontendComponent": "DsKpiTile",
+        "props": [
+          "metric <- 指标实体",
+          "glow <- 仅 2 个核心 KPI（L4 issue 修复约束）"
+        ],
+        "variants": [
+          "default",
+          "glow"
+        ]
+      },
+      {
+        "figmaComponent": "DS/DataDisplay/GlowMetric",
+        "dsName": "GlowMetric",
+        "class": "A-direct",
+        "frontendComponent": "DsGlowMetric",
+        "props": [
+          "value <- 数字（TY number 等宽）",
+          "glowColor <- RD 派生主色"
+        ],
+        "variants": [
+          "default"
+        ]
+      },
+      {
+        "figmaComponent": "DS/Map/MapPanel",
+        "dsName": "MapPanel",
+        "class": "C-manual",
+        "frontendComponent": null,
+        "props": [],
+        "variants": [
+          "default"
+        ],
+        "manualNote": "路况地图为自由布局+外部瓦片源，无法参数化为单一组件；人工实现入口：前端地图引擎（如 AMap/Leaflet）+ 设计标注层，视觉验收对齐导出 PNG"
+      },
+      {
+        "figmaComponent": "DS/Chart/TrendChart",
+        "dsName": "TrendChart",
+        "class": "B-composite",
+        "frontendComponent": "DsTrendChart",
+        "props": [
+          "series <- 双序列（养护量/及时率）",
+          "axis <- 深色网格 + TY caption 14 轴标"
+        ],
+        "variants": [
+          "default",
+          "empty"
+        ]
+      },
+      {
+        "figmaComponent": "DS/Chart/GaugeChart",
+        "dsName": "GaugeChart",
+        "class": "B-composite",
+        "frontendComponent": "DsGauge",
+        "props": [
+          "value <- 0-100",
+          "arc <- 三段式 arc→cubic（禁手写 path，Stage 5 几何教训）"
+        ],
+        "variants": [
+          "default"
+        ]
+      },
+      {
+        "figmaComponent": "DS/DataDisplay/RankList",
+        "dsName": "RankList",
+        "class": "A-direct",
+        "frontendComponent": "DsRankList",
+        "props": [
+          "items <- 段落排名",
+          "highlight <- 前三名主色"
+        ],
+        "variants": [
+          "default"
+        ]
+      },
+      {
+        "figmaComponent": "DS/Feedback/AlertTicker",
+        "dsName": "AlertTicker",
+        "class": "A-direct",
+        "frontendComponent": "DsAlertTicker",
+        "props": [
+          "alerts <- 滚动队列",
+          "interval <- 滚动间隔"
+        ],
+        "variants": [
+          "default"
+        ]
+      },
+      {
+        "figmaComponent": "Local/Main/MaintenanceProjectList",
+        "dsName": "MaintenanceProjectList",
+        "class": "B-composite",
+        "frontendComponent": "DsProjectTable",
+        "props": [
+          "rows <- 项目行（深色行 44+）",
+          "pager <- 分页实例"
+        ],
+        "variants": [
+          "default"
+        ]
+      },
+      {
+        "figmaComponent": "Local/Main/DeviceMonitor",
+        "dsName": "DeviceMonitor",
+        "class": "A-direct",
+        "frontendComponent": "DsDeviceMonitor",
+        "props": [
+          "devices <- 设备状态列表",
+          "statusColor <- ST-1 语义映射"
+        ],
+        "variants": [
+          "default"
+        ]
+      },
+      {
+        "figmaComponent": "Local/Main/AlertPanel",
+        "dsName": "AlertPanel",
+        "class": "B-composite",
+        "frontendComponent": "DsAlertPanel",
+        "props": [
+          "groups <- 告警分级分组（danger/warning/info）"
+        ],
+        "variants": [
+          "default"
+        ]
+      },
+      {
+        "figmaComponent": "Local/Main/TimeRangeTabs",
+        "dsName": "TimeRangeTabs",
+        "class": "A-direct",
+        "frontendComponent": "DsTimeRangeTabs",
+        "props": [
+          "ranges <- 24h/7d/30d",
+          "active <- 激活态"
+        ],
+        "variants": [
+          "24h",
+          "7d",
+          "30d"
+        ]
+      }
+    ],
+    "layoutRules": [
+      "大屏基准 3840×2160(@2x 1920×1080) → 根容器固定尺寸 + transform scale 适配（禁 rem 换算）",
+      "深色主题：background #0A1A3C 上 text 必须 ≥4.5:1（L4 STOP_MAX_LOOP 遗留项，人工决策后回写）",
+      "glow 仅限关键指标与地图热区（shadowToken.usage 约束随包交付）",
+      "spacing 档位 8/16/24（dense 大屏无 4/12 小档）",
+      "地图区 FILL + 四周面板 FIXED 宽（880/640）→ flex 布局骨架"
+    ]
+  },
+  "tokens": {
+    "color": [
+      {
+        "dsToken": "tokens.color.brand.primary",
+        "value": "#00D4FF",
+        "cssVariable": "--ds-color-brand-primary",
+        "source": "preset:gov-digital-screen.visualSystem.primaryColor"
+      },
+      {
+        "dsToken": "tokens.color.brand.hover",
+        "value": "#01BEE8",
+        "cssVariable": "--ds-color-brand-hover",
+        "source": "derived:RD-1@tokens.color.brand.primary（深色变体：与 background 88:12）"
+      },
+      {
+        "dsToken": "tokens.color.brand.active",
+        "value": "#00C3EB",
+        "cssVariable": "--ds-color-brand-active",
+        "source": "derived:RD-2@tokens.color.brand.primary"
+      },
+      {
+        "dsToken": "tokens.color.text.primary",
+        "value": "#E6F1FF",
+        "cssVariable": "--ds-color-text-primary",
+        "source": "preset:gov-digital-screen.visualSystem.textColors"
+      },
+      {
+        "dsToken": "tokens.color.text.regular",
+        "value": "#8FB3D9",
+        "cssVariable": "--ds-color-text-regular",
+        "source": "preset:gov-digital-screen.visualSystem.textColors"
+      },
+      {
+        "dsToken": "tokens.color.text.secondary",
+        "value": "#5A7CA6",
+        "cssVariable": "--ds-color-text-secondary",
+        "source": "preset:gov-digital-screen.visualSystem.textColors（L4 高优 issue：对比度 3.2:1 待人工决策）"
+      },
+      {
+        "dsToken": "tokens.color.background.page",
+        "value": "#0A1A3C",
+        "cssVariable": "--ds-color-background-page",
+        "source": "preset:gov-digital-screen.visualSystem.background"
+      },
+      {
+        "dsToken": "tokens.color.surface.card",
+        "value": "#0F2547",
+        "cssVariable": "--ds-color-surface-card",
+        "source": "preset:gov-digital-screen.visualSystem.surface"
+      },
+      {
+        "dsToken": "tokens.color.border.default",
+        "value": "#1E3A5F",
+        "cssVariable": "--ds-color-border-default",
+        "source": "preset:gov-digital-screen.visualSystem.stroke"
+      },
+      {
+        "dsToken": "tokens.color.status.success",
+        "value": "#2EE6A6",
+        "cssVariable": "--ds-color-status-success",
+        "source": "rule:ST-1@preset.chartColors"
+      },
+      {
+        "dsToken": "tokens.color.status.danger",
+        "value": "#FF5C5C",
+        "cssVariable": "--ds-color-status-danger",
+        "source": "rule:ST-1@preset.chartColors"
+      },
+      {
+        "dsToken": "tokens.color.status.warning",
+        "value": "#F5C542",
+        "cssVariable": "--ds-color-status-warning",
+        "source": "rule:ST-1@preset.chartColors"
+      }
+    ],
+    "typography": [
+      {
+        "dsToken": "tokens.typography.display",
+        "cssVariable": "--ds-typography-display",
+        "source": "preset:gov-digital-screen.visualSystem.typeScale"
+      },
+      {
+        "dsToken": "tokens.typography.heading",
+        "cssVariable": "--ds-typography-heading",
+        "source": "preset:gov-digital-screen.visualSystem.typeScale"
+      },
+      {
+        "dsToken": "tokens.typography.body",
+        "value": "14/20/400",
+        "cssVariable": "--ds-typography-body",
+        "source": "preset:gov-digital-screen.visualSystem.typeScale"
+      },
+      {
+        "dsToken": "tokens.typography.caption",
+        "value": "14（TY-3 大屏提升档）",
+        "cssVariable": "--ds-typography-caption",
+        "source": "rule:TY-3@platform.big-screen"
+      },
+      {
+        "dsToken": "tokens.typography.number",
+        "cssVariable": "--ds-typography-number",
+        "source": "preset:gov-digital-screen.visualSystem.typeScale"
+      }
+    ],
+    "spacing": [
+      {
+        "dsToken": "tokens.spacing.base",
+        "value": 8,
+        "cssVariable": "--ds-spacing-base",
+        "source": "preset:gov-digital-screen.visualSystem.spacing"
+      },
+      {
+        "dsToken": "tokens.spacing.scale",
+        "value": "8/16/24",
+        "cssVariable": "--ds-spacing-scale",
+        "source": "preset:gov-digital-screen.visualSystem.spacing"
+      },
+      {
+        "dsToken": "tokens.spacing.cardPadding",
+        "value": 16,
+        "cssVariable": "--ds-spacing-card-padding",
+        "source": "preset:gov-digital-screen.visualSystem.spacing"
+      }
+    ],
+    "radius": [
+      {
+        "dsToken": "tokens.radius.sm",
+        "value": 2,
+        "cssVariable": "--ds-radius-sm",
+        "source": "preset:gov-digital-screen.visualSystem.radius"
+      },
+      {
+        "dsToken": "tokens.radius.md",
+        "value": 4,
+        "cssVariable": "--ds-radius-md",
+        "source": "preset:gov-digital-screen.visualSystem.radius"
+      }
+    ],
+    "shadow": [
+      {
+        "dsToken": "tokens.shadow.glow",
+        "cssVariable": "--ds-shadow-glow",
+        "source": "preset:gov-digital-screen.visualSystem.shadow（type=glow，usage 受限：仅关键指标与地图热区）"
+      }
+    ]
+  },
+  "audit": {
+    "qaPassed": "设计态：L2 QA 47 PASS / 0 FAIL（DS Spec QA 脚本）；L3 未构建",
+    "criticScore": 7.7,
+    "freezeStatus": "pending"
+  },
+  "_meta": {
+    "generatedAt": "2026-09-15T23:00:00+08:00",
+    "status": "design-phase",
+    "note": "案例：Dark Screen 3840×2160 规划 → 可视化组件映射矩阵（重点展示 C-manual 地图面板与深色 token 约束）。Export Gate 未通过：L4 终审 7.7 = STOP_MAX_LOOP（对比度遗留项），exports 为空规划清单；criticScore <8 时本清单仅作映射矩阵参考，正式导出须 Critic PASS 后重跑"
+  }
+}

@@ -1,0 +1,10 @@
+# 运行时（Bridge 自动生成）
+.vibe/
+runtime-capability.json
+
+# 依赖 / 编辑器
+node_modules/
+package-lock.json
+.DS_Store
+Thumbs.db
+*.log

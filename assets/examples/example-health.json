@@ -1,0 +1,55 @@
+{
+  "_source": "few-shot 示例 2/3 —— AI 发型 App（美业健康类移动应用）项目需求整理。历史会话细节不可考，页面清单与视觉参数为按领域惯例重建，使用前可由用户修正",
+  "product": {
+    "name": "AI 型衣",
+    "industry": "美业",
+    "targetUser": "20-35 岁关注形象管理的消费者，想先预览发型效果再去门店",
+    "platform": "mobile-app"
+  },
+  "designDirection": {
+    "style": "premium-saas",
+    "keywords": ["轻奢", "暖调", "大图沉浸", "柔和圆角", "AI 科技感点缀"],
+    "reference": ["Apple", "小红书", "Perfect Corp"],
+    "avoid": ["渐变", "玻璃拟态", "重投影", "拟物", "密集表格", "情绪化插画", "3D", "霓虹"]
+  },
+  "informationArchitecture": {
+    "pages": [
+      { "name": "首页", "purpose": "回答「我能体验什么」：AI 试发风格入口 + 精选画廊", "layout": "tab-flow + card-feed" },
+      { "name": "AI 试发", "purpose": "回答「这个发型在我头上什么样」：拍照/选脸型 → 风格生成 → 效果对比", "layout": "tab-flow + step-flow" },
+      { "name": "效果对比", "purpose": "回答「换发前后差别」：Before/After 滑动对比", "layout": "full-bleed-compare" },
+      { "name": "预约到店", "purpose": "回答「喜欢就去剪」：发型师/门店选择 + 时段预约", "layout": "tab-flow + list-detail" },
+      { "name": "我的", "purpose": "回答「我的历史与档案」：试发记录、脸型档案、优惠券", "layout": "tab-flow + profile" }
+    ],
+    "layoutPattern": "tab-flow",
+    "contentDensity": "balanced"
+  },
+  "visualSystem": {
+    "colorMood": "暖调轻奢，AI 环节以品牌紫点缀科技感",
+    "primaryColor": "#5A5CF0",
+    "background": "#FAFAFA",
+    "typography": "PingFang SC / 字阶 24-32-17-15-13-11，标题 medium",
+    "spacing": "8pt 网格，卡片间距 12-16px，大图区全幅出血",
+    "radius": "8/12/16（图片卡大圆角）"
+  },
+  "componentExpectation": [
+    { "name": "TabBar", "type": "navigation", "priority": "P0" },
+    { "name": "NavBar", "type": "navigation", "priority": "P0" },
+    { "name": "Button", "type": "form", "priority": "P0" },
+    { "name": "Input", "type": "form", "priority": "P0" },
+    { "name": "StyleGalleryCard", "type": "data-display", "priority": "P0" },
+    { "name": "CameraEntry", "type": "form", "priority": "P0" },
+    { "name": "BeforeAfterCompare", "type": "data-display", "priority": "P1" },
+    { "name": "FaceShapePicker", "type": "form", "priority": "P1" },
+    { "name": "StyleFilterChips", "type": "navigation", "priority": "P1" },
+    { "name": "BookingFlow", "type": "form", "priority": "P1" },
+    { "name": "StylistCard", "type": "data-display", "priority": "P1" },
+    { "name": "CouponCard", "type": "data-display", "priority": "P2" },
+    { "name": "LoadingOverlay", "type": "feedback", "priority": "P0" }
+  ],
+  "_assumptions": [
+    "product.name: 「AI 型衣」为占位名（历史项目名不可考）",
+    "componentExpectation: 页面清单与组件按美业 AI 试发领域惯例推导，用户未提供原始需求文档",
+    "componentExpectation: platform=mobile-app 与 premium-saas 缺省 web 形态不一致，Preset P0 中的 HeroSection/PricingCard/FeatureGrid 不适用已排除（平台适配例外，见 design-intelligence.md §⑥.2）",
+    "visualSystem.primaryColor: 未命中行业映射的美业建议色 #E8A0BF 时可保留品牌紫；此处按 AI 科技感取向选 #5A5CF0"
+  ]
+}

@@ -1,0 +1,67 @@
+# Runtime Capability — 运行时能力判定与降级规则（L0）
+
+Skill 在执行任何层之前，必须先知道"这个环境能跑多远"。本文定义能力探测、三模式矩阵与逐层降级行为。
+
+## 1. 探测实现
+
+唯一入口：`tools/runtime-check.mjs`（node，无外部依赖）。
+
+| 能力 | 探测方式 | 判定为 ✅ 的条件 |
+|---|---|---|
+| **Figma 写能力** | `GET {BRIDGE_URL}/health`（公开端点，无 token、无副作用，复用现有 Bridge，零协议新增） | `service === "agnet-design-figma-bridge"` 且 `plugin.connected === true` |
+| **Figma 读能力** | 读 `~/.workbuddy/mcp.json`，存在**未 disabled** 且名称/参数含 `figma` 的已知读取型 MCP（figma-context / figma-developer-mcp / framelink） | 至少一个匹配 |
+
+约束（硬性）：
+- 探针**只读**：不创建新通信协议、不修改 Bridge 核心、不修改 Figma Plugin。
+- stdio 型 MCP 进程无法从外部探活，故"配置存在且启用"即视为读能力可用（诚实标注：探测的是配置而非连通性）。
+- Bridge 可达但 `plugin.connected === false` ≠ 写能力（插件没连等于画不了）。
+
+## 2. 输出契约（runtime-capability.json）
+
+```json
+{
+  "figmaRead": true,
+  "figmaWrite": true,
+  "executor": "figma-plugin-bridge",
+  "mode": "FULL_MODE",
+  "details": {
+    "bridge": { "reachable": true, "pluginConnected": true, "url": "..." },
+    "figmaMcp": { "available": true, "servers": ["figma-context"] },
+    "hints": null
+  },
+  "checkedAt": "ISO-8601"
+}
+```
+
+- `mode` 枚举锁死：`FULL_MODE | READ_ONLY_MODE | OFFLINE_MODE`
+- `executor`：仅写能力存在时为 `"figma-plugin-bridge"`，否则 `null`
+- 默认落盘到运行目录 runtime-capability.json（`--out` 可改，`--no-write` 仅打印）
+
+## 3. Capability Matrix（Skill 消费的唯一判定表）
+
+| 模式 | figmaWrite | figmaRead | 执行范围 | 用户可见提示 |
+|---|---|---|---|---|
+| **FULL_MODE** | ✅ | ✅（或❌，见 §4 注） | L1 → L2 → L3 → L4 → L5 | 正常流程 |
+| **READ_ONLY_MODE** | ❌ | ✅ | L1 → L2 → **Build Plan JSON**（不执行） | "当前环境只有读取能力，需要安装 Figma Bridge 才能自动绘制" |
+| **OFFLINE_MODE** | ❌ | ❌ | 仅设计资产：Brief / DS Spec / Build Plan | "未检测到 Figma 连接能力，仅可生成设计资产" |
+
+## 4. 逐层降级规则
+
+- **L1 / L2**：三模式全部可跑（纯知识层，不碰 Figma）。
+- **L3 Build Plan**：三模式全部产出 `build-plan.json`；仅 FULL_MODE 将其交给 Adapter 执行。
+- **L4 Critic**：仅 FULL_MODE 可跑。READ_ONLY 下若仅有读 MCP 且用户提供了 Figma 文件链接，允许对**已存在**的页面做只读审查，但不得谎称为生成后审查。
+- **L5 Export**：仅 FULL_MODE。其余模式输出 export-manifest 的 `design-phase` 规划态（复用 Export Gate 既有语义：criticScore 缺失 ⇒ 不放行 live-build）。
+- **诚实铁律**：任何模式都不得假装执行了被降级的层；未跑的层在交付物中标注 `"mode": "<mode>"` 与降级原因。
+
+> 注：FULL_MODE 不强制要求读 MCP——写通道自带 PNG/SVG 导出，Critic 取证走 Bridge 即可；读 MCP 属于增益（可对比既有页面、截图取证）。
+
+## 5. 与五层的接线
+
+```
+用户 Prompt
+  → [L0] node tools/runtime-check.mjs → mode
+  → mode 路由（上表）
+  → 各层产物按 mode 裁剪
+```
+
+Adapter（通道适配）只在 FULL_MODE 介入：Build Plan → Bridge 方言（现状即 仓库既有构建脚本 的既有形态，不扩大架构）。

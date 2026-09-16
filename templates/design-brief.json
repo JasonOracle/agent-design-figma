@@ -1,0 +1,83 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Design Brief",
+  "description": "L1 Design Intelligence 出口物：自然语言需求的结构化设计契约。所有字段必填；未由规则确定的值写入 _assumptions。",
+  "type": "object",
+  "required": ["product", "designDirection", "informationArchitecture", "visualSystem", "componentExpectation"],
+  "properties": {
+    "product": {
+      "type": "object",
+      "required": ["name", "industry", "targetUser", "platform"],
+      "properties": {
+        "name":       { "type": "string", "description": "产品名，未给出时按行业生成占位名并标注 assumption" },
+        "industry":   { "type": "string", "enum": ["教育", "医疗", "政务", "交通", "金融", "美业", "电商", "通用"] },
+        "targetUser": { "type": "string", "description": "目标用户一句话画像" },
+        "platform":   { "type": "string", "enum": ["web-admin", "web-site", "mobile-app", "big-screen"] }
+      }
+    },
+    "designDirection": {
+      "type": "object",
+      "required": ["style", "keywords", "reference", "avoid"],
+      "properties": {
+        "style":     { "type": "string", "enum": ["premium-saas", "enterprise-dashboard", "gov-digital-screen"], "description": "命中的 Style Preset id" },
+        "keywords":  { "type": "array", "items": { "type": "string" }, "minItems": 3, "description": "设计关键词（中文优先）" },
+        "reference": { "type": "array", "items": { "type": "string" }, "description": "对标产品/设计语言，如 Apple / Stripe / Element Plus" },
+        "avoid":     { "type": "array", "items": { "type": "string" }, "description": "明确禁止的设计元素，如 渐变/玻璃拟态/3D" }
+      }
+    },
+    "informationArchitecture": {
+      "type": "object",
+      "required": ["pages", "layoutPattern", "contentDensity"],
+      "properties": {
+        "pages": {
+          "type": "array",
+          "minItems": 3,
+          "items": {
+            "type": "object",
+            "required": ["name", "purpose", "layout"],
+            "properties": {
+              "name":    { "type": "string" },
+              "purpose": { "type": "string", "description": "一句话说明该页回答用户的什么问题" },
+              "layout":  { "type": "string", "description": "布局模式，如 sidebar+content / tab-view / grid-kpi" }
+            }
+          }
+        },
+        "layoutPattern": {
+          "type": "string",
+          "enum": ["sidebar-content", "top-nav-content", "grid-dashboard", "full-bleed-screen", "tab-flow"]
+        },
+        "contentDensity": { "type": "string", "enum": ["sparse", "balanced", "dense"] }
+      }
+    },
+    "visualSystem": {
+      "type": "object",
+      "required": ["colorMood", "primaryColor", "background", "typography", "spacing", "radius"],
+      "properties": {
+        "colorMood":    { "type": "string", "description": "色彩情绪一句话，如 冷静专业蓝紫 / 深空科技蓝" },
+        "primaryColor": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$", "description": "必须出自 Style Preset 或行业映射表" },
+        "background":   { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+        "typography":   { "type": "string", "description": "字体族+字阶摘要，如 Inter / 26-32-16-14-13-12-11" },
+        "spacing":      { "type": "string", "description": "间距基数，如 8pt 网格 (4/8/12/16/24/32)" },
+        "radius":       { "type": "string", "description": "圆角档位，如 4/6/8 或 2/4/6" }
+      }
+    },
+    "componentExpectation": {
+      "type": "array",
+      "minItems": 5,
+      "items": {
+        "type": "object",
+        "required": ["name", "type", "priority"],
+        "properties": {
+          "name":     { "type": "string" },
+          "type":     { "type": "string", "description": "组件类别，如 navigation / data-display / form / feedback / chart" },
+          "priority": { "type": "string", "enum": ["P0", "P1", "P2"] }
+        }
+      }
+    },
+    "_assumptions": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "规则未覆盖处的显式假设清单；规则命中的判断不得写入此字段"
+    }
+  }
+}

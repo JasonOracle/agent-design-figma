@@ -1,0 +1,40 @@
+{
+  "id": "gov-digital-screen",
+  "name": "Gov Digital Screen / 智慧大屏 IOC",
+  "keywords": ["深蓝科技", "Cyan glow", "数据即装饰", "驾驶舱", "远距可读"],
+  "reference": ["智慧城市 IOC", "高速指挥中心", "数字孪生驾驶舱"],
+  "avoid": ["纯白大面积区块", "浅色主题", "营销文案", "玻璃拟态卡片", "动效堆砌(单屏≤2处)", "小字号(<14px)"],
+  "visualSystem": {
+    "colorMood": "深空科技蓝，数据高亮如信号灯",
+    "primaryColor": "#00D4FF",
+    "background": "#0A1A3C",
+    "surface": "#0F2547",
+    "textColors": ["#E6F1FF", "#8FB3D9", "#5A7CA6"],
+    "stroke": "#1E3A5F",
+    "chartColors": ["#00D4FF", "#3D7EFF", "#2EE6A6", "#FFB547", "#FF5C5C"],
+    "typography": "标题 DIN/科技数字字体（数字等宽），正文系统栈 / 最小 14px / 数字 20-26px 强调",
+    "spacing": "8pt 网格，面板间距 16-24px，面板内 padding 16",
+    "radius": "2/4",
+    "shadow": "0 0 8px rgba(0,212,255,0.6)（仅关键指标与地图热区）"
+  },
+  "layoutPattern": "full-bleed-screen",
+  "contentDensity": "dense",
+  "geometry": {
+    "frame": "1920x1080 基准（3840x2160 出 2x）",
+    "titleBar": "高度占比 8%",
+    "sidePanels": "左右各约 25%，中央地图约 42%+",
+    "chartRatio": "图表面积占比 ≥50%"
+  },
+  "coreComponents": [
+    { "name": "TitleBar", "type": "navigation", "priority": "P0" },
+    { "name": "KpiTile", "type": "data-display", "priority": "P0" },
+    { "name": "GlowMetric", "type": "data-display", "priority": "P0" },
+    { "name": "TrendChart", "type": "chart", "priority": "P0" },
+    { "name": "GaugeChart", "type": "chart", "priority": "P0" },
+    { "name": "MapPanel", "type": "chart", "priority": "P0" },
+    { "name": "RankList", "type": "data-display", "priority": "P0" },
+    { "name": "AlertTicker", "type": "feedback", "priority": "P1" },
+    { "name": "DeviceStatusGrid", "type": "data-display", "priority": "P1" },
+    { "name": "TimeRangeTabs", "type": "navigation", "priority": "P1" }
+  ]
+}

@@ -1,0 +1,286 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Design System Spec",
+  "description": "L2 Design System Generation 出口物：L3 Figma Build 的唯一输入。所有 token 必须携带 source 字段，值只能来源于 Style Preset、Brief 显式覆盖、确定性规则或规则派生，禁止 L2 自由创造。",
+  "type": "object",
+  "required": ["brand", "platform", "tokens", "components", "layout", "responsive", "accessibility", "sourceMapping"],
+  "properties": {
+    "brand": {
+      "type": "object",
+      "required": ["name", "industry", "stylePresetId", "contentDensity"],
+      "properties": {
+        "name":           { "type": "string", "description": "产品名，来自 Brief.product.name" },
+        "industry":       { "type": "string", "description": "行业，来自 Brief.product.industry" },
+        "stylePresetId":  { "type": "string", "enum": ["premium-saas", "enterprise-dashboard", "gov-digital-screen"], "description": "命中的 Style Preset，来自 Brief.designDirection.style" },
+        "contentDensity": { "type": "string", "enum": ["sparse", "balanced", "dense"] }
+      }
+    },
+    "platform": {
+      "type": "string",
+      "enum": ["web-admin", "web-site", "mobile-app", "big-screen"],
+      "description": "来自 Brief.product.platform"
+    },
+    "tokens": {
+      "type": "object",
+      "required": ["color", "typography", "spacing", "radius", "shadow"],
+      "properties": {
+        "color": {
+          "type": "object",
+          "required": ["brand", "background", "surface", "text", "border", "status", "chart"],
+          "properties": {
+            "brand": {
+              "type": "object",
+              "required": ["primary", "hover", "active"],
+              "properties": {
+                "primary": { "$ref": "#/definitions/tokenColor" },
+                "hover":   { "$ref": "#/definitions/tokenColor", "description": "RD-1 派生：primary 与表面色 88:12 混合（浅色主题表面=#FFFFFF，深色主题表面=background）" },
+                "active":  { "$ref": "#/definitions/tokenColor", "description": "RD-2 派生：primary 与 #000000 92:8 混合" }
+              }
+            },
+            "background": {
+              "type": "object",
+              "required": ["page"],
+              "properties": { "page": { "$ref": "#/definitions/tokenColor" } }
+            },
+            "surface": {
+              "type": "object",
+              "required": ["card"],
+              "properties": {
+                "card": { "$ref": "#/definitions/tokenColor" }
+              }
+            },
+            "text": {
+              "type": "object",
+              "required": ["primary", "regular", "secondary", "placeholder"],
+              "properties": {
+                "primary":     { "$ref": "#/definitions/tokenColor" },
+                "regular":     { "$ref": "#/definitions/tokenColor" },
+                "secondary":   { "$ref": "#/definitions/tokenColor" },
+                "placeholder": { "$ref": "#/definitions/tokenColor" }
+              }
+            },
+            "border": {
+              "type": "object",
+              "required": ["default", "divider"],
+              "properties": {
+                "default": { "$ref": "#/definitions/tokenColor" },
+                "divider": { "$ref": "#/definitions/tokenColor", "description": "RD-3 派生：default 与 surface 50:50 混合" }
+              }
+            },
+            "status": {
+              "type": "object",
+              "required": ["success", "warning", "danger", "info"],
+              "properties": {
+                "success": { "$ref": "#/definitions/tokenColor", "description": "ST-1：从 preset.chartColors 按色相映射（绿系）" },
+                "warning": { "$ref": "#/definitions/tokenColor", "description": "ST-1：黄/橙系" },
+                "danger":  { "$ref": "#/definitions/tokenColor", "description": "ST-1：红系" },
+                "info":    { "$ref": "#/definitions/tokenColor", "description": "ST-1：蓝/青系" }
+              }
+            },
+            "chart": {
+              "type": "object",
+              "required": ["series1", "series2", "series3", "series4", "series5"],
+              "description": "逐字取自 preset.visualSystem.chartColors，禁止改序改值",
+              "properties": {
+                "series1": { "$ref": "#/definitions/tokenColor" },
+                "series2": { "$ref": "#/definitions/tokenColor" },
+                "series3": { "$ref": "#/definitions/tokenColor" },
+                "series4": { "$ref": "#/definitions/tokenColor" },
+                "series5": { "$ref": "#/definitions/tokenColor" }
+              }
+            }
+          }
+        },
+        "typography": {
+          "type": "object",
+          "required": ["display", "heading", "body", "caption", "number"],
+          "properties": {
+            "display": { "$ref": "#/definitions/typeToken" },
+            "heading": { "$ref": "#/definitions/typeToken" },
+            "body":    { "$ref": "#/definitions/typeToken" },
+            "caption": { "$ref": "#/definitions/typeToken" },
+            "number":  { "$ref": "#/definitions/typeToken", "description": "Number/Data：数字等宽（tabular-nums / DIN），用于 KPI、表格数值" }
+          }
+        },
+        "spacing": {
+          "type": "object",
+          "required": ["base", "scale"],
+          "properties": {
+            "base":        { "$ref": "#/definitions/tokenValue" },
+            "scale":       { "$ref": "#/definitions/tokenValue", "description": "斜杠分隔的档位，如 4/8/12/16/24/32" },
+            "cardPadding": { "$ref": "#/definitions/tokenValue" },
+            "cellPadding": { "$ref": "#/definitions/tokenValue" },
+            "pagePadding": { "$ref": "#/definitions/tokenValue" }
+          }
+        },
+        "radius": {
+          "type": "object",
+          "required": ["sm", "md"],
+          "properties": {
+            "sm": { "$ref": "#/definitions/tokenValue" },
+            "md": { "$ref": "#/definitions/tokenValue" },
+            "lg": { "$ref": "#/definitions/tokenValue" }
+          }
+        },
+        "shadow": {
+          "type": "object",
+          "minProperties": 1,
+          "description": "只允许出现在 preset.visualSystem.shadow 中的投影；gov 的 glow 需标 type=glow 并写明受限用途",
+          "properties": {
+            "card":    { "$ref": "#/definitions/shadowToken" },
+            "overlay": { "$ref": "#/definitions/shadowToken" },
+            "glow":    { "$ref": "#/definitions/shadowToken" }
+          }
+        }
+      }
+    },
+    "components": {
+      "type": "array",
+      "minItems": 4,
+      "items": {
+        "type": "object",
+        "required": ["name", "briefRefs", "category", "priority", "decision", "basis", "states"],
+        "properties": {
+          "name":        { "type": "string", "description": "物理组件名（extend 时为被扩展的目标组件名）" },
+          "briefRefs":   { "type": "array", "items": { "type": "string" }, "minItems": 1, "description": "本条目覆盖的 Brief.componentExpectation 名称；QA 校验其并集必须等于 Brief 全量" },
+          "category":    { "type": "string", "description": "navigation / form / data-display / feedback / chart / layout" },
+          "priority":    { "type": "string", "enum": ["P0", "P1", "P2"] },
+          "decision":    { "type": "string", "enum": ["reuse-core", "extend", "generate-core", "create-local", "reject"] },
+          "figmaNaming": { "type": "string", "description": "DS/<Category>/<Name> 或 Local/<Page>/<Name>；create-local 禁止使用 DS/ 前缀" },
+          "basis":       { "type": "string", "description": "判定依据，必须引用具体条件（geometry/token/复用次数/priority）" },
+          "variants":    { "type": "array", "items": { "type": "string" }, "description": "extend 时新增的 variant 清单" },
+          "states":      { "type": "array", "items": { "type": "string" }, "description": "状态矩阵；Button/Input/Table/Card 四类必选态不可缺" }
+        }
+      }
+    },
+    "layout": {
+      "type": "object",
+      "required": ["pattern", "frameBaseline", "pages"],
+      "properties": {
+        "pattern":       { "type": "string", "description": "来自 Brief.informationArchitecture.layoutPattern" },
+        "frameBaseline": { "type": "string", "description": "基准画布，如 1440x900 / 375x812 / 1920x1080(@2x 3840x2160)" },
+        "pages": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["name", "zones"],
+            "properties": {
+              "name":  { "type": "string", "description": "与 Brief.informationArchitecture.pages[].name 一一对应" },
+              "zones": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "object",
+                  "required": ["name", "role", "size"],
+                  "properties": {
+                    "name":  { "type": "string" },
+                    "role":  { "type": "string", "description": "导航/内容/数据/地图/反馈等分区职责" },
+                    "size":  { "type": "string", "description": "尺寸表达式：WxH / WxFILL / FILL，数值必须出自 token、preset geometry 或 LD 规则" },
+                    "order": { "type": "integer", "description": "构建顺序，数字越小越先建" },
+                    "notes": { "type": "string" }
+                  }
+                }
+              },
+              "notes": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "responsive": {
+      "type": "object",
+      "required": ["baseline", "breakpoints", "rules"],
+      "properties": {
+        "baseline":    { "type": "string" },
+        "breakpoints": { "type": "array", "items": { "type": "object", "required": ["name", "width"], "properties": { "name": { "type": "string" }, "width": { "type": "integer" } } } },
+        "rules":       { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "accessibility": {
+      "type": "object",
+      "required": ["contrast", "minFontSize", "touchTarget", "focusRing"],
+      "properties": {
+        "contrast":    { "type": "array", "items": { "type": "string" }, "description": "逐条 前景/背景 对比值与结论，如 text.primary on surface.card = 12.6:1 PASS" },
+        "minFontSize": { "$ref": "#/definitions/tokenValue" },
+        "touchTarget": { "$ref": "#/definitions/tokenValue" },
+        "focusRing":   { "$ref": "#/definitions/tokenValue" },
+        "notes":       { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "sourceMapping": {
+      "type": "object",
+      "required": ["presetId", "rulesUsed", "briefOverrides", "existingDsRefs", "assumptions"],
+      "properties": {
+        "presetId":       { "type": "string" },
+        "rulesUsed":      { "type": "array", "items": { "type": "string" }, "description": "本次转换启用的规则 id 全集（TK/RD/ST/TY/SP/CD/LD/AC 系列）" },
+        "briefOverrides": { "type": "array", "items": { "type": "string" }, "description": "Brief 显式覆盖 Preset 缺省值的字段清单" },
+        "existingDsRefs": { "type": "array", "items": { "type": "string" }, "description": "目标文件已存在的 DS 组件引用；非空即视为存量项目，generate-core 必须为 0" },
+        "assumptions":    { "type": "array", "items": { "type": "string" }, "description": "继承 Brief._assumptions + L2 自身新增假设，规则命中处不得写入" }
+      }
+    },
+    "buildPlan": {
+      "type": "object",
+      "description": "可选：L2 预估的 L3 构建批次视图。真正的批次规模以 L3 运行期 readback 为准，本字段仅作交接参考",
+      "required": ["strategy", "batches"],
+      "properties": {
+        "strategy": { "type": "string" },
+        "batches": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["seq", "target", "estOps"],
+            "properties": {
+              "seq":    { "type": "integer" },
+              "target": { "type": "string" },
+              "estOps": { "type": "integer", "maximum": 30, "description": "预估 op 数必须 ≤30（构建执行红线）" }
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "tokenValue": {
+      "type": "object",
+      "required": ["value", "source"],
+      "properties": {
+        "value":  { "type": ["string", "number"] },
+        "source": { "type": "string", "pattern": "^(preset|brief|rule|derived|existing-ds):", "description": "来源四类：preset:<id>.<path> / brief:<field> / rule:<rule-id> / derived:<rule-id>@<父token路径>" },
+        "note":   { "type": "string" }
+      }
+    },
+    "tokenColor": {
+      "type": "object",
+      "required": ["value", "source"],
+      "properties": {
+        "value":  { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+        "source": { "type": "string", "pattern": "^(preset|brief|rule|derived|existing-ds):" },
+        "note":   { "type": "string" }
+      }
+    },
+    "typeToken": {
+      "type": "object",
+      "required": ["fontFamily", "size", "lineHeight", "weight", "source"],
+      "properties": {
+        "fontFamily": { "type": "string" },
+        "size":       { "type": "integer" },
+        "lineHeight": { "type": "integer" },
+        "weight":     { "type": "integer" },
+        "fontStyle":  { "type": "string" },
+        "source":     { "type": "string", "pattern": "^(preset|brief|rule|derived|existing-ds):" },
+        "note":       { "type": "string" }
+      }
+    },
+    "shadowToken": {
+      "type": "object",
+      "required": ["value", "type", "usage", "source"],
+      "properties": {
+        "value": { "type": "string" },
+        "type":  { "type": "string", "enum": ["drop", "glow"] },
+        "usage": { "type": "string", "description": "允许使用的场景；glow 仅限关键指标与地图热区" },
+        "source": { "type": "string", "pattern": "^preset:" }
+      }
+    }
+  }
+}

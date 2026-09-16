@@ -1,0 +1,45 @@
+{
+  "id": "enterprise-dashboard",
+  "name": "Enterprise Dashboard / 企业中后台",
+  "keywords": ["效率", "可预测结构", "表格", "KPI", "数据卡片", "深浅双模式"],
+  "reference": ["Element Plus", "Ant Design Pro"],
+  "avoid": ["营销式大图", "超圆角(>8px)", "情绪化插画", "渐变", "玻璃拟态", "大阴影", "3D", "霓虹"],
+  "visualSystem": {
+    "colorMood": "冷静专业蓝紫，中性灰阶承载信息层级",
+    "primaryColor": "#5A5CF0",
+    "background": "#F2F3F5",
+    "surface": "#FFFFFF",
+    "textColors": ["#303133", "#606266", "#909399", "#C0C4CC"],
+    "stroke": "#E4E7ED",
+    "chartColors": ["#5470C6", "#91CC75", "#FAC858", "#FC8452", "#EE6666"],
+    "typography": "系统栈（PingFang SC / Microsoft YaHei + Inter 数字）/ 字阶 26-32-16-24-14-20-13-20-12-18-11-16",
+    "spacing": "8pt 网格 (4/8/12/16/24/32)，卡片内 padding 16",
+    "radius": "2/4/6",
+    "shadow": "0 1px 4px rgba(0,0,0,0.06)"
+  },
+  "layoutPattern": "sidebar-content",
+  "contentDensity": "dense",
+  "geometry": {
+    "button": 30, "input": 30, "select": 30,
+    "tableHeader": 40, "tableRow": 44,
+    "cardRadius": 4, "frame": "1440x900",
+    "darkMode": "独立 dark token 表，缺省浅色"
+  },
+  "coreComponents": [
+    { "name": "TopBar", "type": "navigation", "priority": "P0" },
+    { "name": "Sidebar", "type": "navigation", "priority": "P0" },
+    { "name": "Breadcrumb", "type": "navigation", "priority": "P0" },
+    { "name": "Button", "type": "form", "priority": "P0" },
+    { "name": "Input", "type": "form", "priority": "P0" },
+    { "name": "Select", "type": "form", "priority": "P0" },
+    { "name": "Table", "type": "data-display", "priority": "P0" },
+    { "name": "Pagination", "type": "navigation", "priority": "P0" },
+    { "name": "Card", "type": "layout", "priority": "P0" },
+    { "name": "Badge", "type": "feedback", "priority": "P0" },
+    { "name": "EmptyState", "type": "feedback", "priority": "P0" },
+    { "name": "ErrorState", "type": "feedback", "priority": "P0" },
+    { "name": "LoadingState", "type": "feedback", "priority": "P0" },
+    { "name": "KpiCard", "type": "data-display", "priority": "P1" },
+    { "name": "Chart", "type": "chart", "priority": "P1" }
+  ]
+}

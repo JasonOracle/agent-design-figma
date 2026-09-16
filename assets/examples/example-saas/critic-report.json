@@ -1,0 +1,50 @@
+{
+  "project": "企业考试管理平台",
+  "page": "工作台 Dashboard",
+  "scores": {
+    "layout": 8.5,
+    "color": 9,
+    "consistency": 9.5,
+    "commercial": 8,
+    "usability": 8.5
+  },
+  "average": 8.7,
+  "issues": [
+    {
+      "severity": "medium",
+      "location": "TrendChart（LineChart 折线序列）",
+      "evidence": "Series vector 实际绘制区高 76px，贝塞尔曲线未经过 12 个月数据点（Stage 7 像素 diff bbox 实测 y 偏移 3-11px）",
+      "evidenceNodeIds": ["19:330.Series.vector"],
+      "suggestion": "重建折线 vector：y 映射按数据域→绘制区线性换算，控制点用 Catmull-Rom 转 cubic，逐点 readback 校验",
+      "targetLayer": "L3"
+    },
+    {
+      "severity": "medium",
+      "location": "PieChart（学科占比扇形）",
+      "evidence": "5 个扇形 arc→cubic 近似导致 12% 扇形变形：实测 bbox 宽高比 1.24，理论值 1.0（几何抽查）",
+      "evidenceNodeIds": ["19:330.Pie.sector-2"],
+      "suggestion": "改用三段式 arc→cubic 公式重生成扇形 path（每 90° 一段控制点），重建后逐扇形比对 bbox",
+      "targetLayer": "L3"
+    },
+    {
+      "severity": "low",
+      "location": "BaseTable 选中行",
+      "evidence": "选中行底色 #F0F1FE 为组件级派生值（menu 8% 混合），未入 token inventory，违反『非清单色值必须标注』原则（Stage 9.1 纠偏记录）",
+      "evidenceNodeIds": ["19:330.Table.row-selected"],
+      "suggestion": "二选一：评审转正为 semantic token selection.background（补 source: derived:CR-x@menu），或维持组件级派生并在 DS Spec 注明，防止悄悄转正",
+      "targetLayer": "L2"
+    }
+  ],
+  "action": "PASS",
+  "_loop": {
+    "round": 1,
+    "maxLoop": 3,
+    "history": [8.7],
+    "note": "Round 1 一次通过：存量 DS（reuse 10 / extend 3）保证一致性 9.5；几何类问题均为 low/medium 不阻塞 PASS（CL-1），转 L3 下轮构建修复清单"
+  },
+  "_meta": {
+    "reviewer": "agent (visual-critic.md §1 锚点比对 + Stage 7 pixel-diff 结构化证据)",
+    "reviewedAt": "2026-09-15T20:00:00+08:00",
+    "inputs": ["assets/examples/example-saas.json", "assets/examples/example-saas.dsspec.json", "真实视觉回归实测数据"]
+  }
+}

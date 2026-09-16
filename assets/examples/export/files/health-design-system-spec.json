@@ -1,0 +1,185 @@
+{
+  "_source": "当次验证 L2 产物 —— assets/examples/export/files/health-design-brief.json → DS Spec，按冻结规则 §2/§4/§6 转换，Schema 引用 assets/templates/design-system-spec.json。绿地移动项目：generate-core 6 + create-local 7 + extend 0 + reject 0",
+  "brand": {
+    "name": "AI 智能健康管理",
+    "industry": "医疗",
+    "stylePresetId": "premium-saas",
+    "contentDensity": "balanced"
+  },
+  "platform": "mobile-app",
+  "tokens": {
+    "color": {
+      "brand": {
+        "primary": { "value": "#0FB5AE", "source": "brief:visualSystem.primaryColor(行业映射:医疗)", "note": "医疗信任青，L1 规则命中非自由选择" },
+        "hover":   { "value": "#2CBEB8", "source": "derived:RD-1@tokens.color.brand.primary", "note": "与表面色 #FFFFFF 88:12 混合（脚本复算）" },
+        "active":  { "value": "#0EA7A0", "source": "derived:RD-2@tokens.color.brand.primary", "note": "与 #000000 92:8 混合（脚本复算）" }
+      },
+      "background": {
+        "page": { "value": "#FAFAFA", "source": "preset:premium-saas.visualSystem.background" }
+      },
+      "surface": {
+        "card": { "value": "#FFFFFF", "source": "preset:premium-saas.visualSystem.surface" }
+      },
+      "text": {
+        "primary":     { "value": "#111827", "source": "preset:premium-saas.visualSystem.textColors[0]" },
+        "regular":     { "value": "#6B7280", "source": "preset:premium-saas.visualSystem.textColors[1]" },
+        "secondary":   { "value": "#9CA3AF", "source": "preset:premium-saas.visualSystem.textColors[2]" },
+        "placeholder": { "value": "#9CA3AF", "source": "rule:TY-4(无第四灰阶，复用 textColors[2])" }
+      },
+      "border": {
+        "default": { "value": "#E5E7EB", "source": "preset:premium-saas.visualSystem.stroke" },
+        "divider": { "value": "#F2F3F5", "source": "derived:RD-3@tokens.color.border.default", "note": "与 surface #FFFFFF 50:50 混合（脚本复算）" }
+      },
+      "status": {
+        "success": { "value": "#00B578", "source": "rule:industry-mapping(医疗辅助色)", "note": "取代 ST-1 色相映射的 #10B981——行业映射优先于通用规则，L1 Brief.accentColor 显式携带" },
+        "warning": { "value": "#F59E0B", "source": "rule:ST-1@preset.chartColors(黄系)" },
+        "danger":  { "value": "#EF4444", "source": "rule:ST-1@preset.chartColors(红系)" },
+        "info":    { "value": "#6366F1", "source": "rule:ST-1@preset.chartColors(蓝系)" }
+      },
+      "chart": {
+        "series1": { "value": "#5A5CF0", "source": "preset:premium-saas.visualSystem.chartColors[0]" },
+        "series2": { "value": "#10B981", "source": "preset:premium-saas.visualSystem.chartColors[1]" },
+        "series3": { "value": "#F59E0B", "source": "preset:premium-saas.visualSystem.chartColors[2]" },
+        "series4": { "value": "#EF4444", "source": "preset:premium-saas.visualSystem.chartColors[3]" },
+        "series5": { "value": "#6366F1", "source": "preset:premium-saas.visualSystem.chartColors[4]" }
+      }
+    },
+    "typography": {
+      "display": { "fontFamily": "Noto Sans SC", "size": 26, "lineHeight": 32, "weight": 500, "fontStyle": "Medium", "source": "preset:premium-saas.visualSystem.typography(26-32)", "note": "环境回退：Inter/PingFang SC 不可用，见 assumptions" },
+      "heading": { "fontFamily": "Noto Sans SC", "size": 16, "lineHeight": 22, "weight": 500, "fontStyle": "Medium", "source": "preset:premium-saas.visualSystem.typography(16)+rule:TY-2(行高=size+6)" },
+      "body":    { "fontFamily": "Noto Sans SC", "size": 14, "lineHeight": 20, "weight": 400, "fontStyle": "Regular", "source": "preset:premium-saas.visualSystem.typography(14)+rule:TY-2" },
+      "caption": { "fontFamily": "Noto Sans SC", "size": 13, "lineHeight": 19, "weight": 400, "fontStyle": "Regular", "source": "preset:premium-saas.visualSystem.typography(13)+rule:TY-2" },
+      "number":  { "fontFamily": "Noto Sans SC", "size": 16, "lineHeight": 22, "weight": 500, "fontStyle": "Medium", "source": "rule:TY-1(数字等宽语义，字阶取 heading 档)", "note": "Figma 环境无 openType tabular 控制，以 Medium + 右对齐近似；HealthScoreCard 大数字用 display 档" }
+    },
+    "spacing": {
+      "base":        { "value": 4, "source": "preset:premium-saas.visualSystem.spacing(8pt 网格)" },
+      "scale":       { "value": "4/8/12/16/24/32", "source": "preset:premium-saas.visualSystem.spacing" },
+      "cardPadding": { "value": 16, "source": "rule:SP-3(移动端卡片 padding 缺省 16)" },
+      "pagePadding": { "value": 16, "source": "rule:SP-3(移动端页面左右 padding 缺省 16)" }
+    },
+    "radius": {
+      "sm": { "value": 6,  "source": "brief:visualSystem.radius(6/8/10)", "note": "preset 4/6/8 + 医疗修正圆角+2（§③），记入 briefOverrides" },
+      "md": { "value": 8,  "source": "brief:visualSystem.radius(6/8/10)" },
+      "lg": { "value": 10, "source": "brief:visualSystem.radius(6/8/10)" }
+    },
+    "shadow": {
+      "card":    { "value": "0 1px 2px rgba(0,0,0,0.04)",  "type": "drop", "usage": "内容卡默认", "source": "preset:premium-saas.visualSystem.shadow" },
+      "overlay": { "value": "0 4px 12px rgba(0,0,0,0.04)", "type": "drop", "usage": "浮层/底部弹层", "source": "preset:premium-saas.visualSystem.shadow" }
+    }
+  },
+  "components": [
+    { "name": "TabBar",         "briefRefs": ["TabBar"],         "category": "navigation",   "priority": "P0", "decision": "generate-core", "figmaNaming": "DS/Navigation/TabBar",         "basis": "CD-2b：移动端必需导航，绿地无既有 DS，preset coreComponents 无对应项；3 个 Tab（首页/数据/个人中心），item 高 56 满足 AC-2", "states": ["default", "active"] },
+    { "name": "NavBar",         "briefRefs": ["NavBar"],         "category": "navigation",   "priority": "P0", "decision": "generate-core", "figmaNaming": "DS/Navigation/NavBar",         "basis": "preset coreComponents 命中，绿地首建；高 44（LD-5）", "states": ["default"] },
+    { "name": "Button",         "briefRefs": ["Button"],         "category": "form",         "priority": "P0", "decision": "generate-core", "figmaNaming": "DS/Form/Button",               "basis": "preset coreComponents 命中；高 44（AC-2 移动端触控红线）", "states": ["primary", "secondary", "disabled", "loading"] },
+    { "name": "Input",          "briefRefs": ["Input"],          "category": "form",         "priority": "P0", "decision": "generate-core", "figmaNaming": "DS/Form/Input",                "basis": "preset coreComponents 命中；高 44（AC-2）", "states": ["default", "focus", "error", "disabled"] },
+    { "name": "StatCard",       "briefRefs": ["StatCard"],       "category": "data-display", "priority": "P0", "decision": "generate-core", "figmaNaming": "DS/DataDisplay/StatCard",      "basis": "preset coreComponents 命中；心率/睡眠/步数三卡 + 详情页指标卡复用 ≥3 次（CD-1）", "states": ["default"] },
+    { "name": "LoadingOverlay", "briefRefs": ["LoadingOverlay"], "category": "feedback",     "priority": "P0", "decision": "generate-core", "figmaNaming": "DS/Feedback/LoadingOverlay",   "basis": "AI 等待态基础件，首页建议/详情分析/档案同步三页复用 ≥3（CD-1）", "states": ["default"] },
+    { "name": "HealthScoreCard","briefRefs": ["HealthScoreCard"],"category": "data-display", "priority": "P0", "decision": "create-local", "figmaNaming": "Local/Home/HealthScoreCard",   "basis": "CD-1 复用 <3（仅首页）：大数字评分+进度环+AI 摘要为首页专属结构，与 StatCard 80% 不一致不可 extend；复用 token 不进 DS", "states": ["default"] },
+    { "name": "TrendChart",     "briefRefs": ["TrendChart"],     "category": "chart",        "priority": "P0", "decision": "create-local", "figmaNaming": "Local/Detail/TrendChart",      "basis": "CD-1 复用 <3（仅详情页）：周趋势折线为页内特殊结构，vector M/L/Q/C/Z 实现（10.1 §3.3），chart series1 主色", "states": ["default", "empty"] },
+    { "name": "VitalChart",     "briefRefs": ["VitalChart"],     "category": "chart",        "priority": "P1", "decision": "create-local", "figmaNaming": "Local/Detail/VitalChart",      "basis": "CD-1 复用 <3（仅详情页）：指标卡内迷你 sparkline 行，随 StatCard 实例组合出现", "states": ["default"] },
+    { "name": "AdviceCard",     "briefRefs": ["AdviceCard"],     "category": "feedback",     "priority": "P0", "decision": "create-local", "figmaNaming": "Local/Common/AdviceCard",      "basis": "CD-1 复用 <3（首页今日建议 + 详情 AI 分析共 2 处）：AI 图标+标题+正文的品牌强调卡，两页各自本地构建", "states": ["default"] },
+    { "name": "ProfileCard",    "briefRefs": ["ProfileCard"],    "category": "data-display", "priority": "P1", "decision": "create-local", "figmaNaming": "Local/Profile/ProfileCard",    "basis": "CD-1 复用 <3（仅个人中心）：头像+姓名+健康标签结构", "states": ["default"] },
+    { "name": "HealthRecordList","briefRefs": ["HealthRecordList"],"category": "data-display","priority": "P1", "decision": "create-local", "figmaNaming": "Local/Profile/HealthRecordList","basis": "CD-1 复用 <3（仅个人中心）：档案条目行（图标+名称+值+chevron）", "states": ["default"] },
+    { "name": "SettingsList",   "briefRefs": ["SettingsList"],   "category": "data-display", "priority": "P1", "decision": "create-local", "figmaNaming": "Local/Profile/SettingsList",   "basis": "CD-1 复用 <3（仅个人中心）：设置行（图标+名称+chevron），与档案行结构近似但语义不同，各自本地实现", "states": ["default"] }
+  ],
+  "layout": {
+    "pattern": "tab-flow",
+    "frameBaseline": "402x874（iPhone 16 Pro 竖屏，用户显式指定）",
+    "pages": [
+      {
+        "name": "首页",
+        "zones": [
+          { "name": "StatusBar",  "role": "系统状态栏",       "size": "402x54", "order": 1, "notes": "iPhone 16 Pro 实测 54（覆盖 LD-5 缺省 44，见 assumptions）" },
+          { "name": "NavBar",     "role": "大标题导航：AI Health Assistant", "size": "402x56", "order": 2, "notes": "DS/Navigation/NavBar 实例 + display 档标题 + 右侧头像圆点" },
+          { "name": "ScoreZone",  "role": "健康评分卡",       "size": "370x180", "order": 3, "notes": "Local/Home/HealthScoreCard：评分 86 + 进度环(vector Q 弧) + AI 摘要行" },
+          { "name": "VitalRow",   "role": "心率/睡眠/步数",   "size": "370x112(3列 gap12)", "order": 4, "notes": "DS/DataDisplay/StatCard 实例 ×3，图标用 status/chart 色 vector" },
+          { "name": "AdviceZone", "role": "今日建议",         "size": "370x128", "order": 5, "notes": "Local/Common/AdviceCard：AI 徽标 + 3 条建议" },
+          { "name": "TabBar",     "role": "底部导航",         "size": "402x90(56+safeArea34)", "order": 6, "notes": "DS/Navigation/TabBar 实例" }
+        ]
+      },
+      {
+        "name": "数据详情",
+        "zones": [
+          { "name": "StatusBar",  "role": "系统状态栏",       "size": "402x54", "order": 1 },
+          { "name": "NavBar",     "role": "返回导航：数据详情", "size": "402x44", "order": 2, "notes": "NavBar 实例 + 返回 chevron" },
+          { "name": "TrendZone",  "role": "周趋势折线图",     "size": "370x232", "order": 3, "notes": "Local/Detail/TrendChart：7 点折线 + 网格线 + 数值标注，series1 主色" },
+          { "name": "MetricsRow", "role": "健康指标卡片",     "size": "370x128(3列 gap12)", "order": 4, "notes": "StatCard 实例 ×3 + Local/Detail/VitalChart sparkline" },
+          { "name": "AiZone",     "role": "AI 分析建议",      "size": "370x140", "order": 5, "notes": "Local/Common/AdviceCard（AI 分析变体文案）" },
+          { "name": "TabBar",     "role": "底部导航",         "size": "402x90", "order": 6, "notes": "TabBar 实例（数据 Tab active）" }
+        ]
+      },
+      {
+        "name": "个人中心",
+        "zones": [
+          { "name": "StatusBar",  "role": "系统状态栏",       "size": "402x54", "order": 1 },
+          { "name": "NavBar",     "role": "标题导航：个人中心", "size": "402x44", "order": 2 },
+          { "name": "ProfileZone","role": "用户 Profile",     "size": "370x104", "order": 3, "notes": "Local/Profile/ProfileCard：头像圆 + 姓名 + 健康标签 chips" },
+          { "name": "RecordZone", "role": "健康档案",         "size": "370x196", "order": 4, "notes": "Local/Profile/HealthRecordList：血型/过敏史/慢病/紧急联系人 4 行" },
+          { "name": "SettingsZone","role": "设置入口",        "size": "370x164", "order": 5, "notes": "Local/Profile/SettingsList：目标/提醒/隐私/关于 4 行" },
+          { "name": "TabBar",     "role": "底部导航",         "size": "402x90", "order": 6, "notes": "TabBar 实例（我的 Tab active）" }
+        ]
+      }
+    ]
+  },
+  "responsive": {
+    "baseline": "402x874",
+    "breakpoints": [
+      { "name": "compact", "width": 375 },
+      { "name": "base",    "width": 402 },
+      { "name": "max",     "width": 430 }
+    ],
+    "rules": [
+      "移动端单列布局；内容区 FILL 伸缩，三档宽度仅内容宽度变化（pagePadding 恒 16）",
+      "全幅出血区无；卡片流在 compact 档 StatCard 行保持 3 列（数据卡不折叠）"
+    ]
+  },
+  "accessibility": {
+    "contrast": [
+      "text.primary #111827 on surface.card #FFFFFF = 16.1:1 PASS（标题/正文）",
+      "text.regular #6B7280 on surface.card #FFFFFF = 4.8:1 PASS（正文）",
+      "text.secondary #9CA3AF on surface.card #FFFFFF = 2.8:1 FAIL-TEXT（仅占位符/单位标签，禁用于正文）",
+      "brand.primary #0FB5AE on surface.card #FFFFFF = 2.6:1 FAIL-TEXT（仅作色块/图标/描边/进度环，不作文字色——已知视觉取舍，同 Apple Health 实践）",
+      "surface.card #FFFFFF on brand.primary #0FB5AE = 2.6:1 NOTE（Button.primary 白字 17px Medium，同上标注）",
+      "status.success #00B578 on surface.card #FFFFFF = 3.0:1 PASS-LARGE（仅大号数值/图标，如步数达标态）"
+    ],
+    "minFontSize": { "value": 11, "source": "preset:premium-saas.visualSystem.typography(最小字阶 11)" },
+    "touchTarget": { "value": 44, "source": "rule:AC-2(移动端触控 ≥44px；Button/Input 44、TabBar item 56、列表行 ≥48)" },
+    "focusRing":   { "value": "2px #0FB5AE", "source": "rule:AC-3(focus ring 取 brand.primary；移动端主要体现为 pressed 态)" },
+    "notes": [
+      "心率异常值用 status.danger、睡眠不足用 status.warning 点缀（数据语义色，不作文字色）",
+      "AI 建议卡必须可关闭/可折叠，避免不可中断阻塞"
+    ]
+  },
+  "sourceMapping": {
+    "presetId": "premium-saas",
+    "rulesUsed": ["CD-1", "CD-2b", "RD-1", "RD-2", "RD-3", "ST-1", "industry-mapping(医疗)", "TY-1", "TY-2", "TY-4", "SP-3", "LD-5", "GEO-1", "AC-2", "AC-3"],
+    "briefOverrides": [
+      "tokens.color.brand.primary ← brief:visualSystem.primaryColor(#0FB5AE，行业映射医疗)",
+      "tokens.color.status.success ← brief:accentColor(#00B578，行业辅助色，优先于 ST-1)",
+      "tokens.radius ← brief:visualSystem.radius(6/8/10，preset+医疗修正圆角+2)",
+      "layout.frameBaseline ← brief:constraints.device(402x874，覆盖 LD-5 缺省 375x812)"
+    ],
+    "existingDsRefs": [],
+    "assumptions": [
+      "StatusBar 高度 54 为 iPhone 16 Pro 实测值，覆盖 LD-5 缺省 44（新机型超出现有规则表，L2 显式声明）",
+      "字体落地 Noto Sans SC（Figma 桌面 CJK 实测可用，继承 Brief._assumptions）；Inter 数字等宽以 Medium+对齐近似",
+      "页面数据为演示占位值（评分 86/心率 72bpm/睡眠 7h12m/步数 8,432），继承 Brief._assumptions",
+      "status.success 采用行业辅助色 #00B578 而非 ST-1 通用映射 #10B981：行业映射优先级更高，此优先级关系为本 Spec 首次显式声明"
+    ]
+  },
+  "buildPlan": {
+    "strategy": "ds-first：先建 6 个核心 DS 组件（逐个 create-component + READBACK），再三页分区构建；每批 ≤30 ops，WRITE→READBACK，as: 映射逐批落盘 build-ids（构建目录 build-ids.json）；构建顺序 Page Frame → App Shell(Status/TabBar) → Header(NavBar) → Content Sections → Cards → Charts → TabBar → Typography 校对",
+    "batches": [
+      { "seq": 1, "target": "DS 首建：NavBar+TabBar（含 3 Tab 项）", "estOps": 26 },
+      { "seq": 2, "target": "DS 首建：Button 四态", "estOps": 24 },
+      { "seq": 3, "target": "DS 首建：Input 四态 + StatCard", "estOps": 28 },
+      { "seq": 4, "target": "DS 首建：LoadingOverlay", "estOps": 12 },
+      { "seq": 5, "target": "首页：Page Frame+StatusBar+NavBar+ScoreZone(HealthScoreCard)", "estOps": 30 },
+      { "seq": 6, "target": "首页：VitalRow(StatCard×3)+AdviceCard", "estOps": 26 },
+      { "seq": 7, "target": "数据详情：TrendChart 折线图", "estOps": 28 },
+      { "seq": 8, "target": "数据详情：MetricsRow+VitalChart+AiZone", "estOps": 26 },
+      { "seq": 9, "target": "个人中心：ProfileCard+HealthRecordList+SettingsList", "estOps": 30 },
+      { "seq": 10, "target": "五级 QA 审计（只读）", "estOps": 18 }
+    ]
+  }
+}

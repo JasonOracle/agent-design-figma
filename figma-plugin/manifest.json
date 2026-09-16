@@ -1,0 +1,17 @@
+{
+  "name": "agnet-design-figma Bridge (Dev)",
+  "id": "1523849673120845333",
+  "api": "1.0.0",
+  "main": "code.js",
+  "ui": "ui.html",
+  "editorType": [
+    "figma"
+  ],
+  "documentAccess": "dynamic-page",
+  "networkAccess": {
+    "allowedDomains": [
+      "http://localhost:45677"
+    ],
+    "reasoning": "Local development plugin. It connects only to a loopback-only bridge server (localhost:45677) running on this same machine, to send node-creation commands (frames / text / rectangles) into the Figma canvas. No data leaves the machine and no remote host is contacted. Note: Figma's manifest validator rejects the equivalent 127.0.0.1 spelling, so only the localhost form is listed."
+  }
+}

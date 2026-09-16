@@ -1,0 +1,74 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Critic Report",
+  "description": "L4 Visual Critic 唯一出口物：每页一份。scores 五维均为 0-10（一位小数）；每条 issue 必须携带可复查的 evidence 并路由到唯一 targetLayer（L1/L2/L3）。loop 上限 3，禁止无限自动优化。",
+  "type": "object",
+  "required": ["project", "page", "scores", "average", "issues", "action"],
+  "properties": {
+    "project": {
+      "type": "string",
+      "description": "产品名，来自 Brief.product.name，须与 example-*.json / *.dsspec.json 的 brand.name 一致"
+    },
+    "page": {
+      "type": "string",
+      "description": "页面名，来自 Brief.informationArchitecture.pages[].name；逐页出报告，禁止合并"
+    },
+    "scores": {
+      "type": "object",
+      "required": ["layout", "color", "consistency", "commercial", "usability"],
+      "additionalProperties": false,
+      "properties": {
+        "layout":      { "type": "number", "minimum": 0, "maximum": 10, "description": "页面比例/网格/对齐/留白/密度（visual-critic.md §1.1）" },
+        "color":       { "type": "number", "minimum": 0, "maximum": 10, "description": "token 使用率/主色比例/对比度/状态色/unknownColors（§1.2）" },
+        "consistency": { "type": "number", "minimum": 0, "maximum": 10, "description": "组件/spacing/radius/typography/icon（§1.3）" },
+        "commercial":  { "type": "number", "minimum": 0, "maximum": 10, "description": "商业感锚点比对：Apple/Stripe/Linear/AntD Pro/Material 3（§1.4）" },
+        "usability":   { "type": "number", "minimum": 0, "maximum": 10, "description": "层级/路径/CTA/触控/信息流（§1.5）" }
+      }
+    },
+    "average": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 10,
+      "description": "五维算术平均，half-up 保留一位小数；QA 校验与 scores 实算值一致"
+    },
+    "issues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["severity", "location", "evidence", "suggestion", "targetLayer"],
+        "properties": {
+          "severity":        { "type": "string", "enum": ["low", "medium", "high", "critical"], "description": "low=建议性 / medium=明确缺陷 / high=违反红线（token 外色值、触控<44）/ critical=结构性" },
+          "location":        { "type": "string", "description": "组件名或分区路径，如 HealthScoreCard / Home/TabBar" },
+          "evidence":        { "type": "string", "description": "必填：实测值 + 规则出处，如 'battery fill #D9D9D9 不在 L2 白名单 16 色内（QA4 扫描）'" },
+          "evidenceNodeIds": { "type": "array", "items": { "type": "string" }, "description": "可选：Figma node id 快照，供审查回放" },
+          "suggestion":      { "type": "string", "description": "可执行的修正描述，必须指明改哪个 token/组件/节点；禁止'不够高级'类不可执行话术" },
+          "targetLayer":     { "type": "string", "enum": ["L1", "L2", "L3"], "description": "唯一路由层，判定规则见 references/critic-mapping.md；一个 issue 只允许路由一层" }
+        }
+      }
+    },
+    "action": {
+      "type": "string",
+      "enum": ["PASS", "FIX", "STOP_MAX_LOOP"],
+      "description": "PASS=average≥8 且无单项<7；FIX=存在 <7 单维或必须修复的 issue；STOP_MAX_LOOP=3 轮循环后仍未达标，转人工（禁止继续自动优化）"
+    },
+    "_loop": {
+      "type": "object",
+      "description": "Critic Loop 过程元数据（QA 校验 round ≤ 3）",
+      "required": ["round", "maxLoop"],
+      "properties": {
+        "round":    { "type": "integer", "minimum": 1, "maximum": 3, "description": "当前报告对应的审查轮次（Round 1/2/3）" },
+        "maxLoop":  { "type": "integer", "const": 3 },
+        "history":  { "type": "array", "items": { "type": "number" }, "description": "各轮 average 时间序（首元素为 Round 1），长度 ≤ round" },
+        "note":     { "type": "string", "description": "轮次间修复摘要，如 'Round2: 修复 battery 色/卡片 padding（L2 ×3）'" }
+      }
+    },
+    "_meta": {
+      "type": "object",
+      "properties": {
+        "reviewer":   { "type": "string", "description": "审查执行者（agent 版本/模式）" },
+        "reviewedAt": { "type": "string", "description": "ISO 8601" },
+        "inputs":     { "type": "array", "items": { "type": "string" }, "description": "审查依据的产物路径（brief/dsspec/build-ids/export-manifest）" }
+      }
+    }
+  }
+}

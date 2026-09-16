@@ -1,0 +1,197 @@
+{
+  "_source": "few-shot DS Spec 1/3 —— example-saas.json（企业考试管理平台）的 brief → DS Spec 转换结果。本项目为存量 DS 项目（存量 DS 项目，已有 10 个 DS 组件），决策以 reuse-core 为主，新增正式 DS 组件 = 0",
+  "brand": {
+    "name": "企业考试管理平台",
+    "industry": "教育",
+    "stylePresetId": "enterprise-dashboard",
+    "contentDensity": "dense"
+  },
+  "platform": "web-admin",
+  "tokens": {
+    "color": {
+      "brand": {
+        "primary": { "value": "#5A5CF0", "source": "preset:enterprise-dashboard.visualSystem.primaryColor" },
+        "hover":   { "value": "#6E70F2", "source": "derived:RD-1@tokens.color.brand.primary", "note": "与表面色 #FFFFFF 88:12 混合" },
+        "active":  { "value": "#5355DD", "source": "derived:RD-2@tokens.color.brand.primary", "note": "与 #000000 92:8 混合" }
+      },
+      "background": {
+        "page": { "value": "#F2F3F5", "source": "preset:enterprise-dashboard.visualSystem.background" }
+      },
+      "surface": {
+        "card": { "value": "#FFFFFF", "source": "preset:enterprise-dashboard.visualSystem.surface" }
+      },
+      "text": {
+        "primary":     { "value": "#303133", "source": "preset:enterprise-dashboard.visualSystem.textColors[0]" },
+        "regular":     { "value": "#606266", "source": "preset:enterprise-dashboard.visualSystem.textColors[1]" },
+        "secondary":   { "value": "#909399", "source": "preset:enterprise-dashboard.visualSystem.textColors[2]" },
+        "placeholder": { "value": "#C0C4CC", "source": "preset:enterprise-dashboard.visualSystem.textColors[3]" }
+      },
+      "border": {
+        "default": { "value": "#E4E7ED", "source": "preset:enterprise-dashboard.visualSystem.stroke" },
+        "divider": { "value": "#F2F3F6", "source": "derived:RD-3@tokens.color.border.default", "note": "与 surface #FFFFFF 50:50 混合" }
+      },
+      "status": {
+        "success": { "value": "#91CC75", "source": "rule:ST-1@preset.chartColors(绿系)" },
+        "warning": { "value": "#FAC858", "source": "rule:ST-1@preset.chartColors(黄系)" },
+        "danger":  { "value": "#EE6666", "source": "rule:ST-1@preset.chartColors(红系)" },
+        "info":    { "value": "#5470C6", "source": "rule:ST-1@preset.chartColors(蓝系)" }
+      },
+      "chart": {
+        "series1": { "value": "#5470C6", "source": "preset:enterprise-dashboard.visualSystem.chartColors[0]" },
+        "series2": { "value": "#91CC75", "source": "preset:enterprise-dashboard.visualSystem.chartColors[1]" },
+        "series3": { "value": "#FAC858", "source": "preset:enterprise-dashboard.visualSystem.chartColors[2]" },
+        "series4": { "value": "#FC8452", "source": "preset:enterprise-dashboard.visualSystem.chartColors[3]" },
+        "series5": { "value": "#EE6666", "source": "preset:enterprise-dashboard.visualSystem.chartColors[4]" }
+      }
+    },
+    "typography": {
+      "display": { "fontFamily": "PingFang SC / Microsoft YaHei + Inter", "size": 26, "lineHeight": 32, "weight": 500, "source": "preset:enterprise-dashboard.visualSystem.typography(26-32)" },
+      "heading": { "fontFamily": "PingFang SC / Microsoft YaHei + Inter", "size": 16, "lineHeight": 24, "weight": 500, "source": "preset:enterprise-dashboard.visualSystem.typography(16-24)" },
+      "body":    { "fontFamily": "PingFang SC / Microsoft YaHei + Inter", "size": 14, "lineHeight": 20, "weight": 400, "source": "preset:enterprise-dashboard.visualSystem.typography(14-20)" },
+      "caption": { "fontFamily": "PingFang SC / Microsoft YaHei + Inter", "size": 12, "lineHeight": 18, "weight": 400, "source": "preset:enterprise-dashboard.visualSystem.typography(12-18)" },
+      "number":  { "fontFamily": "Inter", "size": 16, "lineHeight": 24, "weight": 500, "fontStyle": "tabular-nums", "source": "rule:TY-1@preset.typography(数字用 Inter 等宽，取字阶 16-24)" }
+    },
+    "spacing": {
+      "base":        { "value": 4, "source": "preset:enterprise-dashboard.visualSystem.spacing(8pt 网格)" },
+      "scale":       { "value": "4/8/12/16/24/32", "source": "preset:enterprise-dashboard.visualSystem.spacing" },
+      "cardPadding": { "value": 16, "source": "preset:enterprise-dashboard.visualSystem.spacing(卡片内 padding 16)" },
+      "cellPadding": { "value": 12, "source": "rule:SP-2(密表格单元格 padding 缺省 12)" }
+    },
+    "radius": {
+      "sm": { "value": 2, "source": "preset:enterprise-dashboard.visualSystem.radius(2/4/6)" },
+      "md": { "value": 4, "source": "preset:enterprise-dashboard.geometry.cardRadius", "note": "卡片圆角 4px 为 设计智能规则·几何红线" },
+      "lg": { "value": 6, "source": "preset:enterprise-dashboard.visualSystem.radius(2/4/6)" }
+    },
+    "shadow": {
+      "card": { "value": "0 1px 4px rgba(0,0,0,0.06)", "type": "drop", "usage": "Card / 下拉浮层", "source": "preset:enterprise-dashboard.visualSystem.shadow" }
+    }
+  },
+  "components": [
+    { "name": "TopBar",      "briefRefs": ["TopBar"],      "category": "navigation",   "priority": "P0", "decision": "reuse-core", "figmaNaming": "DS/Navigation/TopBar",      "basis": "已存在 DS 组件（existingDsRefs），geometry 与 token 满足需求，命中 CD-1 条件①②", "states": ["default"] },
+    { "name": "Sidebar",     "briefRefs": ["Sidebar"],     "category": "navigation",   "priority": "P0", "decision": "reuse-core", "figmaNaming": "DS/Navigation/Sidebar",     "basis": "已存在 DS 组件，命中 CD-1", "states": ["default", "active"] },
+    { "name": "Breadcrumb",  "briefRefs": ["Breadcrumb"],  "category": "navigation",   "priority": "P0", "decision": "reuse-core", "figmaNaming": "DS/Navigation/Breadcrumb",  "basis": "已存在 DS 组件，命中 CD-1", "states": ["default", "hover"] },
+    { "name": "Button",      "briefRefs": ["Button"],      "category": "form",         "priority": "P0", "decision": "reuse-core", "figmaNaming": "DS/Form/Button",            "basis": "已存在 DS 组件，高度 30px 红线满足（几何红线）", "states": ["primary", "secondary", "disabled", "loading"] },
+    { "name": "Input",       "briefRefs": ["Input"],       "category": "form",         "priority": "P0", "decision": "reuse-core", "figmaNaming": "DS/Form/Input",             "basis": "已存在 DS 组件，高度 30px 红线满足", "states": ["default", "focus", "error", "disabled"] },
+    { "name": "Select",      "briefRefs": ["Select"],      "category": "form",         "priority": "P0", "decision": "reuse-core", "figmaNaming": "DS/Form/Select",            "basis": "已存在 DS 组件，高度 30px 红线满足", "states": ["default", "focus", "disabled"] },
+    { "name": "Table",       "briefRefs": ["Table"],       "category": "data-display", "priority": "P0", "decision": "reuse-core", "figmaNaming": "DS/DataDisplay/Table",      "basis": "已存在 DS 组件，Header 40 / Row 44 红线满足", "states": ["header", "row", "empty", "loading"] },
+    { "name": "Pagination",  "briefRefs": ["Pagination"],  "category": "navigation",   "priority": "P0", "decision": "reuse-core", "figmaNaming": "DS/Navigation/Pagination",  "basis": "已存在 DS 组件，命中 CD-1", "states": ["default", "active", "disabled"] },
+    { "name": "Card",        "briefRefs": ["Card"],        "category": "layout",       "priority": "P0", "decision": "reuse-core", "figmaNaming": "DS/Layout/Card",            "basis": "已存在 DS 组件，圆角 4px 红线满足", "states": ["default", "hover"] },
+    { "name": "Badge",       "briefRefs": ["Badge"],       "category": "feedback",     "priority": "P0", "decision": "reuse-core", "figmaNaming": "DS/Feedback/Badge",         "basis": "已存在 DS 组件，语义色由 status token 提供", "states": ["success", "warning", "danger", "info", "neutral"] },
+    { "name": "State",       "briefRefs": ["EmptyState", "ErrorState", "LoadingState"], "category": "feedback", "priority": "P0", "decision": "extend", "figmaNaming": "DS/Feedback/State", "variants": ["empty", "error", "loading"], "basis": "Brief 拆为三个独立组件，但三者 80% 结构一致（图标+标题+描述），仅图标与文案不同，命中 CD-2 extend 条件；以既有 State 组件新增 3 个 variant 覆盖，不新建组件", "states": ["empty", "error", "loading"] },
+    { "name": "ScoreBadge",  "briefRefs": ["ScoreBadge"],  "category": "feedback",     "priority": "P1", "decision": "extend", "figmaNaming": "DS/Feedback/Badge", "variants": ["score-优", "score-良", "score-不及格"], "basis": "与 Badge 结构 100% 一致，仅语义色取值不同（success/danger），命中 CD-2；新增 3 个语义 variant，不新建组件", "states": ["success", "danger"] },
+    { "name": "ExamCard",    "briefRefs": ["ExamCard"],    "category": "data-display", "priority": "P1", "decision": "create-local", "figmaNaming": "Local/ExamDetail/ExamCard", "basis": "考试详情页专属信息卡，含双 Tab 挂载点，属页面特殊结构，命中 CD-3；复用 Card token 但不进 DS", "states": ["default"] },
+    { "name": "KpiCard",     "briefRefs": ["KpiCard"],     "category": "data-display", "priority": "P1", "decision": "create-local", "figmaNaming": "Local/Dashboard/KpiCard",   "basis": "Dashboard 专用数据卡（number token + status 点），跨页复用 <3，命中 CD-3 以本地 Frame 实现", "states": ["default"] },
+    { "name": "TrendChart",  "briefRefs": ["TrendChart"],  "category": "chart",        "priority": "P1", "decision": "create-local", "figmaNaming": "Local/Dashboard/TrendChart", "basis": "图表按矢量实现规则以简单几何/矢量本地实现，chartColors 取 series1/2，不进 DS", "states": ["default", "empty"] },
+    { "name": "CourseTable", "briefRefs": ["CourseTable"], "category": "data-display", "priority": "P2", "decision": "reject", "basis": "P2 低频且与既有 Table 能力重叠（仅列配置差异），命中 CD-4：用 Table 实例+列覆写覆盖，不建任何组件", "states": [] }
+  ],
+  "layout": {
+    "pattern": "sidebar-content",
+    "frameBaseline": "1440x900",
+    "pages": [
+      {
+        "name": "登录页",
+        "zones": [
+          { "name": "Backdrop",   "role": "背景层",   "size": "1440x900", "order": 1 },
+          { "name": "CenterCard", "role": "登录表单卡", "size": "480xFILL(垂直居中)", "order": 2, "notes": "surface.card + radius.md + shadow.card" }
+        ]
+      },
+      {
+        "name": "工作台 Dashboard",
+        "zones": [
+          { "name": "Sidebar",   "role": "主导航",   "size": "240xFILL", "order": 1, "notes": "宽度出自 rule:LD-3（web-admin 侧栏缺省 240），若目标文件既有实现不同以 readback 为准" },
+          { "name": "TopBar",    "role": "顶栏",     "size": "FILLx56",  "order": 2, "notes": "高度出自 rule:LD-2（web-admin 顶栏缺省 56），同上以 readback 为准" },
+          { "name": "KpiGrid",   "role": "KPI 网格", "size": "FILLx120(4列 gap16)", "order": 3, "notes": "KpiCard 本地组件 ×4，数字用 tokens.typography.number" },
+          { "name": "ChartArea", "role": "趋势图区", "size": "FILLx320(2:1 分栏 gap16)", "order": 4 },
+          { "name": "TodoTable", "role": "待办表格", "size": "FILLxFILL", "order": 5, "notes": "Table 实例，Header 40 / Row 44 红线" }
+        ]
+      },
+      {
+        "name": "用户管理",
+        "zones": [
+          { "name": "Sidebar",     "role": "主导航",     "size": "240xFILL", "order": 1 },
+          { "name": "TopBar",      "role": "顶栏",       "size": "FILLx56",  "order": 2 },
+          { "name": "BreadcrumbBar", "role": "面包屑",   "size": "FILLx48",  "order": 3 },
+          { "name": "FilterRow",   "role": "搜索筛选行", "size": "FILLx30(gap8)", "order": 4, "notes": "Input/Select 高度 30px 红线" },
+          { "name": "TableArea",   "role": "数据表格",   "size": "FILLxFILL", "order": 5 },
+          { "name": "PaginationBar", "role": "分页",     "size": "FILLx32",  "order": 6 }
+        ]
+      },
+      {
+        "name": "考试管理",
+        "zones": [
+          { "name": "Sidebar",       "role": "主导航",     "size": "240xFILL", "order": 1 },
+          { "name": "TopBar",        "role": "顶栏",       "size": "FILLx56",  "order": 2 },
+          { "name": "BreadcrumbBar", "role": "面包屑",     "size": "FILLx48",  "order": 3 },
+          { "name": "FilterRow",     "role": "搜索筛选行", "size": "FILLx30(gap8)", "order": 4 },
+          { "name": "TableArea",     "role": "8 列考试表", "size": "FILLxFILL", "order": 5, "notes": "8 列为页面特殊结构，列宽在本地 Frame 内定义，不污染 Table 组件" },
+          { "name": "PaginationBar", "role": "分页",       "size": "FILLx32",  "order": 6 }
+        ]
+      },
+      {
+        "name": "考试详情",
+        "zones": [
+          { "name": "Sidebar",       "role": "主导航",   "size": "240xFILL", "order": 1 },
+          { "name": "TopBar",        "role": "顶栏",     "size": "FILLx56",  "order": 2 },
+          { "name": "BreadcrumbBar", "role": "面包屑",   "size": "FILLx48",  "order": 3 },
+          { "name": "ExamCard",      "role": "考试信息卡（含双 Tab 挂载点）", "size": "FILLxFILL", "order": 4, "notes": "Local/ExamDetail/ExamCard，Tab 为页内本地结构" }
+        ]
+      },
+      {
+        "name": "系统设置",
+        "zones": [
+          { "name": "Sidebar",     "role": "主导航",   "size": "240xFILL", "order": 1 },
+          { "name": "TopBar",      "role": "顶栏",     "size": "FILLx56",  "order": 2 },
+          { "name": "FormCards",   "role": "基础/AI/通知三组设置卡", "size": "FILLxFILL(纵向 gap16)", "order": 3, "notes": "Card 实例 + 表单控件；Toggle 为页内本地结构" }
+        ]
+      }
+    ]
+  },
+  "responsive": {
+    "baseline": "1440x900（页面画布基线红线）",
+    "breakpoints": [
+      { "name": "compact", "width": 1280 },
+      { "name": "base",    "width": 1440 },
+      { "name": "wide",    "width": 1920 }
+    ],
+    "rules": [
+      "web-admin 不做移动断点；内容区 FILL 自适应三档宽度",
+      "1280 档：Sidebar 收窄为图标模式（64px），KPI 网格降为 2 列",
+      "1920 档：内容区最大宽度 1680 居中，避免表格无限拉伸"
+    ]
+  },
+  "accessibility": {
+    "contrast": [
+      "text.primary #303133 on surface.card #FFFFFF = 12.6:1 PASS（正文）",
+      "text.regular #606266 on surface.card #FFFFFF = 7.0:1 PASS（正文）",
+      "text.secondary #909399 on surface.card #FFFFFF = 4.2:1 PASS-LARGE（仅辅助信息，禁用于 14px 以下正文）",
+      "brand.primary #5A5CF0 on surface.card #FFFFFF = 5.0:1 PASS（可作文字色与控件色）",
+      "status.warning #FAC858 on surface.card #FFFFFF = 1.6:1 FAIL-TEXT（禁止作文字色，仅作色块/边框/图标底）"
+    ],
+    "minFontSize": { "value": 11, "source": "preset:enterprise-dashboard.visualSystem.typography(最小字阶 11)" },
+    "touchTarget": { "value": 30, "source": "preset:enterprise-dashboard.geometry.button(桌面指针设备 30px 控件红线)" },
+    "focusRing":   { "value": "2px #5A5CF0", "source": "rule:AC-3(focus ring 取 brand.primary 2px)" },
+    "notes": ["表格斑马纹/悬浮态使用 border.divider，不得引入新灰色阶"]
+  },
+  "sourceMapping": {
+    "presetId": "enterprise-dashboard",
+    "rulesUsed": ["CD-1", "CD-2", "CD-3", "CD-4", "RD-1", "RD-2", "RD-3", "ST-1", "TY-1", "SP-2", "LD-2", "LD-3", "AC-3"],
+    "briefOverrides": [],
+    "existingDsRefs": ["DS/Navigation/TopBar", "DS/Navigation/Sidebar", "DS/Navigation/Breadcrumb", "DS/Navigation/Pagination", "DS/Form/Button", "DS/Form/Input", "DS/Form/Select", "DS/DataDisplay/Table", "DS/Layout/Card", "DS/Feedback/Badge", "DS/Feedback/State"],
+    "assumptions": [
+      "Sidebar 240 / TopBar 56 为 LD-2/LD-3 规则缺省值；目标文件已有既有实现，构建时若 readback 不同以 readback 为准并回写本 Spec"
+    ]
+  },
+  "buildPlan": {
+    "strategy": "ds-first：先 READ 校验 11 个既有 DS 组件存在性（禁止盲目 create-component），再按页分区构建；每批 ≤30 ops，WRITE→READBACK，as: 映射逐批落盘 build-ids",
+    "batches": [
+      { "seq": 1, "target": "DS 存在性校验 + 分区坐标规划（只读）", "estOps": 12 },
+      { "seq": 2, "target": "Dashboard：Sidebar+TopBar+KpiGrid", "estOps": 28 },
+      { "seq": 3, "target": "Dashboard：ChartArea+TodoTable", "estOps": 24 },
+      { "seq": 4, "target": "用户管理：FilterRow+TableArea+Pagination", "estOps": 26 },
+      { "seq": 5, "target": "考试管理：8 列表格区", "estOps": 30 },
+      { "seq": 6, "target": "考试详情：ExamCard+双 Tab", "estOps": 22 },
+      { "seq": 7, "target": "系统设置：三组表单卡", "estOps": 25 },
+      { "seq": 8, "target": "登录页 + 五级 QA 审计", "estOps": 18 }
+    ]
+  }
+}

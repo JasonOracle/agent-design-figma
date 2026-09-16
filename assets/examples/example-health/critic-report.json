@@ -1,0 +1,42 @@
+{
+  "project": "AI 型衣",
+  "page": "首页",
+  "scores": {
+    "layout": 8.5,
+    "color": 9,
+    "consistency": 9,
+    "commercial": 8.5,
+    "usability": 8.5
+  },
+  "average": 8.7,
+  "issues": [
+    {
+      "severity": "low",
+      "location": "BookingFlow 预约按钮",
+      "evidence": "副文案『到店前可免费改期 1 次』使用 12px caption，低于 L2 accessibility.minFontSize=14（readback fontSize=12）",
+      "evidenceNodeIds": ["Local/BookingFlow/cta-note"],
+      "suggestion": "归档到 caption 14 档（TY-3），或将该文案降级为图标+tooltip",
+      "targetLayer": "L2"
+    },
+    {
+      "severity": "low",
+      "location": "StyleGalleryCard 热度数字",
+      "evidence": "预约数『2.3k』未启用 tabular-nums，与相邻 KPI 数字基线错位 1px（typography.number 档位定义了等宽要求）",
+      "evidenceNodeIds": ["StyleGalleryCard/heat-number"],
+      "suggestion": "改用 typography.number 档（DIN/tabular-nums），与 StatCard 数字体保持同源",
+      "targetLayer": "L2"
+    }
+  ],
+  "action": "PASS",
+  "_loop": {
+    "round": 3,
+    "maxLoop": 3,
+    "history": [7.9, 8.3, 8.7],
+    "note": "Round1 发现 4 项：环形评分器为灰色实心（create-ellipse 默认 fill 未清除）、电池 #D9D9D9 非白名单色、卡片 padding 12px 低于 token 最小档、TabBar 激活态缺失 → 全部路由 L2。Round2 只修受影响 token/组件（set-fill clear+set-stroke 主色、映射 border.default、cardPadding 对齐 16 档、补 active 态），禁止整页重建。Round3 复评通过（CL-1/CL-5）"
+  },
+  "_meta": {
+    "reviewer": "agent (visual-critic.md §1 + get-node detail:true 结构化读回)",
+    "reviewedAt": "2026-09-15T21:00:00+08:00",
+    "inputs": ["assets/examples/example-health.json", "assets/examples/example-health.dsspec.json", "AI 医疗 App 真实 Critic Loop 记录（同型问题）"]
+  }
+}
