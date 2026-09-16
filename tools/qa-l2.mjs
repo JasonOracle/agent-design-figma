@@ -145,6 +145,42 @@ for (const { name, spec } of pairs) {
 
 /* ---------------- QA2 ---------------- */
 
+/**
+ * Brief 覆盖分支的取数表 —— `brief:<字段>` 必须能对回 Brief 里真实存在的那个值。
+ *
+ * 为什么需要它：design-system.md §4.2 明列色值有三个合法来源，「Brief 显式覆盖」是第二条，
+ * 但本脚本原来的色板白名单只实现了第一条，于是 **任何合法的 Brief 颜色覆盖都会被判未知颜色**。
+ * 反过来说，也**不能**简单地「见 brief: 前缀就放行」——那等于给出一条永远 PASS 的旁路，
+ * 把 QA2 变成可以被一句话关掉的检查（正是 lessons #47「降级开关连坐」的形态）。
+ * 所以此处逐路径把 `brief:<字段>` 映回 Brief 的值，比对不上照样 FAIL。
+ */
+const BRIEF_COLOR_PATH = {
+  "tokens.color.brand.primary": ["visualSystem", "primaryColor"],
+  "tokens.color.background.page": ["visualSystem", "background"],
+  "tokens.color.surface.card": ["visualSystem", "surface"],
+  "tokens.color.border.default": ["visualSystem", "stroke"],
+  "tokens.color.text.primary": ["visualSystem", "textColors", 0],
+  "tokens.color.text.regular": ["visualSystem", "textColors", 1],
+  "tokens.color.text.secondary": ["visualSystem", "textColors", 2],
+  "tokens.color.text.placeholder": ["visualSystem", "textColors", 3],
+};
+
+/** token 路径 → 期望的 brief 字段名（即 `brief:` 前缀后应写的那串） */
+const briefFieldFor = (tpath) => (BRIEF_COLOR_PATH[tpath] || []).join(".").replace(/\.\d+$/, "");
+
+/** 按路径取 Brief 的值；路径上任何一环不存在都返回 undefined（不抛） */
+function pickBriefColor(brief, tpath) {
+  if (!brief) return undefined;
+  const keys = BRIEF_COLOR_PATH[tpath];
+  if (!keys) return undefined;
+  let cur = brief;
+  for (const k of keys) {
+    if (cur === null || cur === undefined) return undefined;
+    cur = cur[k];
+  }
+  return typeof cur === "string" ? cur.toUpperCase() : undefined;
+}
+
 function collectPresetPalette(preset) {
   const vs = preset.visualSystem || {};
   const palette = new Set();
@@ -173,7 +209,7 @@ function tokenPaths(node, prefix = "", out = {}) {
   return out;
 }
 
-for (const { name, spec } of pairs) {
+for (const { name, brief, spec } of pairs) {
   if (!spec) continue;
   const pid = spec.brand?.stylePresetId;
   if (!presets[pid]) {
@@ -193,6 +229,35 @@ for (const { name, spec } of pairs) {
     // 上游脚本先判 palette 命中、再判 derived，于是「把派生值填成任意一个色板色」
     // 能蒙混过关（写成 #000000 / #FFFFFF / primary 本身都不会被发现）。这里把顺序
     // 倒过来：带 derived: 前缀就必须能被公式复算出同一个值。
+    if (src.startsWith("brief:")) {
+      // Brief 显式覆盖（§4.2 第二种合法来源）：色板白名单管不到它，但**必须**满足三件事——
+      // ① `brief:` 后写的字段名与该 token 路径匹配（防凭空盖前缀）
+      // ② 值等于 Brief 里真实声明的值（防改值蒙混）
+      // ③ 已记入 sourceMapping.briefOverrides（防漏审计）
+      // 三者缺一即 FAIL。这样既不误伤合法覆盖，又不给出「见 prefix 就放行」的旁路。
+      const field = src.slice("brief:".length).replace(/\(.*$/, "").trim();
+      const expectedField = briefFieldFor(tpath);
+      if (!expectedField || field !== expectedField) {
+        bad.push(`${tpath}=${val} (source=${src}) —— brief: 字段名与该 token 不匹配（应为 brief:${expectedField || "无可映射字段"}）`);
+        continue;
+      }
+      const declared = pickBriefColor(brief, tpath);
+      if (declared === undefined) {
+        bad.push(`${tpath}=${val} (source=${src}) —— brief: 覆盖但该 Brief 路径不存在或不是颜色字段`);
+        continue;
+      }
+      if (declared !== val) {
+        bad.push(`${tpath}=${val} (source=${src}) —— 与 Brief 声明的 ${declared} 不一致`);
+        continue;
+      }
+      const overrides = Array.isArray(spec.sourceMapping?.briefOverrides) ? spec.sourceMapping.briefOverrides : [];
+      if (!overrides.some((o) => String(o).includes(field))) {
+        bad.push(`${tpath}=${val} (source=${src}) —— Brief 覆盖未同步记入 sourceMapping.briefOverrides`);
+        continue;
+      }
+      continue;
+    }
+
     if (!src.startsWith("derived:")) {
       if (palette.has(val)) continue;
       bad.push(`${tpath}=${val} (source=${src || "缺失"})`);

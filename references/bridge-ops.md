@@ -121,6 +121,29 @@ POST /v1/batch
 4. **`chunkSize` 与引用互斥**：只要 batch 里出现 `@last` / `$name`，跨 chunk 的引用命名空间会断，Bridge 会自动把整批当**一个 chunk** 执行并在 `referenced:true` + `note` 里说明。想要分片提速，就把一个 chunk 内的步骤写成**不依赖前序引用**（自己保存 id 再显式传入）。
 5. `run` 不能作为 step 出现（batch 已经是批量），嵌套会被拒绝。
 
+### 3.0 超时语义（D2 运行 A 实测，务必先读）
+
+`timeoutMs` 到期**不等于那批没跑**。实测形态是：Bridge 侧可能已经 chunk 分片并**执行了一部分**，
+但在插件把结果回传前就超时返回 `NO_RESULT: picked up "run" but never returned`；
+若批内含 `$name` 引用，跨 chunk 的命名空间断裂还可能让它返回 `executed: 0` ——**而画布上已经有东西了**。
+
+**失败后的正确顺序（唯一允许的顺序）**：
+
+1. `GET /v1/history?n=50` 看这次到底执行到哪一步。
+2. `get-page-summary` + `get-node` **回读现状**，确认画布上多了什么、少了什么。
+3. 只在「确认现状」之后才决定是续跑、清理还是重发。
+
+**绝不允许**「见到超时就直接重发」——`append-child` / `move-node` 这类**重挂类 op 不是幂等的**，
+重发会叠加在中间态上（D2 运行 A 因此丢掉 10 个组件，只剩一个空帧，两侧都不报错，见 `lessons.md` #58）。
+
+**批大小怎么估**：
+
+| 维度 | 说明 |
+|---|---|
+| op 条数 | 上限 30（超过就有 chunk 风险） |
+| **任务复杂度** | **更重要的维度**：`create-*` 很便宜，`append-child` 要做坐标重算 + 兄弟索引重建，**贵得多**。混入重挂类 op 时按「最贵的那个」估 |
+| 引用依赖 | 批内有 `$name` 时无法提速（见第 4 点），不如直接拆小、逐批回读 |
+
 ### 3.1 `run` 批量内部的引用语法（单独用 `/v1/command` 调 `run` 时）
 
 ```jsonc
@@ -134,6 +157,22 @@ POST /v1/batch
 - `"@last"` = 上一步创建的那个节点。
 - `"$name"` = 之前某一步用 `as: "name"` 声明过的节点。**只有 `create-*` 类 op 支持 `as`**。
 - `run` **fail-fast**：某步抛错就中止，`error.partial` 返回已成功的步骤。
+
+**⚠️ 字面 id 绝不能加 `$` 前缀**。`"7:418"` 是画布上的真实节点 id，写成 `"$7:418"` 会被当成
+「名为 `7:418` 的引用」→ `unknown batch reference`。构造 op 计划时若 `$name` 与字面 id 混用，
+**必须用一个统一的 `ref()` 助手区分两者**（判据：`/^\d+:\d+$/` 才是字面 id），不要靠人眼逐条认。
+
+**⚠️ `run` 与 `/v1/batch` 的回包信封不同——不要混用取值路径**：
+`run` 的结果在 `data.ops`，`/v1/batch` 的结果在 `data.results`。取值时必须两个都试并**校验条数**，
+否则会出现「`ok:true` 但 `executed` 是 `undefined`」这种静默假绿：
+
+```js
+const results = r.data?.ops || r.data?.results || r.results || [];
+if (results.length !== ops.length) {
+  console.error(`  ❌ 只回传 ${results.length}/${ops.length} 步——按超时处理（见 §3.0）`);
+  process.exit(1);
+}
+```
 
 ---
 
@@ -151,6 +190,21 @@ node tools/precheck.mjs plan.json --live   # 再连 Bridge，核对计划引用�
 - 计划样例：`assets/examples/example-health.ops.json`（42 步，覆盖建帧 / 建文 / 建组件 / 实例 / 效果 / 读回）
 - **离线查不出**「某个 node id 在画布上到底存不存在」——画布是桩的。这类字面 id 一律列成「待核对」，交给 `--live`
 - **`set-effects` 多写的字段会被静默丢弃**（见 §6）——既不报错也不生效，所以只能由预检静态拦
+
+**⚠️ 两条闸门的分工边界（D2 运行 A 实测，别误读绿灯）**：
+
+| 闸门 | 能查 | **查不了** |
+|---|---|---|
+| 离线 `precheck` | 结构错误、参数契约、**`$name` 引用链完整性**（知道本批内谁声明过什么）、必填缺失、字段形状 | 画布上字面 id 是否存在；**批大小会不会触发 chunk 断裂**（见 §3.0 与 `lessons.md` #62） |
+| `precheck --live` | **字面 id 引用**是否存在 | `$name` 引用（它不管）；它只核对字面 id，**若计划里全是 `$name`，它会绿着但什么都没核对** |
+
+**判据**：`--live` 的绿 ≠「引用都没问题」，只等于「**字面 id 引用**都没问题」。
+两条闸门分工，**任一单独跑都不足**。
+
+**⚠️ 更关键的一条：`precheck` 全绿 ≠ 可以整批发车。** 静态预检的输入世界里**没有「传输」这一维**
+——它验计划本身对不对，验不了「以这个大小发出去会怎样」。实测：一个 117 ops 的批次
+`precheck` 报 **0 错通过**，运行期却因 Bridge 强拆 chunk 导致 `$name` 断链、返 `executed=0`。
+**批大小必须靠纪律 + 显式告警守**（见 §3.0）。
 
 ### 4.1 幂等：命名空间前缀 + 重建前清扫
 
@@ -212,6 +266,12 @@ POST /v1/batch
 | `create-vector` | `name?`, `points?`\|`data?`, `closed?`, `x?`, `y?`, `width?`, `height?`, `parentId?`, `stroke?`, `strokeWeight?`, `strokeCap?`, `strokeJoin?`, `fill?` |
 
 > `create-*` 支持 `as: "name"`，供 batch 内 `$name` 引用。
+>
+> **⚠️ `clips` 是「仅创建期可写」字段**（`code.js` 只在建帧时读它，`set-frame` 之类不含该字段）：
+> 建帧时漏了 `clips:true`，**事后没有任何 op 能补**，只能删帧重建、连带丢掉已排好的子级坐标。
+> 本仓库目前只有 `clipsContent` 一个已知的仅创建期字段，但它风险很高
+> ——玻璃 / 溢出裁剪类效果全都依赖它（见 `lessons.md` #60）。
+> **L3 计划阶段就要定稿，不要指望画到一半再调。**
 
 ### 5.3 变换与结构
 
@@ -223,6 +283,20 @@ POST /v1/batch
 | `resize-node` | `id`, `width`, `height` |
 | `delete-node` | `id` |
 | `append-child` | `parentId`, `childId`（或 `child` / `id`） |
+
+> **⚠️ `move-node` 与 `append-child` 不是同义的两个名字，语义完全不同**（D2 运行 A 在此翻过车，见 `lessons.md` #59）：
+>
+> | | `move-node` | `append-child` |
+> |---|---|---|
+> | 动什么 | **只改 `x` / `y`**（画布绝对坐标） | **改父级**（`parent.appendChild`） |
+> | 不动什么 | **父级不变** | —— 但**子级坐标会被重算**（Figma 里父级一换，相对坐标就变） |
+> | 典型误用 | 想「把节点放进某容器」→ 实为**什么都没搬**，节点仍挂在原父级下 | 想「微调位置」→ 实为**先搬再偏**，位置由父级重新决定 |
+>
+> **正确姿势**：搬进容器用 `append-child`，**搬完再 `move-node` 调坐标**（先挂后移，顺序不能反）。
+>
+> 这个错误**对结构性回读是全盲的**：`append-child` 的每一步都返回 `ok:true`，被搬节点的
+> `x`/`y`/`width`/`height` 也都合法——只有把父帧导成 PNG 才发现里面是空的。
+> **所以「导出成功」不等于「有内容」，必须配一次像素检查**（见 `lessons.md` #56）。
 
 ### 5.4 样式
 

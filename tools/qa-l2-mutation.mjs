@@ -81,6 +81,20 @@ expectFail("派生 token 的父路径不存在", (s) => { s.tokens.color.border.
 expectFail("使用了未知派生规则", (s) => { s.tokens.color.brand.hover.source = "derived:RD-9@tokens.color.brand.primary"; }, "未知派生规则");
 expectFail("引用了不存在的 preset", (s) => { s.brand.stylePresetId = "nope-preset"; }, "不存在的 preset");
 
+// QA2 — Brief 覆盖分支（§4.2 第二种合法来源）。基准产物已有一处真实用例：
+// tokens.color.brand.primary 的 source = brief:visualSystem.primaryColor。
+// 下面三条各自堵一种滥用方式：值对不上 Brief（改值蒙混）、凭空盖前缀、漏记 briefOverrides。
+// 缺任何一条，「见 brief: 就放行」的旁路就会重新打开。
+expectFail("brief: 来源的值与 Brief 声明不一致", (s) => {
+  s.tokens.color.brand.primary.value = "#123456";
+}, "与 Brief 声明");
+expectFail("凭空盖 brief: 前缀（字段名与该 token 不匹配）", (s) => {
+  s.tokens.color.brand.primary.source = "brief:visualSystem.nonexistentField";
+}, "字段名与该 token 不匹配");
+expectFail("brief: 覆盖未记入 sourceMapping.briefOverrides", (s) => {
+  s.sourceMapping.briefOverrides = [];
+}, "briefOverrides");
+
 // QA3 — 覆盖与数量
 expectFail("briefRefs 少覆盖一个组件（并集不等）", (s) => {
   s.components.find((x) => x.decision === "create-local").briefRefs = [];

@@ -165,7 +165,8 @@
     "rulesUsed": ["CD-1", "CD-2", "CD-2b", "CD-3", "RD-1", "RD-2", "RD-3", "ST-1", "TY-1", "TY-2", "TY-4", "SP-3", "LD-5", "AC-2", "AC-3"],
     "briefOverrides": [
       "tokens.radius ← brief:visualSystem.radius(8/12/16)，覆盖 preset 缺省 4/6/8",
-      "tokens.typography ← brief:visualSystem.typography(24-32-17-15-13-11)，覆盖 preset 字阶 26-32-16-14-13-12-11"
+      "tokens.typography ← brief:visualSystem.typography(24-32-17-15-13-11)，覆盖 preset 字阶 26-32-16-14-13-12-11",
+      "tokens.color.brand.primary ← brief:visualSystem.primaryColor(#5A5CF0)，覆盖 preset 缺省 #5A5CF0"
     ],
     "existingDsRefs": [],
     "assumptions": [
