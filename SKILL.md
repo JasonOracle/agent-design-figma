@@ -69,7 +69,28 @@ User Prompt（自然语言）
 
 - 输出 Brief JSON → L2 消费（生成完整 Token Set 与组件库规格）
 - L4 Visual Critic 不达标回写时，修正对象是 Brief JSON 的 `designDirection` / `visualSystem` 字段
-- 详见 `references/design-intelligence.md`（完整规则）、`references/design-style-library.md`（三套 Preset）、`references/brief-schema.md`（Schema 定义）
+- 详见 `references/design-intelligence.md`（完整规则）、`references/design-style-library.md`（四套 Preset）、`references/brief-schema.md`（Schema 定义）
+
+## L2 Design System Layer
+
+L1 的 Brief 就绪后，按 `references/design-system.md` 把它转换成 **DS Spec** —— L3 的**唯一输入**（L3 禁止直接消费 Brief 或自然语言需求）：
+
+```
+Brief JSON → ①Token(五类,全带 source) → ②Component 判定 → ③Layout 分区 → ④Build Plan → DS Spec JSON
+```
+
+五条硬规则（完整规则见 `references/design-system.md`）：
+
+1. **规则引擎，不是创作引擎**：同一 Brief 必须得到同一 DS Spec；规则未覆盖处写进 `sourceMapping.assumptions`，禁止静默自由发挥。
+2. **色值只有三个来源**：Preset 的 `visualSystem` / Brief 显式覆盖（须记进 `briefOverrides`）/ 白名单派生（**仅 RD-1/2/3 + ST-1 四条**）。禁止混色、透明度变体、新增灰阶——preset 只有一个 shadow 就只有一个。
+3. **每个 token 必须带 `source`**：五种前缀 `preset:` / `brief:` / `rule:` / `derived:` / `existing-ds:`，可反向审计。
+4. **组件判定按序短路**：`reject` → `reuse-core` → `extend` → `create-local` → `generate-core`。P0 必须 100% 覆盖；`reject` 仅限 P1/P2；**存量项目 `generate-core` 必须为 0**；`create-local` 禁止用 `DS/` 前缀。
+5. **四件套状态矩阵不可缺**：Button / Input / Table / Card 在 Brief 出现即需完整状态（四类必选态见同文件 §10）。
+
+- 出口校验：`node tools/qa-l2.mjs` —— 四项（Schema / Token 无未知色 / 覆盖与数量 / DS 单源）。**实际运行，不靠目测。**
+- 平台布局模板（web-admin / **web-site** / mobile-app / big-screen）：`references/design-system.md` §11
+- 字体降级链（Windows 的 Figma 无 PingFang SC，须按链探测）：同文件 §6.1
+- **本层是「红线下的次优解」**：文档降方差、脚本拦越界，但**不消除方差**——同输入不同模型仍可能得出不同的合法解。这个边界不得掩盖（同文件 §1）。
 
 ## L3 Figma Build Layer
 
@@ -97,7 +118,7 @@ Export PNG / 结构化 READBACK → 五维评分（Layout/Color/Consistency/Comm
 - Report Schema：`assets/templates/critic-report.json`（evidence 必填、targetLayer ∈ L1/L2/L3）
 - few-shot（覆盖三种循环结局）：`assets/examples/example-{saas,health,highway}/critic-report.json`
   - saas = 企业后台 Round 1 一次 PASS / health = 消费健康 App 3 轮收敛 PASS / highway = 政务大屏 3 轮仍不达标 STOP_MAX_LOOP
-- 出口校验：Python QA 脚本（90+ 断言：schema/评分/证据/路由/loop 自洽）
+- 出口校验：critic-report 逐条核对（schema / 评分 / 证据 / 路由 / loop 自洽）。**本 Skill 不随包附带校验脚本**，须按上述条目人工核对，不得声称已自动校验。
 
 ## L5 Export Layer
 
@@ -108,7 +129,7 @@ Prompt → L1 Brief → L2 DS Spec → L3 Figma Build → L4 Critic（≥8 PASS�
 ```
 
 **Export Gate（进入导出的硬性前置，全部满足才允许 live-build 导出）**：
-1. L3 QA1–QA5 全绿（0 FAIL）
+1. L3 出口检查 QA1–QA5 全绿（0 FAIL，逐条核对）
 2. L4 Critic average ≥8 且无单项 <7（action=PASS）
 3. Freeze protocol passed（冻结文件零修改）
 4. Build IDs 完整（build-ids 快照 + rootNodeIds 可回读）
@@ -120,11 +141,11 @@ Prompt → L1 Brief → L2 DS Spec → L3 Figma Build → L4 Critic（≥8 PASS�
 - 组件/Token 映射规则（A 直接/B 组合/C 不可自动）：`references/export-mapping.md`
 - few-shot：`assets/examples/export/example-{saas,health,highway}-export.json`
   - saas = 真实 live-build（真实构建产物回填）/ health = 真实 live-build（真实导出 PNG+SVG）/ highway = design-phase（critic 7.7 未过 Gate，exports 为空规划清单——Gate 规则的活教材）
-- 出口校验：Python QA 脚本（QA1-QA7：Schema/文件存在/node id 回读/映射完整/Token 回溯/无孤儿/冻结零修改）
+- 出口校验：交付物检查清单 QA1–QA7（Schema / 文件存在 / node id 回读 / 映射完整 / Token 回溯 / 无孤儿 / 冻结零修改）——逐条人工核对，**本 Skill 不随包附带校验脚本**
 
 ## L0 Runtime Capability（任何层执行前必须先跑）
 
-**入口**：`node <skill 根目录>/tools/runtime-check.mjs` → 输出默认落在 `<skill 根目录>/.vibe/runtime-capability.json`（路径由脚本自身定位，**任意 cwd 都能跑**）
+**入口**：`node <skill 根目录>/tools/runtime-check.mjs` → 输出默认落在 `<skill 根目录>/.vibe/runtime-capability.json`（路径由脚本自身定位，**任意 cwd 都能跑**）。输出的 `version` 字段即当前技能版本——**每份交付物都应带上它**，让"这份稿子由哪个版本产出"永远可答（版本变更记录见 `CHANGELOG.md`）。
 
 在任何层开始前先探测环境能力，按 mode 路由（完整矩阵见 `references/runtime-capability.md`）：
 
@@ -136,7 +157,7 @@ Prompt → L1 Brief → L2 DS Spec → L3 Figma Build → L4 Critic（≥8 PASS�
 
 注：FULL_MODE 下 `figmaRead` **同样是 true**——Bridge 自带 `get-page-summary` / `get-node` / `export-node` 读能力（见 `details.readSources`）。读能力不是"只有 MCP 才算"，别把它误读成环境残缺。
 
-铁律：未跑的层不得假装跑过（交付物标注 mode 与降级原因）；探针只读，零新协议、零 Bridge/Plugin 修改。安装指南：`SETUP.md`（普通用户 5 分钟上手），架构边界：`README.md`。安装体验 QA：独立安装体验 QA 脚本。
+铁律：未跑的层不得假装跑过（交付物标注 mode 与降级原因）；探针只读，零新协议、零 Bridge/Plugin 修改。安装指南：`SETUP.md`（普通用户 5 分钟上手），架构边界：`README.md`。安装体验走查：按 `SETUP.md` Step 1–3 实走一遍 + 跑 runtime-check 自检。
 
 ## few-shot 示例
 

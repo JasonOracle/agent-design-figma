@@ -11,7 +11,7 @@
       "properties": {
         "name":           { "type": "string", "description": "产品名，来自 Brief.product.name" },
         "industry":       { "type": "string", "description": "行业，来自 Brief.product.industry" },
-        "stylePresetId":  { "type": "string", "enum": ["premium-saas", "enterprise-dashboard", "gov-digital-screen"], "description": "命中的 Style Preset，来自 Brief.designDirection.style" },
+        "stylePresetId":  { "type": "string", "enum": ["premium-saas", "enterprise-dashboard", "gov-digital-screen", "web-marketing"], "description": "命中的 Style Preset，来自 Brief.designDirection.style" },
         "contentDensity": { "type": "string", "enum": ["sparse", "balanced", "dense"] }
       }
     },
