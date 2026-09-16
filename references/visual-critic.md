@@ -164,3 +164,4 @@ Report 中 `_loop` 字段记录轮次与历史均分，出口检查须确认 `ro
 - 输入依赖：L3 的 export（PNG/SVG）+ build-ids 快照 + L2 DS Spec（白名单/档位/触控红线）
 - 输出去向：`critic-mapping.md` 路由 → L1（designDirection/visualSystem）/ L2（token/组件规格）/ L3（Build Plan/节点重建）
 - 回写后重走受影响层的 stage gate；L2 回写必须重跑 L2 出口检查（DS Spec 逐条核对）
+- **出口校验**：`node tools/qa-critic.mjs`（QA1–QA8：Schema 契约 / 评分与 `average` 实算 / 证据 / 路由 / loop 自洽 / `_evidence` 档位契约 / 跨产物一致）。**报告里的数字会被复算**：`average` 用未舍入原值判等，evidence 里引用的 token 色值、`accessibility` 标量与档位列表都要与 DS Spec 对得上——手写过一遍的数字不可信（`contrast-audit.mjs` 抓到 13 条声称值错 9 条，同一批错误也存在于 critic-report）。

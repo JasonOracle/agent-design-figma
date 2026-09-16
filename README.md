@@ -115,6 +115,8 @@ node ~/.workbuddy/skills/agent-design-figma/tools/qa-plugin.mjs
 - `tools/layout-audit.mjs` — L4 布局审计（gap / 对齐 / 档位 / 越界 / 触控，基于 get-node 实测坐标）
 - `tools/contrast-audit.mjs` — L4 Color 维对比度审计：从 DS Spec tokens 复算「文本 × 表面」矩阵的 WCAG 比值，并把 `accessibility.contrast` 里**手写的每个数字**与复算逐条比对（首次运行即发现随包样例 13 条声称值里 9 条不符）
 - `tools/contrast-audit-mutation.mjs` — 对 contrast-audit 的变异测试（36 例：注入 9 类错误 + 边界值/非白背景/非 hex 取值，确认能抓错且不误报）
+- `tools/qa-critic.mjs` — L4 Critic 产出校验（134 断言：Schema / 五维评分与 average 实算 / issue 证据须带量或核对动作 / targetLayer 路由 / loop 自洽 / `_evidence` 档位契约 / 跨产物一致）；可校验任意产物（`--report` + `--brief` + `--spec`），`--strict` 让软提示升为失败
+- `tools/qa-critic-mutation.mjs` — 对 qa-critic 的变异测试（51 条断言：注入 30+ 类已知缺陷 + 一次全报 + `--strict` 升档 + 自带样例零告警门禁）
 - `tools/precheck.mjs` — **构建计划开工前预检**（L3）：把你的 op 序列离线过一遍真 `code.js`，一次报出全部静态错误（未知 op / 缺必填 / 参数类型 / 颜色格式 / 效果字段被静默丢弃）；`--live` 可再核对画布已有 id
 - `tools/precheck-mutation.mjs` — 对 precheck 的变异测试（63 条断言：注入 13 类错误 + 36 op 全通跑 + B2 在线核对端到端）
 - `tools/figma-harness.mjs` — 离线加载真 `code.js` 的共享装置（严格效果桩 + 效果字段两侧契约），供 qa-plugin 与 precheck 共用

@@ -3,7 +3,7 @@
   "title": "Critic Report",
   "description": "L4 Visual Critic 唯一出口物：每页一份。scores 五维均为 0-10（一位小数）；每条 issue 必须携带可复查的 evidence 并路由到唯一 targetLayer（L1/L2/L3）。loop 上限 3，禁止无限自动优化。",
   "type": "object",
-  "required": ["project", "page", "scores", "average", "issues", "action"],
+  "required": ["project", "page", "scores", "average", "issues", "action", "_meta", "_evidence"],
   "properties": {
     "project": {
       "type": "string",
@@ -64,6 +64,7 @@
     },
     "_meta": {
       "type": "object",
+      "required": ["reviewer"],
       "properties": {
         "reviewer":   { "type": "string", "description": "审查执行者（agent 版本/模式）；须写明本次证据档位 structured-only 或 structured+vision" },
         "reviewedAt": { "type": "string", "description": "ISO 8601" },

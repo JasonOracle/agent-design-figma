@@ -127,7 +127,7 @@ Export PNG / 结构化 READBACK → 五维评分（Layout/Color/Consistency/Comm
 - Report Schema：`assets/templates/critic-report.json`（evidence 必填、targetLayer ∈ L1/L2/L3）
 - few-shot（覆盖三种循环结局）：`assets/examples/example-{saas,health,highway}/critic-report.json`
   - saas = 企业后台 Round 1 一次 PASS / health = 消费健康 App 3 轮收敛 PASS / highway = 政务大屏 3 轮仍不达标 STOP_MAX_LOOP
-- 出口校验：critic-report 逐条核对（schema / 评分 / 证据 / 路由 / loop 自洽）。**本 Skill 不随包附带校验脚本**，须按上述条目人工核对，不得声称已自动校验。
+- **出口校验不许人工目测**：`node tools/qa-critic.mjs` 校验 critic-report（**134 条断言**，QA1–QA8：Schema 契约 / 五维评分与 `average` 实算 / issue 证据须带**量或核对动作** / targetLayer 路由 / loop 自洽 / `_evidence` 档位契约 / 跨产物一致）。带 `--report` + `--brief` + `--spec` 可校验用户自己的产物；`--strict` 把软提示升为失败（样例自身走这一档）。**报告里的数字会被复算**——C3 上线即发现随包三份 critic-report 的页面名、引用的 token 色值、档位表与 `minFontSize` 全都有与 DS Spec 对不上的地方（同 `contrast-audit.mjs` 的教训：写在产物里的数字会被下游当事实复用）。
 
 ## L5 Export Layer
 
@@ -150,7 +150,7 @@ Prompt → L1 Brief → L2 DS Spec → L3 Figma Build → L4 Critic（≥8 PASS�
 - 组件/Token 映射规则（A 直接/B 组合/C 不可自动）：`references/export-mapping.md`
 - few-shot：`assets/examples/export/example-{saas,health,highway}-export.json`
   - saas = 真实 live-build（真实构建产物回填）/ health = 真实 live-build（真实导出 PNG+SVG）/ highway = design-phase（critic 7.7 未过 Gate，exports 为空规划清单——Gate 规则的活教材）
-- 出口校验：交付物检查清单 QA1–QA7（Schema / 文件存在 / node id 回读 / 映射完整 / Token 回溯 / 无孤儿 / 冻结零修改）——逐条人工核对，**本 Skill 不随包附带校验脚本**
+- 出口校验：交付物检查清单 QA1–QA7（Schema / 文件存在 / node id 回读 / 映射完整 / Token 回溯 / 无孤儿 / 冻结零修改）。**L5 的执行体尚未落地（`qa-export`，C3 待开工）**——在它落地之前这几条仍是人工逐条核对；而**已经落地的层一律改用脚本**：L2 = `node tools/qa-l2.mjs`、L4 = `node tools/qa-critic.mjs`，不得再拿「人工核对过」当校验过的证据。
 
 ## L0 Runtime Capability（任何层执行前必须先跑）
 

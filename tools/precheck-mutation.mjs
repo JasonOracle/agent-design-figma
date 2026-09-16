@@ -21,10 +21,12 @@
  *       （证明它是被丢弃而不是报错，这才使 precheck 的静态拦成为必要且唯一可行的手段）
  *  E B2 在线核对（真 Bridge + mock 插件，端到端）：
  *     · id 存在 → 通过 · id 缺失 → 报出「哪一步的哪个 id」
- *     · 插件掉线 → 失败，且**不得**把没查说成「全部存在于画布」
+ *     · 插件在册但不应答（超时）→ 报「意外响应」并失败
+ *     · 插件从未连接（/health 直接说未连接）→ 当场判失败，不发命令
+ *     两种离线都**不得**把没查说成「全部存在于画布」
  *
  * 用法：node tools/precheck-mutation.mjs
- * 零依赖；退出码 0 = 全部例通过。B2 段会临时占用端口 45691（可用 QA_PRECHECK_PORT 覆盖）。
+ * 零依赖；退出码 0 = 全部例通过。B2 段会临时占用端口 45691 与 45692（可用 QA_PRECHECK_PORT 覆盖）。
  */
 import fs from "node:fs";
 import os from "node:os";
@@ -268,6 +270,9 @@ expect("DS Spec 误当计划", { brand: {}, buildPlan: { strategy: "s", batches:
         continue;
       }
       if (!body || !body.cmd) continue;
+      // 已"掉线"就**连在途命令也不回**：否则这条长轮询会把停摆前的最后一条命令答掉，
+      // 「插件不应答」就退化成赌时序（Bridge 判定插件在线的窗口是 45s，短 sleep 追不上）。
+      if (!running) break;
       const cmd = body.cmd;
       const id = cmd.params && cmd.params.id;
       const reply =
@@ -303,14 +308,39 @@ expect("DS Spec 误当计划", { brand: {}, buildPlan: { strategy: "s", batches:
       check(/画布上不存在这个节点/.test(r.out), "B2：应说明该节点在画布上不存在");
       check(!/全部存在于画布/.test(r.out), "B2：核出缺失时**不得**同时说「全部存在于画布」");
     }
-    // 边界：插件掉线时要明确说"核对不了"，而不是当作通过
+    // 边界一：插件在册但不应答（挂死 / 已关但还没过 Bridge 的 45s stale 窗口）→ 必须超时报「意外响应」。
+    // 这里**不能**靠"停掉轮询再睡 300ms"假装掉线：Bridge 判定插件在线的窗口是 45s（`PLUGIN_STALE_MS`），
+    // 而 mock 的在途长轮询最长 500ms，短睡只会让 mock 把最后一条命令答掉——那这条用例就在赌时序，
+    // 实测会偶发假绿。确定性来自 mock 侧「停摆后连在途命令也不回」，不是来自等更久。
     {
       running = false;
       await sleep(300);
       const r = await runAsync(withId("1:2"), liveArgs);
-      check(r.status === 1, `B2：插件掉线时应失败而不是静默通过（实际 ${r.status}）\n${r.out}`);
-      check(/插件未连接|连不上 Bridge|意外响应/.test(r.out), "B2：插件掉线时应明确报出「核对不了」");
+      check(r.status === 1, `B2：插件在册但不应答时应失败而不是静默通过（实际 ${r.status}）\n${r.out}`);
+      check(/意外响应/.test(r.out), "B2：插件不应答时应报「意外响应」，不得当作通过");
       check(!/全部存在于画布/.test(r.out), "B2：没核成时**不得**说「全部存在于画布」（不许把没查说成查过了）");
+    }
+
+    // 边界二：插件从未连接（/health 直接说未连接）→ 当场判失败，不发命令。
+    // 用一台**全新**的 Bridge：否则要等满 45s 才等到 stale。
+    {
+      const PORT2 = PORT + 1;
+      const bridge2 = spawn(
+        process.execPath,
+        [path.join(HERE, "..", "bridge", "server.js"), "--port", String(PORT2), "--token", TOKEN, "--no-ipv6"],
+        { stdio: ["ignore", "ignore", "pipe"] },
+      );
+      let err2 = "";
+      bridge2.stderr.on("data", (d) => (err2 += d));
+      try {
+        await sleep(700);
+        const r = await runAsync(withId("1:2"), ["--live", "--port", String(PORT2), "--token", TOKEN]);
+        check(r.status === 1, `B2：无插件连接时应失败（实际 ${r.status}）\n${r.out}${err2}`);
+        check(/未连接|核对不了/.test(r.out), "B2：无插件连接时应明确报出「核对不了」");
+        check(!/全部存在于画布/.test(r.out), "B2：无插件连接时不得说「全部存在于画布」");
+      } finally {
+        bridge2.kill();
+      }
     }
   } finally {
     running = false;
