@@ -128,7 +128,9 @@ Report 中 `_loop` 字段记录轮次与历史均分，QA 校验 `round ≤ 3`�
 1. **结构化优先**：Layout/Color/Consistency/Usability 全部基于 get-node 读回数据判定（该通道已通过端到端验证）；
 2. **视觉补充**：PNG 导出供人工/多模态复核，Commercial 维以结构化证据 + 锚点比对为主，PNG 目视为辅；
 3. **逐页产出**：每页一份 Report（`project + page` 唯一），禁止多页合并；
-4. **证据可复查**：issue.evidence 必须包含实测值与规则出处，审查者可按 evidenceNodeIds 回放。
+4. **证据可复查**：issue.evidence 必须包含实测值与规则出处，审查者可按 evidenceNodeIds 回放；
+5. **avoid 判定基准**：审查用的禁用清单 = Brief `designDirection.avoid`（**已按 `design-intelligence.md` §⑧ 仲裁后的实际清单**）。被用户显式点名覆盖的手法**不再作为否决依据**——用户点名要毛玻璃、而 Preset 原本禁用玻璃拟态时，不得因「出现玻璃拟态」扣分；此时应改判其**实现质量**（模糊半径是否合理、叠投影是否过重、字底对比度是否仍达 4.5:1）。换言之：`avoidOverrides` 换掉的是"能不能用"，换不掉"用得好不好"。
+6. **读全再评**：Layout 维要求逐节点实测，用 `get-node {depth:2~3, detail:true}` 一次取全子树（见 `bridge-ops.md` §2.3）。**禁止每个节点各打一次 roundtrip**——那是上一版真实浪费掉的时间。
 
 ## 5. 与其他层的关系
 

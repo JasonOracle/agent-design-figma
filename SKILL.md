@@ -71,6 +71,16 @@ User Prompt（自然语言）
 - L4 Visual Critic 不达标回写时，修正对象是 Brief JSON 的 `designDirection` / `visualSystem` 字段
 - 详见 `references/design-intelligence.md`（完整规则）、`references/design-style-library.md`（三套 Preset）、`references/brief-schema.md`（Schema 定义）
 
+## L3 Figma Build Layer
+
+L2 的 DS Spec 就绪后，按 `references/bridge-ops.md` 执行写画布。五条硬规则（完整配方见该文件 §4/§6）：
+
+1. **op 名与参数形状必须照抄文档，不要凭印象构造**。参数形状是契约：`set-effects` 曾因给模糊类效果多写一个 `color` 字段，导致整条 effects 赋值被 Figma 拒绝、招牌的毛玻璃场景全灭。
+2. **幂等构建**：本次构建的顶层页框统一命名空间前缀（如 `<产品名> / <页名>`）；正式开工前先 `get-page-summary`，把匹配该前缀的上一轮残留 `delete-node` 清掉——中途失败的构建会在画布留残骸，直接重跑会叠垃圾。
+3. **走批量通道**：`POST /v1/batch`（默认 40 步一个 chunk，上限 200）。296 个 op 逐条调用 = 296 次长轮询往返、1~2 分钟纯等待；批量后压到个位数。失败时 `failedAt.step` 就是断点，**从断点续跑，不要整页重建**。
+4. **字体按降级链探测**：Windows 的 Figma 没有 PingFang SC / SF Pro，`loadFontAsync` 会直接抛错。按 L1 给出的链依次尝试，首个成功者胜出，并把**实际生效**的字体写进 build log（不要对外宣称用了链首字体）。
+5. **分批写入 + 逐批回读**：写入一批 → `get-node {depth:2, detail:true}` 回读该批 → 校验通过再写下一批。`depth` 与 `detail` 是独立参数，看清 §2.3 的语义再取值。
+
 ## L4 Visual Critic Layer
 
 L3 生成完成后，对每页执行五维审查并形成闭环：
@@ -81,6 +91,7 @@ Export PNG / 结构化 READBACK → 五维评分（Layout/Color/Consistency/Comm
   → 只修复受影响 token/组件/节点 → 重新审查 → ≤3 轮，禁止无限自动优化
 ```
 
+- **布局审计不许目测**：Layout 维的 gap / 对齐 / 档位 / 越界 / 触控一律用 `node tools/layout-audit.mjs <readback.json> --baseline <WxH>` 出违规清单（基于 get-node 实测坐标，可复现、可回归），不要现写临时代码算坐标。读取时用 `get-node {depth:2~3, detail:true}` 取全子树——回读若只有不带几何的子级，工具会明确提示深审不可用。
 - 评分模型与 Loop 规则：`references/visual-critic.md`
 - issue → 层路由与回写约束（CR-1~5）：`references/critic-mapping.md`
 - Report Schema：`assets/templates/critic-report.json`（evidence 必填、targetLayer ∈ L1/L2/L3）
@@ -104,7 +115,7 @@ Prompt → L1 Brief → L2 DS Spec → L3 Figma Build → L4 Critic（≥8 PASS�
 
 五类输出：PNG（@1x/@2x 展示/评审/AI 视觉理解）、SVG（图标/Vector/页面级矢量）、Figma JSON（Node Tree/Geometry/AutoLayout/Instance/TokenReference）、Design Specification（Brief/DS Spec/Build Plan/Critic Report 随包）、Frontend Mapping（组件映射矩阵 + Token→CSS Variable + Layout 规则）。
 
-- 总体架构：仓库 docs/ 内 Export Layer 架构文档
+- 总体架构与映射规则：`references/export-mapping.md`
 - 出口协议 Schema：`assets/templates/export-manifest.json`（所有路径可追溯；dsToken 可沿点路径回溯 DS Spec）
 - 组件/Token 映射规则（A 直接/B 组合/C 不可自动）：`references/export-mapping.md`
 - few-shot：`assets/examples/export/example-{saas,health,highway}-export.json`
@@ -113,7 +124,7 @@ Prompt → L1 Brief → L2 DS Spec → L3 Figma Build → L4 Critic（≥8 PASS�
 
 ## L0 Runtime Capability（任何层执行前必须先跑）
 
-**入口**：`node tools/runtime-check.mjs` → 运行目录下 runtime-capability.json
+**入口**：`node <skill 根目录>/tools/runtime-check.mjs` → 输出默认落在 `<skill 根目录>/.vibe/runtime-capability.json`（路径由脚本自身定位，**任意 cwd 都能跑**）
 
 在任何层开始前先探测环境能力，按 mode 路由（完整矩阵见 `references/runtime-capability.md`）：
 
@@ -122,6 +133,8 @@ Prompt → L1 Brief → L2 DS Spec → L3 Figma Build → L4 Critic（≥8 PASS�
 | FULL_MODE | Bridge 插件已连接（figmaWrite） | L1 → L2 → L3 → L4 → L5 全链路 |
 | READ_ONLY_MODE | 仅读取型 MCP（figmaRead） | L1 → L2 → Build Plan JSON；提示"当前环境只有读取能力，需要安装 Figma Bridge 才能自动绘制" |
 | OFFLINE_MODE | 均无 | 仅生成 Brief / DS Spec / Build Plan 设计资产 |
+
+注：FULL_MODE 下 `figmaRead` **同样是 true**——Bridge 自带 `get-page-summary` / `get-node` / `export-node` 读能力（见 `details.readSources`）。读能力不是"只有 MCP 才算"，别把它误读成环境残缺。
 
 铁律：未跑的层不得假装跑过（交付物标注 mode 与降级原因）；探针只读，零新协议、零 Bridge/Plugin 修改。安装指南：`SETUP.md`（普通用户 5 分钟上手），架构边界：`README.md`。安装体验 QA：独立安装体验 QA 脚本。
 

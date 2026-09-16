@@ -3,19 +3,24 @@
  * runtime-check.mjs — agent-design-figma 运行时能力探针
  *
  * 职责：只读探测，不做任何写操作，不创建新通信协议，不修改 Bridge / Plugin。
- *   A. Figma 写能力  = Figma Plugin Bridge 可达 且 插件已连接（GET /health 公开端点）
- *   B. Figma 读能力  = 用户 MCP 配置（~/.workbuddy/mcp.json 或 ~/.codebuddy/mcp.json）中存在启用的 Figma MCP
- *                      （figma-context / figma-developer-mcp / framelink 等）
+ *   A. Figma 写能力 = Figma Plugin Bridge 可达 且 插件已连接（GET /health 公开端点）
+ *   B. Figma 读能力 = A 成立时由 Bridge 自己提供（get-page-summary / get-node / export-node）
+ *                      或 用户 MCP 配置（~/.workbuddy/mcp.json 或 ~/.codebuddy/mcp.json）中
+ *                      存在启用的 Figma MCP（figma-context / figma-developer-mcp / framelink 等）
  *
  * 输出 runtime-capability.json：
  *   { figmaRead, figmaWrite, executor, mode, details, checkedAt }
  *
  * mode 判定（Skill 消费的唯一契约）：
- *   FULL_MODE      写✅        → L1→L2→L3→L4→L5 全链路
- *   READ_ONLY_MODE 写❌ 读✅   → L1→L2 + Build Plan，提示安装 Bridge
- *   OFFLINE_MODE   全部❌      → 仅设计资产（Brief / DS Spec / Build Plan）
+ *   FULL_MODE      写✅          → L1→L2→L3→L4→L5 全链路
+ *   READ_ONLY_MODE 写❌ 读✅     → L1→L2 + Build Plan，提示安装 Bridge
+ *   OFFLINE_MODE   全部❌        → 仅设计资产（Brief / DS Spec / Build Plan）
  *
- * 用法：node tools/runtime-check.mjs [--out <path>] [--no-write]
+ * 用法（任意 cwd 都可运行；输出路径由本脚本自身定位，不受 cwd 影响）：
+ *   node <skill 根目录>/tools/runtime-check.mjs
+ *   node <skill 根目录>/tools/runtime-check.mjs --out ./runtime-capability.json --no-write
+ *
+ * 无参数时输出落在 <skill 根目录>/.vibe/runtime-capability.json。
  */
 import fs from "node:fs";
 import os from "node:os";
@@ -91,8 +96,19 @@ function probeMcpRead() {
 const bridge = await probeBridge();
 const mcp = probeMcpRead();
 
-const figmaWrite = bridge.reachable && bridge.pluginConnected;
-const figmaRead = mcp.available;
+// Read capability has TWO possible sources, and only the MCP one used to be
+// checked. In FULL_MODE that produced the self-contradictory report
+// figmaWrite:true / figmaRead:false, which reads to a user as "your environment
+// is half broken" when in fact the bridge answers reads itself through
+// get-page-summary / get-node. So a live bridge+plugin counts as read too.
+const BRIDGE_READ_OPS = ["get-page-summary", "get-node", "export-node"];
+const bridgeRead = bridge.reachable && bridge.pluginConnected;
+const figmaWrite = bridgeRead;
+const figmaRead = bridgeRead || mcp.available;
+const readSources = [
+  ...(bridgeRead ? [`bridge:${BRIDGE_READ_OPS.join(",")}`] : []),
+  ...(mcp.available ? [`mcp:${mcp.servers.join(",") || "figma"}`] : []),
+];
 const mode = figmaWrite ? "FULL_MODE" : figmaRead ? "READ_ONLY_MODE" : "OFFLINE_MODE";
 
 const capability = {
@@ -103,6 +119,8 @@ const capability = {
   details: {
     bridge,
     figmaMcp: mcp,
+    readSources,
+    readOps: bridgeRead ? BRIDGE_READ_OPS : [],
     hints: figmaWrite
       ? null
       : figmaRead
