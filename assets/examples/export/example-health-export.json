@@ -1,5 +1,5 @@
 {
-  "project": "AI 智能健康管理 App",
+  "project": "AI 智能健康管理",
   "version": "1.0.0",
   "source": {
     "brief": "assets/examples/export/files/health-design-brief.json",
@@ -281,19 +281,19 @@
     "color": [
       {
         "dsToken": "tokens.color.brand.primary",
-        "value": "#5A5CF0",
+        "value": "#0FB5AE",
         "cssVariable": "--ds-color-brand-primary",
         "source": "brief:visualSystem.primaryColor"
       },
       {
         "dsToken": "tokens.color.brand.hover",
-        "value": "#6E70F2",
+        "value": "#2CBEB8",
         "cssVariable": "--ds-color-brand-hover",
         "source": "derived:RD-1@tokens.color.brand.primary"
       },
       {
         "dsToken": "tokens.color.brand.active",
-        "value": "#5355DD",
+        "value": "#0EA7A0",
         "cssVariable": "--ds-color-brand-active",
         "source": "derived:RD-2@tokens.color.brand.primary"
       },
@@ -341,9 +341,9 @@
       },
       {
         "dsToken": "tokens.color.status.success",
-        "value": "#10B981",
+        "value": "#00B578",
         "cssVariable": "--ds-color-status-success",
-        "source": "rule:ST-1@preset.chartColors"
+        "source": "rule:industry-mapping(医疗辅助色)"
       },
       {
         "dsToken": "tokens.color.status.danger",
@@ -356,28 +356,28 @@
       {
         "dsToken": "tokens.typography.display",
         "cssVariable": "--ds-typography-display",
-        "source": "preset:premium-saas.visualSystem.typeScale"
+        "source": "preset:premium-saas.visualSystem.typography(26-32)"
       },
       {
         "dsToken": "tokens.typography.heading",
         "cssVariable": "--ds-typography-heading",
-        "source": "preset:premium-saas.visualSystem.typeScale"
+        "source": "preset:premium-saas.visualSystem.typography(16)+rule:TY-2(行高=size+6)"
       },
       {
         "dsToken": "tokens.typography.body",
-        "value": "15/21/400",
+        "value": "14/20/400",
         "cssVariable": "--ds-typography-body",
-        "source": "preset:premium-saas.visualSystem.typeScale"
+        "source": "preset:premium-saas.visualSystem.typography(14)+rule:TY-2"
       },
       {
         "dsToken": "tokens.typography.caption",
         "cssVariable": "--ds-typography-caption",
-        "source": "preset:premium-saas.visualSystem.typeScale"
+        "source": "preset:premium-saas.visualSystem.typography(13)+rule:TY-2"
       },
       {
         "dsToken": "tokens.typography.number",
         "cssVariable": "--ds-typography-number",
-        "source": "preset:premium-saas.visualSystem.typeScale"
+        "source": "rule:TY-1(数字等宽语义，字阶取 heading 档)"
       }
     ],
     "spacing": [
@@ -397,27 +397,27 @@
         "dsToken": "tokens.spacing.cardPadding",
         "value": 16,
         "cssVariable": "--ds-spacing-card-padding",
-        "source": "preset:premium-saas.visualSystem.spacing"
+        "source": "rule:SP-3(移动端卡片 padding 缺省 16)"
       }
     ],
     "radius": [
       {
         "dsToken": "tokens.radius.sm",
-        "value": 8,
+        "value": 6,
         "cssVariable": "--ds-radius-sm",
-        "source": "preset:premium-saas.visualSystem.radius"
+        "source": "brief:visualSystem.radius(6/8/10)"
       },
       {
         "dsToken": "tokens.radius.md",
-        "value": 12,
+        "value": 8,
         "cssVariable": "--ds-radius-md",
-        "source": "preset:premium-saas.visualSystem.radius"
+        "source": "brief:visualSystem.radius(6/8/10)"
       },
       {
         "dsToken": "tokens.radius.lg",
-        "value": 16,
+        "value": 10,
         "cssVariable": "--ds-radius-lg",
-        "source": "preset:premium-saas.visualSystem.radius"
+        "source": "brief:visualSystem.radius(6/8/10)"
       }
     ],
     "shadow": [

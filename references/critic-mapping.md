@@ -2,7 +2,7 @@
 
 Visual Critic 的每条 issue 必须路由到**唯一**一层（L1/L2/L3），路由决定修复发生的位置与 stage gate。本文件是 `visual-critic.md` CL-6（禁止跨层私改）的判定依据。
 
-> **关于本文提到的 QA1–QA7**：指 `SKILL.md` L5 的**交付物出口检查清单**（Schema / 文件存在 / node id 回读 / 映射完整 / Token 回溯 / 无孤儿 / 冻结零修改）。该清单的执行体（`qa-export`，1.2 · C3 待开工）**尚未落地**——在它落地之前，这几条仍是人工逐条核对，不要因为出现在流程描述里就认为已被自动执行。已落地的层请改用脚本：L2 = `node tools/qa-l2.mjs`、L4 = `node tools/qa-critic.mjs`。
+> **关于本文提到的 QA1–QA7**：指 `SKILL.md` L5 的**交付物出口检查清单**（Schema / 文件存在 / node id 回读 / 映射完整 / Token 回溯 / 无孤儿 / 冻结零修改）。该清单的执行体**已落地**：`node tools/qa-export.mjs`（QA1–QA9、**935 条断言**、配 56 例变异测试；仓库自带样例走 `--strict`，即零告警门禁）。**不要因为某条只出现在流程描述里就认为它已被自动执行**；已落地的层一律用脚本：L2 = `node tools/qa-l2.mjs`、L4 = `node tools/qa-critic.mjs`、L5 = `node tools/qa-export.mjs`。
 
 ## 1. 三层职责边界（先分层，再路由）
 

@@ -117,16 +117,18 @@ node ~/.workbuddy/skills/agent-design-figma/tools/qa-plugin.mjs
 - `tools/contrast-audit-mutation.mjs` — 对 contrast-audit 的变异测试（36 例：注入 9 类错误 + 边界值/非白背景/非 hex 取值，确认能抓错且不误报）
 - `tools/qa-critic.mjs` — L4 Critic 产出校验（134 断言：Schema / 五维评分与 average 实算 / issue 证据须带量或核对动作 / targetLayer 路由 / loop 自洽 / `_evidence` 档位契约 / 跨产物一致）；可校验任意产物（`--report` + `--brief` + `--spec`），`--strict` 让软提示升为失败
 - `tools/qa-critic-mutation.mjs` — 对 qa-critic 的变异测试（51 条断言：注入 30+ 类已知缺陷 + 一次全报 + `--strict` 升档 + 自带样例零告警门禁）
+- `tools/qa-export.mjs` — **L5 出口闸门**（935 条断言，QA1–QA9：内置最小 draft-07 校验器对清单做**真 Schema 校验** / 导出物存在 / node id 可回读 / 映射完整 / **token `value` 快照复算 + `source` 继承** / 无孤儿 + Export Gate 自洽 / 冻结禁区零修改 / **身份一致** / **可追溯性**）。首次运行即发现 32 处产物与其声明的 DS Spec 对不上，并修掉 Schema 里一处「描述说允许、语义不允许」的条件分支（`if/then` 只能叠加，放宽必须写在 `else`）
+- `tools/qa-export-mutation.mjs` — 对 qa-export 的变异测试（56 条断言：注入 30+ 类已知缺陷 + Schema 条件分支正反两例 + 基线零告警 + 冻结态「核不了必须说核不了」+ 无 `.git` 路径）
 - `tools/precheck.mjs` — **构建计划开工前预检**（L3）：把你的 op 序列离线过一遍真 `code.js`，一次报出全部静态错误（未知 op / 缺必填 / 参数类型 / 颜色格式 / 效果字段被静默丢弃）；`--live` 可再核对画布已有 id
 - `tools/precheck-mutation.mjs` — 对 precheck 的变异测试（63 条断言：注入 13 类错误 + 36 op 全通跑 + B2 在线核对端到端）
 - `tools/figma-harness.mjs` — 离线加载真 `code.js` 的共享装置（严格效果桩 + 效果字段两侧契约），供 qa-plugin 与 precheck 共用
 - `tools/check-refs.mjs` — 文档引用校验（扫随包 `.md`，命令式引用与反引号路径逐条落地判定，悬空则非零退出）
 - `tools/check-refs-mutation.mjs` — 对 check-refs 的变异测试（造含已知错误的样本仓库，断言能抓错且不误报）
-- `references/lessons.md` — **实测不变量 38 条**（协议 / Plugin API / 数据流 / 测试 / Windows 环境 / 协作；标注哪些已被工具守卫、哪些只能靠纪律）
+- `references/lessons.md` — **实测不变量 44 条**（协议 / Plugin API / 数据流 / 测试 / Windows 环境 / 协作；标注哪些已被工具守卫、哪些只能靠纪律）
 - `assets/examples/example-health.ops.json` — 一份真实的 L3 构建计划样例（42 步），可直接喂给 `precheck.mjs`
 - `assets/style-library/` — 四套 Style Preset（企业后台 / 政务大屏 / 品牌官网 / 现代 SaaS）
 - `assets/templates/` — 各类交付物的 JSON Schema
-- `assets/examples/` — 三个行业的完整示例（企业后台 / 医疗 App / 政务大屏）
+- `assets/examples/` — 三个行业的完整示例（企业后台 / 美业 AI 试发 / 政务大屏）；另含 `assets/examples/export/files/` 下**一份医疗 App 的导出随包副本**——它与 `example-health.*` 同名但**不是同一个项目**（美业 vs 医疗），见 `references/lessons.md` #44
 
 ## 运行模式（自动判定，无需配置）
 

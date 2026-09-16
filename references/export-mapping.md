@@ -84,10 +84,21 @@ manualNote: "装饰层无参数化价值；前端用 CSS 渐变/SVG 实现入口
 | `tokens.radius.md` | `--ds-radius-md` |
 | `tokens.shadow.card` | `--ds-shadow-card` |
 
-约束：
-1. **不重命名、不换算**：value 原样导出（px 不转 rem，换算属实现层职责并记录在 layoutRules）；
-2. **source 必须随行**：token 映射条目继承 DS Spec 的 source 前缀（preset:/brief:/rule:/derived:/existing-ds:），derived 值导出的是**重算后的最终值**；
-3. QA5：沿 `dsToken` 点路径回溯 DS Spec 原文核对存在性，并校验 cssVariable 命名规则（逐条核对，本 Skill 不随包附带校验脚本）。
+约束（**全部由 `node tools/qa-export.mjs` 的 QA5/QA9 机械校验**，不靠人工逐条核对）：
+
+1. **不重命名、不换算**：`value` 原样导出（px 不转 rem，换算属实现层职责并记录在 layoutRules）。**`value` 是发给前端的最终值，必须与 DS Spec 原值逐字相等**，按叶子形状取值：
+
+   | DS Spec 叶子形状 | `value` 快照写法 | 例 |
+   |---|---|---|
+   | 有 `value`（色 / 间距 / 圆角 / 阴影 / 字阶字符串） | 同值原样 | `#5A5CF0`、`16`、`4/8/12/16/24/32` |
+   | 有 `size` + `lineHeight` + `weight` | `size/lineHeight/weight` | `14/20/400` |
+   | 有 `size` + `lineHeight`（无 weight） | `size/lineHeight` | `16/24` |
+
+   **不许把说明文字塞进 `value`**（如 `"14（TY-3 大屏提升档）"`）——它是机器读的值；说明写进 `source` 的括注或另开的字段。
+
+2. **`source` 必须随行且继承**：token 映射条目的 `source` 必须**是** DS Spec 叶子 `source` 的**前缀**（比较前先剥掉括注与 `+` 串联的后续来源）。可以在后面追加自己的括注，但**不得改指别处**——`preset:xxx.visualSystem.typeScale` 这种「前缀合法、但该字段在预设里根本不存在」的写法会被 QA9 拦下。`derived:` 值导出的是**重算后的最终值**，且必须给出 `@<源 token>` 指向；`preset:<id>.<路径>` 的路径要能在 `assets/style-library/` 目录下的对应预设里真解析出来。
+
+3. QA5/QA9 机械核对：沿 `dsToken` 点路径回溯 DS Spec 原文核对存在性、**`value` 快照复算**、**`source` 继承**、`cssVariable` 命名规则，以及 `preset:` 源路径的真实可解析性。
 
 ## 6. Layout → Implementation Rules（mapping.layoutRules）
 

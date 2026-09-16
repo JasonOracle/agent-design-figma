@@ -126,7 +126,7 @@ Export PNG / 结构化 READBACK → 五维评分（Layout/Color/Consistency/Comm
 - issue → 层路由与回写约束（CR-1~5）：`references/critic-mapping.md`
 - Report Schema：`assets/templates/critic-report.json`（evidence 必填、targetLayer ∈ L1/L2/L3）
 - few-shot（覆盖三种循环结局）：`assets/examples/example-{saas,health,highway}/critic-report.json`
-  - saas = 企业后台 Round 1 一次 PASS / health = 消费健康 App 3 轮收敛 PASS / highway = 政务大屏 3 轮仍不达标 STOP_MAX_LOOP
+  - saas = 企业后台 Round 1 一次 PASS / health = 美业 AI 试发 App「AI 型衣」3 轮收敛 PASS / highway = 政务大屏 3 轮仍不达标 STOP_MAX_LOOP。**注意 `health` 这条是美业（品牌紫 `#5A5CF0`），与 L5 导出包里那份「医疗 / AI 智能健康管理」的随包副本不是同一个项目**——同名不同物，见 `references/lessons.md` #44
 - **出口校验不许人工目测**：`node tools/qa-critic.mjs` 校验 critic-report（**134 条断言**，QA1–QA8：Schema 契约 / 五维评分与 `average` 实算 / issue 证据须带**量或核对动作** / targetLayer 路由 / loop 自洽 / `_evidence` 档位契约 / 跨产物一致）。带 `--report` + `--brief` + `--spec` 可校验用户自己的产物；`--strict` 把软提示升为失败（样例自身走这一档）。**报告里的数字会被复算**——C3 上线即发现随包三份 critic-report 的页面名、引用的 token 色值、档位表与 `minFontSize` 全都有与 DS Spec 对不上的地方（同 `contrast-audit.mjs` 的教训：写在产物里的数字会被下游当事实复用）。
 
 ## L5 Export Layer
@@ -150,7 +150,8 @@ Prompt → L1 Brief → L2 DS Spec → L3 Figma Build → L4 Critic（≥8 PASS�
 - 组件/Token 映射规则（A 直接/B 组合/C 不可自动）：`references/export-mapping.md`
 - few-shot：`assets/examples/export/example-{saas,health,highway}-export.json`
   - saas = 真实 live-build（真实构建产物回填）/ health = 真实 live-build（真实导出 PNG+SVG）/ highway = design-phase（critic 7.7 未过 Gate，exports 为空规划清单——Gate 规则的活教材）
-- 出口校验：交付物检查清单 QA1–QA7（Schema / 文件存在 / node id 回读 / 映射完整 / Token 回溯 / 无孤儿 / 冻结零修改）。**L5 的执行体尚未落地（`qa-export`，C3 待开工）**——在它落地之前这几条仍是人工逐条核对；而**已经落地的层一律改用脚本**：L2 = `node tools/qa-l2.mjs`、L4 = `node tools/qa-critic.mjs`，不得再拿「人工核对过」当校验过的证据。
+  - ⚠️ `health` **这个名字下住着两个不同项目**：核心示例 `example-health.json`/`.dsspec.json` 是「AI 型衣 / 美业」，而导出包里的随包副本 `assets/examples/export/files/health-design-*.json` 是「AI 智能健康管理 / 医疗」。两边各自自洽但互不相同（见 `references/lessons.md` #44 与 `CHANGELOG.md` 待决策项）——**出口校验只认清单自己声明的 `source.*`，不要与核心示例混读**。
+- 出口校验：交付物检查清单 QA1–QA9（Schema 真校验 / 文件存在 / node id 回读 / 映射完整 / Token 回溯 + **value 快照与 source 继承** / 无孤儿 + Export Gate 自洽 / 冻结零修改 / **身份一致** / **可追溯性**）＝ `node tools/qa-export.mjs`（**已落地**；仓库自带样例走 `--strict`，即零告警门禁）。**已经落地的层一律用脚本，不得再拿「人工核对过」当校验过的证据**：L2 = `node tools/qa-l2.mjs`、L4 = `node tools/qa-critic.mjs`、L5 = `node tools/qa-export.mjs`。
 
 ## L0 Runtime Capability（任何层执行前必须先跑）
 
@@ -174,5 +175,5 @@ Prompt → L1 Brief → L2 DS Spec → L3 Figma Build → L4 Critic（≥8 PASS�
 
 ## 实测不变量（动手前先读）
 
-`references/lessons.md` —— 38 条实测踩坑验证过的不变量（协议 / Plugin API / 数据流 / 测试 / 环境 / 协作）。**L3 写画布前、L4 回读前，以及每一次「这次为什么翻车」的归因，都先查这里**：多数翻车不是新问题，是踩过的坑换了个壳。文中标注了哪些已被工具守卫（⚙️）、哪些仍只能靠纪律（📏）——**没被守卫的部分不得假装被守卫**。
+`references/lessons.md` —— 44 条实测踩坑验证过的不变量（协议 / Plugin API / 数据流 / 测试 / 环境 / 协作）。**L3 写画布前、L4 回读前，以及每一次「这次为什么翻车」的归因，都先查这里**：多数翻车不是新问题，是踩过的坑换了个壳。文中标注了哪些已被工具守卫（⚙️）、哪些仍只能靠纪律（📏）——**没被守卫的部分不得假装被守卫**。
 

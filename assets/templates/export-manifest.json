@@ -6,9 +6,13 @@
   "required": ["project", "version", "source", "exports", "mapping", "tokens", "audit"],
   "allOf": [
     {
-      "if": { "properties": { "_meta": { "type": "object", "properties": { "status": { "const": "design-phase" } }, "required": ["status"] } } },
-      "then": { "properties": { "exports": { "properties": { "png": { "minItems": 0 } } } },
-                "description": "design-phase（未过 Export Gate 的规划态）允许 exports.png 为空；live-build 必须 ≥1" }
+      "description": "design-phase（未过 Export Gate 的规划态）允许 exports.png 为空；其余一律必须 ≥1（含 _meta 缺席的情形——缺省按最严档）。注意：JSON Schema 的 if/then 只能**叠加**约束，因此「live-build 必须 ≥1」这条上限必须写在 else，不能写在基座——写基座再在 then 里给 minItems:0，净效果仍是 minItems:1，会造成「description 说允许、语义上不允许」的谎（本文件 1.2 修过这个坑）。",
+      "if": {
+        "required": ["_meta"],
+        "properties": { "_meta": { "type": "object", "required": ["status"], "properties": { "status": { "const": "design-phase" } } } }
+      },
+      "then": { "properties": { "exports": { "type": "object", "properties": { "png": { "type": "array", "minItems": 0 } } } } },
+      "else": { "properties": { "exports": { "type": "object", "properties": { "png": { "type": "array", "minItems": 1 } } } } }
     }
   ],
   "properties": {
@@ -36,7 +40,6 @@
       "properties": {
         "png": {
           "type": "array",
-          "minItems": 1,
           "items": {
             "type": "object",
             "required": ["nodeId", "name", "scale", "path"],
@@ -69,7 +72,7 @@
           "type": "object",
           "required": ["path"],
           "properties": {
-            "path":      { "type": ["string", "null"], "description": "Node Tree/Geometry/AutoLayout/Instance/TokenReference 的 JSON 快照路径；design-phase 为 null" },
+            "path":      { "type": ["string", "null"], "description": "Node Tree/Geometry/AutoLayout/Instance/TokenReference 的 JSON 快照路径；未做 tree dump 时为 null，必须在 note 说明原因与替代证据位置（不写死「design-phase 才为 null」——真实构建也可能只导了 PNG/SVG，有 note 即为诚实标注）" },
             "nodeCount": { "type": "integer", "minimum": 0 },
             "contents":  { "type": "array", "items": { "type": "string" }, "description": "包含的切片：node-tree/geometry/auto-layout/component-instance/token-reference" }
           }
@@ -81,7 +84,7 @@
             "brief":       { "type": "string", "description": "随包分发的 Brief JSON 副本路径" },
             "dsSpec":      { "type": "string", "description": "随包分发的 DS Spec JSON 副本路径" },
             "buildPlan":   { "type": ["string", "null"], "description": "L2 buildPlan 或 L3 build-log 快照路径" },
-            "criticReport":{ "type": ["string", "null"], "description": "L4 Critic Report 路径（必须为 PASS 轮次）" }
+            "criticReport":{ "type": ["string", "null"], "description": "L4 Critic Report 路径（必须为 PASS 轮次）；未随包时为 null，必须在 _meta.note 指明报告位置" }
           }
         }
       }
@@ -129,8 +132,8 @@
       "type": "object",
       "required": ["color", "typography", "spacing", "radius", "shadow"],
       "properties": {
-        "color":      { "$ref": "#/definitions/tokenMappingList", "minItems": 8 },
-        "typography": { "$ref": "#/definitions/tokenMappingList", "minItems": 5 },
+        "color":      { "allOf": [{ "$ref": "#/definitions/tokenMappingList" }, { "type": "array", "minItems": 8 }] },
+        "typography": { "allOf": [{ "$ref": "#/definitions/tokenMappingList" }, { "type": "array", "minItems": 5 }] },
         "spacing":    { "$ref": "#/definitions/tokenMappingList" },
         "radius":     { "$ref": "#/definitions/tokenMappingList" },
         "shadow":     { "$ref": "#/definitions/tokenMappingList" }

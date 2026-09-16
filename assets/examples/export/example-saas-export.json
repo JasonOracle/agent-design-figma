@@ -349,28 +349,28 @@
       {
         "dsToken": "tokens.typography.display",
         "cssVariable": "--ds-typography-display",
-        "source": "preset:enterprise-dashboard.visualSystem.typeScale"
+        "source": "preset:enterprise-dashboard.visualSystem.typography(26-32)"
       },
       {
         "dsToken": "tokens.typography.heading",
         "cssVariable": "--ds-typography-heading",
-        "source": "preset:enterprise-dashboard.visualSystem.typeScale"
+        "source": "preset:enterprise-dashboard.visualSystem.typography(16-24)"
       },
       {
         "dsToken": "tokens.typography.body",
         "value": "14/20/400",
         "cssVariable": "--ds-typography-body",
-        "source": "preset:enterprise-dashboard.visualSystem.typeScale"
+        "source": "preset:enterprise-dashboard.visualSystem.typography(14-20)"
       },
       {
         "dsToken": "tokens.typography.caption",
         "cssVariable": "--ds-typography-caption",
-        "source": "preset:enterprise-dashboard.visualSystem.typeScale"
+        "source": "preset:enterprise-dashboard.visualSystem.typography(12-18)"
       },
       {
         "dsToken": "tokens.typography.number",
         "cssVariable": "--ds-typography-number",
-        "source": "preset:enterprise-dashboard.visualSystem.typeScale"
+        "source": "rule:TY-1@preset.typography(数字用 Inter 等宽，取字阶 16-24)"
       }
     ],
     "spacing": [
@@ -404,7 +404,7 @@
         "dsToken": "tokens.radius.md",
         "value": 4,
         "cssVariable": "--ds-radius-md",
-        "source": "preset:enterprise-dashboard.visualSystem.radius"
+        "source": "preset:enterprise-dashboard.geometry.cardRadius"
       },
       {
         "dsToken": "tokens.radius.lg",

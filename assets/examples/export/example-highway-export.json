@@ -269,7 +269,7 @@
       },
       {
         "dsToken": "tokens.color.status.warning",
-        "value": "#F5C542",
+        "value": "#FFB547",
         "cssVariable": "--ds-color-status-warning",
         "source": "rule:ST-1@preset.chartColors"
       }
@@ -278,29 +278,29 @@
       {
         "dsToken": "tokens.typography.display",
         "cssVariable": "--ds-typography-display",
-        "source": "preset:gov-digital-screen.visualSystem.typeScale"
+        "source": "preset:gov-digital-screen.visualSystem.typography+rule:TY-2"
       },
       {
         "dsToken": "tokens.typography.heading",
         "cssVariable": "--ds-typography-heading",
-        "source": "preset:gov-digital-screen.visualSystem.typeScale"
+        "source": "rule:TY-3(preset 数字强调档 20)+rule:TY-2"
       },
       {
         "dsToken": "tokens.typography.body",
         "value": "14/20/400",
         "cssVariable": "--ds-typography-body",
-        "source": "preset:gov-digital-screen.visualSystem.typeScale"
+        "source": "preset:gov-digital-screen.visualSystem.typography(最小 14px 红线)+rule:TY-2"
       },
       {
         "dsToken": "tokens.typography.caption",
-        "value": "14（TY-3 大屏提升档）",
+        "value": "14/20/400",
         "cssVariable": "--ds-typography-caption",
-        "source": "rule:TY-3@platform.big-screen"
+        "source": "rule:TY-3(preset 禁 <14px，caption 从常规 12 提升至 14)"
       },
       {
         "dsToken": "tokens.typography.number",
         "cssVariable": "--ds-typography-number",
-        "source": "preset:gov-digital-screen.visualSystem.typeScale"
+        "source": "preset:gov-digital-screen.visualSystem.typography(数字 20-26 强调，取 22)+rule:TY-2"
       }
     ],
     "spacing": [

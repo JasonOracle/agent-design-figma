@@ -1,6 +1,6 @@
 # 实测不变量 / Lessons Learned
 
-> 38 条**实测踩坑后验证过**的不变量，不是理论推断。前 30 条源自上游 `figma-vibe-bridge` 七个阶段的沉淀，
+> 44 条**实测踩坑后验证过**的不变量，不是理论推断。前 30 条源自上游 `figma-vibe-bridge` 七个阶段的沉淀，
 > 已按本仓库命名与实现适配；后 6 条是本仓库 1.1–1.2 自查与上游清查中新得到的。
 >
 > **读它的时机**：L3 写画布前、L4 回读前、以及每一次「这次为什么翻车」的归因。
@@ -72,6 +72,10 @@
 38. **判定阈值时不许先舍入**：WCAG 明确「比值不得先舍入再判定」。`#777777` 对白底是 `4.478:1`，显示成两位小数是 `4.48`、显示成一位是 `4.5`——按一位小数看它「达标」，按原值看它**不达标**。工具里 `toFixed` 只能用于**显示**，判定必须用原值，并在贴阈值时打 `⚠边界` 标记。**判据：任何 `round(x) >= limit` 的写法都要问一句「x 本身达标吗」。** ⚙️（`contrast-audit.mjs`，配变异测试「边界灰」用例守住）
 39. **测「对端会认为某端已掉线」时，不能用短 sleep 假装**：B2 的「插件掉线」用例原本是「停掉 mock 轮询 → 睡 300ms → 断言核对失败」。但 Bridge 判定插件在线用的是 **45s** 的 stale 窗口，而 mock 的在途长轮询最长 500ms——300ms 之后它仍可能把停摆前的最后一条命令答掉，于是这条用例**在赌时序**，实测会偶发假绿（同一份代码连跑两次一绿一红）。修法是把「不应答」变成确定性事实（停摆后**连在途命令也不回**），而不是加长 sleep。**判据：凡是靠「等一会儿它就该失效了」写的断言，先去读对端判定失效的窗口是多少。** ⚙️（`precheck-mutation.mjs`，1.2 C3 期间发现）
 40. **「有没有实测痕迹」这类判定要判形状，别用关键词袋**：`qa-critic` 移植上游时照搬了它的关键词袋 `["px","#",":","%","档","级","分",…]`，其中「级」「分」会命中「不够**高级**」「大部**分**」——于是「整体观感不够高级」这种**纯观感话术**照样通过，而它正是 `critic-report.json` 明令禁止的（`suggestion` 不得写「不够高级」）。**判据：关键词袋里的字越短越危险（「级」「分」「档」都会被近义词命中）；能判形状就判形状（`\d+px` / `#RRGGBB` / 带单位的量），并且必须配一条反例用例钉住它。** ⚙️（`qa-critic.mjs`，变异测试「evidence 无实测痕迹」用例守住）
+41. **JSON Schema 的 `if/then` 只能叠加约束，「放宽」必须写在 `else`**：`export-manifest.json` 原把 `exports.png.minItems: 1` 写在基座，再在 `then` 里给 design-phase `minItems: 0`——`allOf` 是**合取**，`then` 撤不掉基座的约束，净效果仍是 `minItems: 1`。于是 Schema 的 `description` 写着「design-phase 允许 exports.png 为空」，**语义上根本不允许**：随包的 `example-highway-export.json` 一直是 invalid，只是从没人真校验过（ajv 独立复核证实）。同理 `$ref` 的兄弟键在 draft-07 里**应被忽略**、在 ajv 里却生效，也别依赖——要叠加约束就用 `allOf` 写明白。**判据：Schema 里每一句「允许…」「…必须…」都要有一条能证伪它的实例；写不出反例的约束等于没写。** ⚙️（`qa-export.mjs` QA1，正反两例内置自检）
+42. **可追溯性的判据是「路径能解析」，不是「前缀看着对」**：token 映射的 `source` 写 `preset:enterprise-dashboard.visualSystem.typeScale`——五类前缀合法、看着很像，但四套 Style Preset 里**都没有 `typeScale` 这个键**（真名是 `typography`），17 条溯源全是假的。前缀校验只能证明「格式对」，证明不了「指的东西存在」。**判据：凡是 `命名空间:路径` 形式的溯源字段，都要真去那个命名空间里把路径解析一次。** ⚙️（`qa-export.mjs` QA9）
+43. **「快照 / 副本 / 汇总」类字段必须与事实源逐一复算**：`export-manifest.json` 的 `tokens[].value` 是**导出给前端的最终值**、`source` 是溯源、`project` 是产品名，三者本该从 DS Spec / Brief 抄来，却从没人核对过——实测 **32 处**对不上：`health` 的品牌色写 `#5A5CF0`（Spec 是 `#0FB5AE`）、圆角写 8/12/16（Spec 是 6/8/10）、`project` 多了个「 App」后缀；`highway` 的警告色写 `#F5C542`（Spec 是 `#FFB547`）、字阶 value 直接写成自由文本「14（TY-3 大屏提升档）」。**与 #37 是同一类病：抄来的值长得对，只有复算能分辨。** 判据：一份产物里凡是从别处抄来的字段，都要能**沿它自己声明的关系追回源头、逐字相等**。⚙️（`qa-export.mjs` QA5/QA8）
+44. **同一个名字不能装两个不同的东西**：`example-health` 这个名字下同时住着两个项目——核心示例 `example-health.json` / `.dsspec.json` 是「AI 型衣 / 美业」（品牌紫 `#5A5CF0`、字阶 24/17/15/13/15、圆角 8/12/16），而随包副本 `assets/examples/export/files/health-design-*.json` 是「AI 智能健康管理 / 医疗」（青绿 `#0FB5AE`、字阶 26/16/14/13/16、圆角 6/8/10）。两边**各自内部自洽**，所以任何只查单份文件的校验器都不会报警——**只有把同前缀下的产物放在一起比才会暴露**。**判据：发现同名前缀下住着两个项目时，先显式记下来交给人决策，不要各按各的修——那只是把分裂固化。** 📏（1.2 · C3 期间发现，已记入 `CHANGELOG.md` 待决策）
 
 ---
 
@@ -84,6 +88,7 @@
 | §3 设计（Color 对比度）/ #37·38 | `contrast-audit.mjs` · `contrast-audit-mutation.mjs`(36) | ✅ 已建 |
 | §3 设计（L4 证据与评分）/ #40 | `qa-critic.mjs`(134) · `qa-critic-mutation.mjs`(51) | ✅ 已建 |
 | §2 Plugin API（静态预检） | `precheck.mjs` · `precheck-mutation.mjs`(66) · `figma-harness.mjs` | ✅ 已建 |
+| §6 出口契约（L5 Export Gate）/ #41·42·43 | `qa-export.mjs`(935) · `qa-export-mutation.mjs`(56) | ✅ 已建 |
 | §7-35 文档引用 | `check-refs.mjs` · `check-refs-mutation.mjs`(18) | ✅ 已建 |
 | §2 Plugin API（运行时语义）/ §5 环境 / §6 协作 | —— | 📏 纪律，无自动拦截 |
 
