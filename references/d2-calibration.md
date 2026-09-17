@@ -396,9 +396,9 @@ D1 §8 把「把命令表固化成一次性出口检查」列为**待定强化�
 | L2 对比度 | `contrast-audit.mjs …/design-system-spec.json` | `通过 —— 正文对比度全达标，声称值与复算一致（CONTRAST AUDIT OK）` | 0 | — |
 | L3 离线预检 | `precheck.mjs plan-batch*.json`（35 份） | `855 步：通过 855 ｜ 错误 0 ｜ 装置缺口 0 ｜ 待核对 12` | 0（逐份） | — |
 | L3 在线核对 | `precheck.mjs --live`（12 份含字面 id） | `ok 外部引用全部存在于画布（12/12）` | 0 | **收尾补跑**（运行期漏跑） |
-| L4 Critic | `qa-critic.mjs` | **未核对** —— 未生成 `critic-report.json`（当轮 L4 改走**读图 + `layout-audit`**） | — | **未核对** |
+| L4 Critic | `qa-critic.mjs --report …/critic-report.json --brief …/design-brief.json --spec …/design-system-spec.json` | `45 PASS / 0 FAIL / 0 WARN —— L4 QA ALL GREEN` | 0 | **收尾补做**（当轮**未核对**：L4 改走读图 + `layout-audit`，未生成 `critic-report.json`；本次把当轮已有素材结构化后补测） |
 | L4 布局 | `layout-audit.mjs …/readback.json --baseline 1920x1080 --scale 2,4,8,16,24 --font 14,20,22,26 --radius 2,4` | `共 1 条（去重前 1 条）：high 0 / medium 1`；`分类（按出现次数）：spacing 1`（AlertTicker 两端留白，**保留上报**） | 0 | 收编后重跑 |
-| L5 Export | `qa-export.mjs` | **未核对** —— 未生成 `export-manifest.json`（当轮改走逐组件 PNG 导出） | — | **未核对** |
+| L5 Export | `qa-export.mjs --manifest …/export-manifest.json` | `409 PASS / 1 FAIL / 0 WARN —— L5 Export Gate 未通过` | 1 | **收尾补做**（当轮**未核对**：L5 只做逐组件 PNG 导出，未生成 manifest）。唯一 FAIL 为 `QA3 live-build 必须有 figmaFileKey` —— **环境取不到该字段**，非产物缺陷，见本节「收尾补做 L4/L5 出口」 |
 | 文档引用 | `check-refs.mjs` | `悬空 0 —— DOC REFS ALL GREEN`（扫 18 篇随包文档；运行期漏跑，收尾补跑首轮 **9 FAIL** → 归零）—— **不记绝对条数**：该数随文档增补而变（见 `lessons.md` #74） | 0 | 已补跑 |
 
 **L3 构建指标**
@@ -413,7 +413,7 @@ D1 §8 把「把命令表固化成一次性出口检查」列为**待定强化�
 | **预检拦下的错**（struct / contract / gap） | **19 条** —— 首轮整批发车时 `effects[0].type` 未知 `「GLOW」`（合法仅 `DROP_SHADOW` / `INNER_SHADOW` / `LAYER_BLUR` / `BACKGROUND_BLUR`） |
 | **若不预检，会在第几步炸** | 该 19 条**全部在发车前被拦下**；若不拦，**5 个批次会在 `set-effects` 步整批 fail-fast** |
 
-**Critic** —— **未核对**（未生成 `critic-report.json`）。当轮 L4 由**人工读图 + `layout-audit`** 承担，抓出 **5 条真缺陷**并已修复（见翻车点 #15/#16/#17 与 §5.2 末「收编结果」）。
+**Critic** —— 当轮**未核对**（未生成 `critic-report.json`）：L4 由**人工读图 + `layout-audit`** 承担，抓出 **5 条真缺陷**并已修复（见翻车点 #15/#16/#17 与本节末「收编结果」）。→ **2026-09-17 收尾补做**：把当轮已有素材结构化成报告后补测，`qa-critic` **45 PASS / 0 FAIL / 0 WARN**（退出码 0），**已核对通过**。详见本节「收尾补做 L4/L5 出口」。
 
 **手工成本** —— **未记账**。运行 B 的记录里没有这一节（模板要求填，本轮漏了）——这本身是下一轮该补的一处（`d2-calibration` §3 的判据依赖它）。
 
@@ -435,11 +435,38 @@ D1 §8 把「把命令表固化成一次性出口检查」列为**待定强化�
 **盲区（本次没看到的）**
 
 - **装置缺口**：无新增（运行 A 的两条仍在：`paint.opacity` 不可观测、`fileKey` 缺失）。
-- **未核对项**：**两条** —— `qa-critic`（未生成 `critic-report.json`）与 `qa-export`（未生成 `export-manifest.json`）。当轮 L4/L5 走了**替代路径**（读图 + 逐组件 PNG 导出），按 §3.4 **不得折算为通过**。
+- **未核对项**：当轮 **两条** —— `qa-critic`（未生成 `critic-report.json`）与 `qa-export`（未生成 `export-manifest.json`）；L4/L5 走了**替代路径**（读图 + 逐组件 PNG 导出），按 §3.4 当轮**不得折算为通过**。→ **两者均已于 2026-09-17「收尾补做出口」**，见下方同名小节。
 - **不适用项**：无（本次为 `FULL_MODE`）。
-- **增益档未评估项**：无 `critic-report` 承载，故无此项可记。
+- **增益档未评估项**：当轮无 `critic-report` 承载故未记；**补做后** `_evidence.unassessed` 有 **5 条**（icon 风格 / Commercial 商业相似度 40% / 主色比例 20% / alignment 未覆盖的 121 对 / 大屏不适用项）。
 
-> **一处工具缺陷（收尾时发现，未修）**：`precheck.mjs --live` 的**汇总行不随后续在线核对更新** —— 上例中汇总行仍打印 `待核对 1`，而 B2 段已明确 `ok 16:2727 存在`。§6 要求的留痕恰是**汇总行**，故只看汇总行会把「**已经核过**」读成「**没核**」。这与 #72（「没查」与「查了没问题」不可区分）是**镜像的同一个病**。记入 1.3 候选。
+> **一处工具缺陷**：`precheck.mjs --live` 的**汇总行不随后续在线核对更新** —— 上例中汇总行仍打印 `待核对 1`，而 B2 段已明确 `ok 16:2727 存在`。§6 要求的留痕恰是**汇总行**，故只看汇总行会把「**已经核过**」读成「**没核**」。这与 #72（「没查」与「查了没问题」不可区分）是**镜像的同一个病**。
+> → **已于 1.3 开工第一刀收编**（`1.3-candidates.md` B2）：核对前那行加「**离线汇总**」限定词，核对后**必再打一行**「最终汇总（含在线核对）」，给出 `已核对 / 核出不存在 / 未核对` 三个数；配 9 条变异断言。
+
+---
+
+**收尾补做 L4/L5 出口（2026-09-17，1.2 定版后）**
+
+> **性质要说准**：这是**补做**，不是「当轮其实跑过」。当轮 L4/L5 确实没走正式出口（故上表当轮记「未核对」）。补做的价值在于把**未知**（这两道闸门能不能喂进去、能到哪一步）变成**已知**（过到哪一项、卡在什么地方）。
+
+| 出口 | 补做产物 | 闸门汇总行 | 退出码 |
+|---|---|---|---|
+| L4 Critic | `.vibe/d2-run-b/critic-report.json` | `45 PASS / 0 FAIL / 0 WARN —— L4 QA ALL GREEN` | 0 |
+| L5 Export | `.vibe/d2-run-b/export-manifest.json` | `409 PASS / 1 FAIL / 0 WARN —— L5 Export Gate 未通过` | 1 |
+
+**L4 —— 已核对通过。** 素材**全部来自当轮已有的真实记录**：`layout-audit` 收编后抓出的 5 条真缺陷、人工读图的观察、翻车点 #15/#16/#17。⚠️ 评的是**修复后终态**，故 `_loop.history` 只记终态一项，并在 `note` 里声明「**不虚构中间轮次分数**」——当轮未逐轮打分，CL-5 的「修复必复评」在当轮**不可追溯**，如实写明而不是补几个好看的数字。报告终态 `action=PASS`（average 8.5 / 最低维 8.0）。
+
+**L5 —— 已核对；1 条 FAIL，且 FAIL 的是环境而非产物。** 409 PASS 覆盖 QA1–QA9 九组，其中 QA5 逐条核了 **253** 条 value 快照与 source 继承、QA9 解析了 **21** 条 preset 源路径、QA2 核了 **14** 个 PNG 逐一落盘。唯一 FAIL 是：
+
+```
+FAIL  QA3 export-manifest live-build 必须有 figmaFileKey
+```
+
+**根因不在产物里**：本环境**取不到 file key** —— 插件支持的 op 只有 `ping` / `get-page-summary` / `get-node` / `set-name` / `create-frame` 等，**没有任何一个返回 `fileKey`**。本轮实测：`ping` 的 `data` 只有 `plugin/page/pageId/editorType/documentAccess`；另试 `get-file-info` / `get-document-info` 均回 `UNSUPPORTED_OP`。根因在**冻结区**（`figma-plugin/code.js` 与 `bridge/`），不在可改范围。
+
+**这是「运行 A 唯一 FAIL」的第二次独立确认** —— 同一道闸门、同一条断言、同一根因，稳定复现。两次运行都撞上它，说明本管线的 L5 `live-build` 档位**结构性不可达**，不是偶发。
+
+> ⚠️ **量尺本身也值得记一笔**：`QA3` 要求 `live-build` 必须带 `figmaFileKey`，其用途是「可按 `fileKey + nodeId` 回读」。但**本管线的回读通道是 Bridge 直连插件，凭 `nodeId` 单键即可回读，`fileKey` 在功能上没有用途** —— 这条断言更像从基于 REST API 的上游继承而来。
+> **但本轮不改工具**：A4 的教训是「**改措辞而不是放宽校验器**」，而这条断言本身并无逻辑错（有 fileKey 确实更可追溯）。正确处理是**把缺口记下来向冻结区提需求**（`1.3-candidates.md` D2），并在此如实说明「FAIL 的是环境凭证，不是产物质量」。
 
 ---
 
