@@ -134,6 +134,26 @@ const skippedSameSpace = [];   // 因「子节点不共享坐标系」而跳过 
 const dataDrivenRows = [];     // 被判为「等距数据标注」而免检 spacing 的整摞元素
 
 /**
+ * `alignment` 的实际覆盖范围（B1 · lessons #67c）。
+ *
+ * 问题：`alignment` 有一句 `if (|prev[cross] - cur[cross]| > TOL) continue` —— 跨轴尺寸不同就跳过。
+ * 它**既不上报也不计数**，于是在报告里，「比过 9 对」与「比过 900 对」长得一模一样，
+ * 「alignment: 0」会被读成「对齐都查过了」。这是 #72 的同一类错（「没查」与「查了没问题」不可分辨）。
+ *
+ * 为什么正确修法是**留痕**而不是**放宽判据**（这里是本条的要点，别把它"修"回去）：
+ *   跨轴尺寸不同的两个元素，视觉惯例是**居中对齐**，不是**边缘对齐**。拿边缘去比是拿错了尺子。
+ *   运行 B 实测（121 对这样的相邻对）：把判据放宽成「跨轴有投影交集即比边缘」，
+ *   新增 5 条报告，**5 条全是假阳性** —— 时间戳 27 高 vs 在线圆点 10 高（圆点居中对齐文字，
+ *   上边缘当然差 8px）。故**不报**，但必须**计数并写出理由**，让人知道这块没被边缘判据覆盖。
+ *
+ * 另一个已排除的方向：给这类对子另加一条「居中偏差」检查。那不是机械修，是新判据设计
+ *   （居中同样有"刻意不居中"的合法情形），须单独立项，见 `1.3-candidates.md` B1 注。
+ */
+let alignCompared = 0;              // 真正做了边缘比对的相邻对
+let alignSkippedCrossSizeDiff = 0;  // 因跨轴尺寸不同而未做边缘比对、**但确实视觉相邻**的对
+const alignSkippedSamples = [];     // 抽样（供人复核"这些到底是什么"）
+
+/**
  * 把一摞兄弟沿**交叉轴**切成若干「带」（band）：同一带内的元素在交叉轴上彼此有真实投影交集。
  *
  * 为什么免检判定必须先分带再聚类 —— 这是运行 B 残留 3 条假阳性的根因：
@@ -407,7 +427,28 @@ function walk(node, trail, sameSpace = true) {
     for (let i = 1; i < stack.length; i++) {
       const prev = stack[i - 1];
       const cur = stack[i];
-      if (Math.abs(prev[ax.cross] - cur[ax.cross]) > TOL) continue;  // 跨轴长度不同，不构成一列/一行
+      // 跨轴尺寸不同 ⇒ 两者本就不构成一列/一行，边缘对齐不是正确判据（见文件头 alignmentCoverage）。
+      // ⚠️ 但**不许静默**：若两者在跨轴上真有投影交集（视觉上确实挨着），计数留痕、抽样存证。
+      if (Math.abs(prev[ax.cross] - cur[ax.cross]) > TOL) {
+        const overlapIfAny =
+          Math.min(prev[ax.edge] + prev[ax.cross], cur[ax.edge] + cur[ax.cross]) -
+          Math.max(prev[ax.edge], cur[ax.edge]);
+        if (overlapIfAny > TOL) {
+          alignSkippedCrossSizeDiff++;
+          if (alignSkippedSamples.length < 12) {
+            alignSkippedSamples.push({
+              axis: ax === AXES.v ? "v" : "h",
+              parent: pathStr,
+              a: prev.name,
+              b: cur.name,
+              crossA: round(prev[ax.cross]),
+              crossB: round(cur[ax.cross]),
+              edgeDelta: round(Math.abs(cur[ax.edge] - prev[ax.edge])),
+            });
+          }
+        }
+        continue;  // 跨轴长度不同，不构成一列/一行
+      }
       // 单轴排序会把「不同行也不同列」的元素排成邻居（网格伪相邻），故要求**跨轴也真的重叠**：
       // 只有两个元素在跨轴上存在真实投影交集，它们才谈得上「同一行/同一列里挨着」，
       // 这时算出来的间隙才有设计含义。否则算出来的是行距/列距，报出去就是假阳性。
@@ -421,6 +462,8 @@ function walk(node, trail, sameSpace = true) {
       if (!inScale(gap, SCALE)) {
         add("spacing", "medium", cur, `"${prev.name}" 与 "${cur.name}" 的间距 ${gap}px 不在档位 [${SCALE.join(",")}]`, { path: pathStr, measured: gap, allowed: SCALE });
       }
+      // 走到这里才是一次**真的**边缘比对（前面任一 continue 都意味着没比）
+      alignCompared++;
       const drift = round(Math.abs(cur[ax.edge] - prev[ax.edge]));
       // 只报"差一点点"的：真正大幅错位是刻意的布局，不该当对齐缺陷
       if (drift > TOL && drift <= 8) {
@@ -534,6 +577,19 @@ const report = {
   shallowWarning: shallowParents
     ? `${shallowParents} 个容器只有不带几何的子级（典型 depth:1 轻量回读）—— Layout 深审不可用，请用 get-node {depth:2~3, detail:true} 重取`
     : null,
+  // `alignment` 的实际覆盖范围。为什么必须写进报告：不写的话「alignment: 0」会被读成
+  // 「对齐都查过了」，而实际可能只比了 9 对、另有 121 对视觉相邻的对子根本没比。
+  // 详见 walk 循环上方的 `alignmentCoverage` 注释与文件头 B1 段。
+  alignmentCoverage: {
+    compared: alignCompared,
+    skippedCrossSizeDiff: alignSkippedCrossSizeDiff,
+    samples: alignSkippedSamples,
+    note:
+      "`alignment` 只在**跨轴尺寸相等**的相邻对之间比边缘。跨轴尺寸不同的对子（下表 samples）" +
+      "按视觉惯例是**居中**对齐，用边缘去比是拿错了尺子——实测放宽判据会得到 100% 假阳性" +
+      "（运行 B：121 对里放宽后新增 5 条，5 条全假）。故不报，但计入本字段：" +
+      "`compared` 才是本轮真正比对过的对数，`skippedCrossSizeDiff` 是**没比**的对数。",
+  },
   issues: grouped,
   generatedAt: new Date().toISOString(),
 };
@@ -564,6 +620,15 @@ if (JSON_ONLY) {
     console.log(`已免检  spacing：${rows.length} 组等距数据标注 —— ${show}${more}`);
   }
   if (report.shallowWarning) console.log(`\n⚠  ${report.shallowWarning}`);
+  // `alignment` 的覆盖范围单列一行。它不进 `unchecked`：这项检查**开着**，只是判据自带边界。
+  // 但边界必须可见 —— 否则「alignment: 0」会被读成「对齐都查过」，而实际本轮只比了 9 对。
+  {
+    const ac = report.alignmentCoverage;
+    console.log(
+      `对齐覆盖  edge 比对 ${ac.compared} 对 ｜ 因跨轴尺寸不同未比 ${ac.skippedCrossSizeDiff} 对` +
+        `   ← 后者按视觉惯例是**居中**对齐，用边缘比是拿错尺子（放宽判据实测 100% 假阳性）`,
+    );
+  }
   if (!grouped.length) {
     console.log("\n无违规。\n");
   } else {

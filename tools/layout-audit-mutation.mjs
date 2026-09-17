@@ -14,14 +14,16 @@
  *   【不误报】注入**合法的**布局模式（叠画/底板/数据驱动刻度/网格相邻/合成页根），
  *             断言**不报** —— 这是本文件比其它 mutation 更重的一半。
  *
- * 覆盖 22 类：
+ * 覆盖 24 类：
  *   应抓错 10：spacing 越档 · padding 越档 · radius 越档 · font-size 越档 · 轻微错位 ·
  *              触摸区不足 · 子级越出父级 · 页框不符基准（含 1px 边界）· 兄弟文字重叠 · 重复兄弟
  *   应放过 7：文字压自己底板 · 仪表盘同心圆叠画 · 折线压网格线 · 等距刻度（数据驱动）·
  *             等距网格线（数据驱动）· 二维网格对角"伪相邻" · 合成页根（子节点同原点，跳过）
- *   留痕 5：关检查项时进 unchecked · 未给 --baseline 时进 unchecked ·
+ *   留痕 7：关检查项时进 unchecked · 未给 --baseline 时进 unchecked ·
  *          数据驱动免检进 dataDrivenSpacing（非静默）· 输入无字段时如实声明「没查」·
- *          反向对照：字段存在时不得虚报为「没查」
+ *          反向对照：字段存在时不得虚报为「没查」·
+ *          **B1 · alignment 覆盖范围进 alignmentCoverage（compared / skippedCrossSizeDiff / samples）**·
+ *          **B1 反向对照：放宽判据会得到 100% 假阳性 —— 居中对齐的不同高元素不得报 alignment**
  *
  * ⚠️ 写这个文件时踩的两个坑（留在这里当告示，因为它们会让测试「永远 FAIL 且看不出原因」）：
  *   ① 退出码只由 **high** 决定（`process.exit(high > 0 ? 1 : 0)`）。
@@ -90,7 +92,7 @@ function run(tree, args = ALL) {
 function issuesBlock(out) {
   return out
     .split("\n")
-    .filter((l) => !/^(已启用|已免检|已跳过|未检查|档位|layout-audit)\s/.test(l.trim()))
+    .filter((l) => !/^(已启用|已免检|已跳过|已检查|未检查|对齐覆盖|档位|layout-audit)\s/.test(l.trim()))
     .join("\n");
 }
 
@@ -368,6 +370,62 @@ const silent = (r, check) => !new RegExp(`\\[\\w+\\] ${check} `).test(issuesBloc
   try { rep = JSON.parse(r.out); } catch { /* 落空则下面断言会报 */ }
   check(!!rep && rep.checksEnabled.padding === true, "22 有 padding 字段时 checksEnabled.padding 为 true");
   check(!!rep && !rep.unchecked.some((s) => /^padding/.test(s)), "22 有字段时 padding 不进 unchecked");
+}
+
+// 23 B1 · `alignment` 的覆盖范围必须留痕（lessons #67c）
+//    旧版有一句 `if (|prev[cross]-cur[cross]| > TOL) continue` —— 跨轴尺寸不同就跳过，
+//    **既不上报也不计数**。于是一份只比了 3 对、和一份比了 900 对的报告，在产物里长得一样：
+//    都写 `alignment: 0`。「没查」与「查了没问题」又一次不可分辨（#72 的同一类错）。
+//    实测规模（运行 B readback）：真正比过 3 对，因跨轴尺寸不同**没比**的有 121 对。
+{
+  // 三个 24 高的块（跨轴尺寸相等）+ 一个 10 高的块（跨轴尺寸不同但视觉相邻）
+  const tree = box([
+    T({ name: "A", width: 100, height: 24, x: 24, y: 24 }),
+    T({ name: "B", width: 100, height: 24, x: 24, y: 80 }),
+    T({ name: "C", width: 100, height: 24, x: 24, y: 136 }),
+    T({ name: "Dot", width: 10, height: 10, x: 24, y: 190 }), // 与 C 跨轴尺寸不同、但纵向相邻
+  ]);
+  const r = run(tree, [...ALL, "--json"]);
+  let rep = null;
+  try { rep = JSON.parse(r.out); } catch { /* 下面断言会报 */ }
+  check(!!rep, "23 --json 可解析");
+  if (rep) {
+    check(!!rep.alignmentCoverage, "23 报告含 alignmentCoverage 段（覆盖范围非静默）");
+    const ac = rep.alignmentCoverage;
+    check(ac && ac.compared > 0, `23 compared 记录真正比过的对数（实际 ${ac && ac.compared}）`);
+    check(
+      ac && ac.skippedCrossSizeDiff >= 1,
+      `23 跨轴尺寸不同而**没比**的对被计数（实际 ${ac && ac.skippedCrossSizeDiff}）`,
+    );
+    check(
+      Array.isArray(ac && ac.samples) && ac.samples.some((s) => s.a === "C" && s.b === "Dot"),
+      "23 没比的对子抽样存档，可被人复核（C vs Dot 应在列）",
+    );
+  }
+  const r2 = run(tree);
+  check(/对齐覆盖/.test(r2.out), `23 文本模式单列「对齐覆盖」行\n${r2.out}`);
+  check(/没?比|未比/.test(r2.out), "23 该行同时说明「没比」的对数（不只讲比过多少）");
+}
+
+// 24 B1 反向对照：**放宽判据是错的** —— 这条断言是"防止未来把它'修'回去"的闸门。
+//    跨轴尺寸不同的两个元素，视觉惯例是**居中**对齐。拿边缘去比是拿错了尺子：
+//    运行 B 实测放宽后在 121 对里新增 5 条报告，**5 条全是假阳性**
+//    （时间戳 27 高 vs 在线圆点 10 高 —— 圆点居中对齐文字，上边缘当然差 8px）。
+//    故这里造一个**居中对齐**的合法布局：文字 20 高、圆点 8 高，圆点在文字垂直中线上。
+//    正确行为：不得报 alignment。若将来有人把判据放宽成"跨轴有交集即比边缘"，本用例立刻 FAIL。
+{
+  const tree = box([
+    // 文字 y=[24,44]（中心 34）；圆点 8 高，居中 ⇒ y=[30,38]（中心 34）
+    leaf("文字", 24, 24, 200, 20, { fontSize: 14 }),
+    T({ name: "Dot", type: "ELLIPSE", width: 8, height: 8, x: 240, y: 30 }),
+  ]);
+  const r = run(tree);
+  check(
+    silent(r, "alignment"),
+    `24 居中对齐的不同高元素**不得**报 alignment（放宽判据的代价是 100% 假阳性）\n${issuesBlock(r.out)}`,
+  );
+  // 而且要能看出来"它没被边缘比对"这件事 —— 否则这条"不报"无法与人区分
+  check(/因跨轴尺寸不同未比 [1-9]/.test(r.out), "24 该对子计入「未比」而不是被静默吞掉");
 }
 
 /* ---------------- 汇总 ---------------- */
