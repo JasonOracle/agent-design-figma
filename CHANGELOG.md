@@ -48,7 +48,7 @@
 - **`export-manifest.json` 里一句「描述说允许、语义上不允许」的谎（C3·qa-export 上线即抓到，并用 ajv 独立复核）** —— 该 Schema 把 `exports.png.minItems: 1` 写在**基座**，再在 `allOf[0].then` 里给 design-phase `minItems: 0`。但 JSON Schema 的 `allOf` 是**合取**，`then` 撤不掉基座的约束——净效果仍是 `minItems: 1`。于是 `description` 写着「design-phase 允许 exports.png 为空」，**语义上根本不允许**：随包的 `example-highway-export.json`（design-phase + 空 png）一直是 invalid，只是从来没人真校验过。修法：把 minItems 上限挪进 `else`，并给 `if` 补 `required: ["_meta"]`（否则缺 `_meta` 的清单会被 `properties` 的「只校验存在的键」漏洞**静默当成 design-phase** 放过——修完前者之后这个洞会变成 fail-open，必须一起堵）。另把 `tokens.color` / `tokens.typography` 的 `$ref` + `minItems` 兄弟键改成 `allOf` 写法（draft-07 规定兄弟键被忽略、ajv 等实现却生效，不该依赖这个歧义），并给三处 `properties` 补 `type`。同时修正两处**过度声称**的字段描述：`figmaJson.path` 原文写「design-phase 为 null」，但真实构建也可能只导了 PNG/SVG；`criticReport` 原文暗示路径必填，而其类型本就允许 null。已记入 `references/lessons.md` #41。
 - **出口清单里 32 处「抄来的值」与其声明的 DS Spec 对不上（C3·qa-export 上线即抓到，属 C1 那一类病）** —— `export-manifest.json` 的 `tokens[].value` 是**发给前端的最终值**、`project` 是产品名，本该从 DS Spec / Brief 抄来，却从没人核对过：`example-health` 的品牌色写 `#5A5CF0`（Spec 是 `#0FB5AE`）、`brand.hover/active` 同理、`status.success` 写 `#10B981`（Spec 是 `#00B578`）、圆角写 8/12/16（Spec 是 6/8/10）、字阶 value 写 `15/21/400`（Spec 是 `14/20/400`）、`project` 多一个「 App」后缀（Schema 明文要求与 `Brief.product.name` 一致）；`example-highway` 的警告色写 `#F5C542`（Spec 是 `#FFB547`）、字阶 value 直接写成**自由文本**「14（TY-3 大屏提升档）」——这是机器读的字段，说明文字不该混进去。已写脚本**从 Spec 取值**逐一回填（32 处），避免手抄复发。
 - **17 条 `source` 是「假溯源」（前缀合法但路径不存在）** —— token 映射的 `source` 写 `preset:enterprise-dashboard.visualSystem.typeScale`，五类前缀合法、看着很像，但四套 Style Preset 里**都没有 `typeScale` 这个键**（真名是 `typography`），三份清单 15 条字阶映射全中。另 `example-health` 把 radius 的来源写成 `preset:...radius`，而 Spec 明说它来自 `brief:visualSystem.radius` 的显式覆盖（Brief 覆盖 vs 预设缺省是完全不同的溯源）；`example-saas` 的 `tokens.radius.md` 同样丢掉了 Spec 里的 `geometry.cardRadius`。**前缀校验只能证明「格式对」，证明不了「指的东西存在」。** 已按各清单自己声明的 Spec 逐条回填，并在 QA9 里立起「`preset:` 源必须真解析一次路径」的硬判据。已记入 `references/lessons.md` #42/#43。
-- **`example-health` 这个名字下住着两个不同项目（C3·qa-export 期间发现的**上游继承问题**，未擅自改写）** —— 核心示例 `assets/examples/example-health.json` / `.dsspec.json`（以及 `example-health/critic-report.json`）是 **「AI 型衣 / 美业」**：品牌紫 `#5A5CF0`、字阶 24/17/15/13/15、圆角 8/12/16、行业映射命中美业；而导出包的随包副本 `assets/examples/export/files/health-design-brief.json` / `health-design-system-spec.json` 是 **「AI 智能健康管理 / 医疗」**：青绿 `#0FB5AE`、字阶 26/16/14/13/16、圆角 6/8/10。两边各自内部自洽，所以单份校验全绿——只有把它们放在一起比才暴露。佐证：`example-health/critic-report.json` 的 `_meta.inputs` 自己写着依据是「AI **医疗** App 真实 Critic Loop 记录（同型问题）」，即核心示例是按照真实医疗项目的记录**重建**成美业的。**本轮只做两件事**：① 把文档里说错的地方改对（`SKILL.md` L4 段原写 `health = 消费健康 App`、`README.md` 原写示例是「医疗 App」）；② 在 `SKILL.md` 的 few-shot 与 `README` 里显式标注同名不同物，并记入 `references/lessons.md` #44。**重命名或对齐哪一边属于数据创作决策，留给 D2 之后定，不各按各的改——那只是把分裂固化。**
+- **`example-health` 这个名字下住着两个不同项目（C3·qa-export 期间发现的**上游继承问题**，未擅自改写）** —— 核心示例 `assets/examples/example-health.json` / `.dsspec.json`（以及 `example-health/critic-report.json`）是 **「AI 型衣 / 美业」**：品牌紫 `#5A5CF0`、字阶 24/17/15/13/15、圆角 8/12/16、行业映射命中美业；而导出包的随包副本（原文件名前缀为 health-design-，**1.2 收尾已统一改为 healthcare-**）是 **「AI 智能健康管理 / 医疗」**：青绿 `#0FB5AE`、字阶 26/16/14/13/16、圆角 6/8/10。两边各自内部自洽，所以单份校验全绿——只有把它们放在一起比才暴露。佐证：`example-health/critic-report.json` 的 `_meta.inputs` 自己写着依据是「AI **医疗** App 真实 Critic Loop 记录（同型问题）」，即核心示例是按照真实医疗项目的记录**重建**成美业的。**本轮只做两件事**：① 把文档里说错的地方改对（`SKILL.md` L4 段原写 `health = 消费健康 App`、`README.md` 原写示例是「医疗 App」）；② 在 `SKILL.md` 的 few-shot 与 `README` 里显式标注同名不同物，并记入 `references/lessons.md` #44。**重命名或对齐哪一边属于数据创作决策，留给 D2 之后定，不各按各的改——那只是把分裂固化。** ✅ **1.2 收尾已闭环**：经用户裁决采用**最窄的一种** —— 只给**导出包随包副本改名**（清单改为 `assets/examples/export/example-healthcare-export.json`，随包 brief / spec / build-log 三个文件的前缀 health-design- 与 health-build- 一并改为 healthcare-，含清单内 5 处交叉引用与 spec 的 `_source` 叙述），**核心示例 `example-health.*` 保持不动**（它是全链路 few-shot 主样例，8 个工具与全部文档都依赖它）。改后 `qa-export` 实测 **935 PASS / 0 FAIL** 未变。判据与取舍见 `references/lessons.md` #44。
 - **`SKILL.md` L4 段把 `health` 示例描述成「消费健康 App」（C3·qa-export 期间发现）** —— 该行指向 `assets/examples/example-health/critic-report.json`，而那份报告的 `project` 是「AI 型衣」、其 issue 讲的是 `BookingFlow 预约按钮` / `StyleGalleryCard 热度数字`（美业），与「消费健康」不符。已改为「美业 AI 试发 App『AI 型衣』」，并注明与 L5 随包副本不同源。
 - **canonical 文档把 OFFLINE 提示截短了（C3·qa-install 上线即抓到）** —— `references/runtime-capability.md` §3 的 Capability Matrix 把 OFFLINE 模式的「用户可见提示」写成 `未检测到 Figma 连接能力，仅可生成设计 asset`，而探针实际输出的是 `未检测到 Figma 连接能力，仅可生成设计资产（Brief / DS Spec / Build Plan）`——文档比真实提示少了一个尾注，用户照着文档核对会以为探针有问题。**这类缺陷用「关键词是否出现」查不出来**（两串都含关键词，上游脚本正是这么查的、所以一直是绿的），只有拿实跑输出逐字比才现形。已按实跑值改齐（`qa-install` 的 QA6 由此立起「引号住的提示语必须与实跑逐字一致」的判据）。
 - **`SETUP.md` 把 token 文件说成「运行目录」（C3·qa-install 期间发现）** —— bridge 用 `path.resolve(__dirname, "..")` 取根目录、token 落在**仓库目录**的 `.vibe/token`，与 cwd 无关；而 `references/bridge-ops.md` 写的是 `<repo>/.vibe/token`。两份文档对同一个文件给了不同锚点，照 `SETUP.md` 从别处启动会得到错误预期。已改为「仓库目录（与你在哪个目录敲命令无关）」，并在 QA7 立起判据：凡提到 `.vibe/token` 的那一行必须把它绑定到仓库而非 cwd。
@@ -67,8 +67,8 @@
 
 ### 待办
 
-- D2 两次实测校准（手册已就绪：`references/d2-calibration.md`；B1/B2 的预检效果应在 D2 里被真正用上并记数据；`example-health` 同名两物的重命名 / 对齐也在此决定）—— **运行 A 已完成，记录见 `.vibe/d2-run-a/RUN-RECORD.md` 与下节**；运行 B 待跑。
-- **待决策（需人拍板，不擅自改）**：`example-health` 同名两物（美业「AI 型衣」vs 医疗「AI 智能健康管理」）—— 是重命名核心示例、还是把随包副本对齐到核心示例、还是两边都保留但改名，属数据创作决策。定之前在文档层如实标注（见上方「修复」段与本文件条目）。
+- ~~D2 两次实测校准~~ ✅ **已完成（运行 A 2026-09-16/17 · 运行 B 2026-09-17）** —— 手册 `references/d2-calibration.md`；**逐闸门留痕（汇总行 + 退出码）见该文件 §5.1 / §5.2**。D1 §8 待定强化项的结论已下：**立项形态 = 「命令接入点对齐」，不做薄编排器**（见本文运行 B 一节与 `references/acceptance-criteria.md` §8.2）。
+- ~~**待决策**：`example-health` 同名两物（美业「AI 型衣」vs 医疗「AI 智能健康管理」）~~ ✅ **已裁决（2026-09-17）**：采用**最窄方案** —— 只给导出包随包副本改名（清单改为 `assets/examples/export/example-healthcare-export.json`，随包三个文件的前缀 health-design- 与 health-build- 统一改为 healthcare-），**核心示例 `example-health.*` 保持不动**。理由与实测见 `references/lessons.md` #44。
 - `example-health` 的 `critic-report.json` 已按核心示例（美业）对齐；若后续决定以医疗为准，该报告与其 `_meta.inputs` 需一并重做。
 
 ---
@@ -187,7 +187,7 @@
 - `references/bridge-ops.md` —— §3 **新增 3.0 超时语义**（超时后的正确顺序三步 + 批大小按「最贵的 op」估）；
   §3.1 补「字面 id 不得加 `$`」「`run` 的 `data.ops` vs `/v1/batch` 的 `data.results` 信封差异 + 条数校验」；
   §5.2 补 `clips` 的仅创建期警告；§5.3 补 `move-node` / `append-child` 语义对照表。
-- `references/lessons.md` —— 新增 **#57–#61**（5 条），守卫覆盖表新增「效果类参数可见性」一行（标为 ⚠️ 临时装置待收编）。
+- `references/lessons.md` —— 新增 **#55–#63**（9 条），守卫覆盖表新增「效果类参数可见性」一行（标为 ⚠️ 临时装置待收编）。
 - **`check-refs.mjs` 在收尾时抓到 3 条悬空引用——全部是本轮写文档时新引入的**（这正是把「漏跑」
   补回来的价值：该闸门在运行 A 期间没跑，一跑就抓到自己刚犯的错）：
   ① 本文档把「页面几何回读脚本」写成了不存在的文件名（它只是运行期临时脚本，
@@ -307,19 +307,21 @@
 - **#71 本地 id 登记文件会失效** —— 具体到运行目录下那份 id 登记表：只追加的登记表在**重跑**场景下必然同时含
   死 id 与活 id，且无法从文件本身区分。**这类文件不该当真相源**（同 #70）。
 
-### 一条需要人拍板的基线问题（本轮唯一可能影响交付正确性的未决项）
+### 基线问题 —— ✅ 已裁决（2026-09-17）
 
 用户选定的画布是 **3840×2160**，但规则库把**大屏的设计基准定义为 1920×1080**，
-3840×2160 是它的 **@2x 出图倍率**（`references/design-system.md` 大屏布局模板）。
-两者不是同一个东西，而**影响的是 L2**：
+3840×2160 是它的 **@2x 出图倍率**（`references/design-system.md` 大屏布局模板）。两者不是同一个东西，而**影响的是 L2**：
 
-- 若 3840×2160 是**倍率**（当前记录按此处理，记作
-  `frameBaseline: "1920x1080（大屏设计基准；出图 3840x2160 @2x）"`）→ **现状正确**，无需改动；
-- 若它是**真实物理分辨率、不做缩放**（如 LED 拼接屏按 1:1 出图）→ **L2 的 `typography` 与 `spacing`
-  需整体 ×2 重推**，本轮全部字号/间距都要改。
+- 若 3840×2160 是**倍率** → **现状正确**，无需改动；
+- 若它是**真实物理分辨率、不做缩放**（如 LED 拼接屏按 1:1 出图）→ **L2 的 `typography` 与 `spacing` 需整体 ×2 重推**，本轮全部字号/间距都要改。
 
-**在拍板前不擅自改**（属数据/规则决策，同 `example-health` 同名两物那条）。已记入运行记录
-的「需要用户裁决」段。
+**裁决：1920×1080 是设计基准，3840×2160 只是 @2x 出图倍率、不进 `frameBaseline`** ——
+已锁进 `references/design-system.md` **LD-10**。三条独立依据：① 倍率与设计尺寸是两层
+（同 iOS @2x / CSS `devicePixelRatio`）；② 规则库所有大屏数字都定义在 1920 上
+（`TitleBar 8%`=86 由 `GEO-1`「1080×8%」算出；正文 ≥14px 是 3–10m 视距红线），
+在 3840 上重推会**整体失效**；③ ×2 会背离 `dense` 与「图表 ≥50%」的意图。
+**例外**已单独划出：LED 拼接屏按点对点 1:1 出图时，`typography` / `spacing` 必须整体重推 ——
+那是一次**规则切换**，不是同一条规则的参数调整。
 
 ### 闸门留痕（汇总行）
 
@@ -346,7 +348,7 @@
 | L2 | 14 PASS | 14 PASS |
 | L4 结论（收编后） | 两轮 Critic 收敛 8.0 → 8.7 PASS | 审计 **21 → 1 条**（20 条假阳性归因为数据驱动）；工具**新抓出 5 条真缺陷**；**语义性缺失仍是盲区**（1 条靠读图） |
 | L5 | Export Gate 全绿（364 PASS） | 未跑（改走逐组件 PNG 导出） |
-| 新增隐式知识 | **5 条**（#57–#61） | **8 条**（#64–#71） |
+| 新增隐式知识 | **9 条**（#55–#63） | **8 条**（#64–#71）＋收编 **2 条**（#72–#73） |
 | 漏跑闸门 | 3 条 | **4 条**（+ `qa-export` / `qa-critic`） |
 | 翻车点中最耗时的一项 | 效果类参数不可见（#57） | **插件退化态**（#65，12 次，占本轮绝大部分时间） |
 | **闸门参数与规格是否同源** | 同源 | **⚠️ 否**：上一轮 `--min-touch 0` + `--baseline` 缺省 + `--font` 含 16，**三条检查实际缺席/放宽**（本轮修正） |
@@ -381,16 +383,19 @@
 
 修复后 `high 0`，14/14 PNG 已重新导出。
 
-### 两条待收编的临时装置（当前只在 `.vibe/d2-run-b/` 下）
+### 两条临时装置 —— ✅ 已收编（用户裁决）
 
-本轮为补审计盲区临时写了两个检查，**都在真实数据上抓到了东西**，故建议收编进 `tools/`：
+本轮为补审计盲区临时写了两个检查，**都在真实数据上抓到了东西**：
 
 1. **重复兄弟节点检查** —— 判「同名兄弟且几何完全重合」，抓到了 TrendChart 的 9 个重复标签
-   （#68 已证明这类缺陷**导出图看不出来**）。属 `layout-audit` 的 `duplicate` 类新检查。
+   （#68 已证明这类缺陷**导出图看不出来**）。
 2. **兄弟重叠检查** —— 抓到了 TitleBar 的 71px 重叠，正是 `layout-audit` **两个检查之间的缝**
-   （#67①）。收编时应作为 `spacing` 的补集，而非新写一套。
+   （#67①）。
 
-> 现状标注：`references/lessons.md` 守卫覆盖表已把这行标为 ⚠️ 临时装置待收编。
+**已并入随包发布的 `tools/layout-audit.mjs`**（检查项 8 → 10：`overlap` 收窄为 **TEXT×TEXT**、新增 `duplicate`），
+**并附两条必要前提**（不带它们就是错报机器 —— 见上文「收编结果」）；
+配套新增 `tools/layout-audit-mutation.mjs`（**51 PASS / 0 FAIL**）。
+`references/lessons.md` 守卫覆盖表两行已由 ⚠️ 改判为 **✅ 已收编**。
 
 ### 阶段闸门漏跑——D1 §8 的判据第二次命中
 
@@ -408,9 +413,10 @@
 
 ### 本轮同步的文档修订
 
-- `references/lessons.md` —— 新增 **#64–#71**（8 条，累计 **71** 条，编号无重复已核）。
+- `references/lessons.md` —— 新增 **#64–#71**（运行 B，8 条）· **#72–#73**（收编，2 条）· **#74**（验收，1 条），累计 **74** 条（编号 `#1–#74` 连续，无缺号无重复，已核）。
   守卫覆盖表新增 4 行：`layout-audit` 的 spacing / overlap **已由本轮收编补齐**（原标"已知缺陷"），
-  重复节点检查**已收编**为 `duplicate`（原标 ⚠️ 临时装置），插件退化态标为 **📏 纪律**（无工具可守）。
+  重份节点检查**已收编**为 `duplicate`（原标 ⚠️ 临时装置 → 改 ✅），插件退化态标为 **📏 纪律**（无工具可守），
+  另补一行记录 `precheck --live` 汇总行不更新的**镜像缺陷**（❌ 无守卫，记 1.3）。
 - `CHANGELOG.md` —— 本节。
 - `references/acceptance-criteria.md` §8.2 —— 运行 B 记录（见该文件）。
 - `tools/layout-audit.mjs` —— 收编两条装置 + 两条前提 + 四个留痕段 + 输入能力探测。

@@ -157,7 +157,7 @@ PingFang SC → Microsoft YaHei → Inter 兜底
 
 ## 8. 与上下游的接口契约
 
-- **对 L1（输入校验）**：Brief 必须能通过 `assets/templates/design-brief.json` 校验；`_assumptions` 非空时**逐条继承**进 `sourceMapping.assumptions`。
+- **对 L1（输入校验）**：Brief 必须能通过 `templates/design-brief.json` 校验；`_assumptions` 非空时**逐条继承**进 `sourceMapping.assumptions`。
 - **对 L3（输出消费）**：L3 只读 DS Spec——
 
   | DS Spec 字段 | L3 的用法 |

@@ -220,6 +220,8 @@ D1 §8 把「把命令表固化成一次性出口检查」列为**待定强化�
 
 ## 5. 运行记录表（每次运行填一份）
 
+**下面是模板**；**两次实测的填实版见 §5.1（运行 A）与 §5.2（运行 B）**。
+
 ```markdown
 ## D2 运行记录 — 运行 [A / B]
 
@@ -286,6 +288,158 @@ D1 §8 把「把命令表固化成一次性出口检查」列为**待定强化�
 - 未核对项：
 - 不适用项（非 FULL_MODE 才可能）：
 ```
+
+---
+
+### 5.1 运行记录 — 运行 A（2026-09-17 填实）
+
+> **填实说明**：本表于 2026-09-17 下午按上文模板填实。**判定类**闸门（`qa-l2` / `contrast-audit` / `qa-critic` / `qa-export` / `precheck` 离线 / `check-refs`）作用于**冻结产物**，重跑与运行期等价，结果直接采信；**活体类**闸门（`runtime-check` / `qa-plugin` / `precheck --live`）依赖当前环境，凡标注「**收尾补跑**」者，其证明的是「计划引用的画布 id **至今**仍存在」，**不等于运行当天核过**。原始记录见 `.vibe/d2-run-a/RUN-RECORD.md`（`/` 下的运行产物**不随包发布**）。
+
+| 项 | 值 |
+|---|---|
+| 日期 / 执行者 | 2026-09-16 23:50 – 2026-09-17 01:05（构建期） |
+| 选题（行业 / 平台 / 页数） | 记账 App / iOS `mobile-app` / Brief IA 4 页，**实建 2 页**（首页·统计） |
+| 档位（探针实测） | `FULL_MODE`（`figmaRead=true` `figmaWrite=true` `executor=figma-plugin-bridge`） |
+| 技能版本 | `1.2.0-dev` |
+| 产物目录 | `.vibe/d2-run-a/`（**不随包发布**，`.gitignore` 已挡） |
+| 端到端耗时 | ≈ 110 分钟（构建期，含大量环境排障）+ ≈ 40 分钟（收尾补跑与回写） |
+
+**闸门留痕**
+
+| 闸门 | 命令 | 汇总行 | 退出码 | 归因 |
+|---|---|---|---|---|
+| 定档 | `runtime-check.mjs` | `"figmaRead": true, "figmaWrite": true, "mode": "FULL_MODE"` | 0 | — |
+| 写通道自检 | `qa-plugin.mjs` | `全部通过：21 项` | 0 | — |
+| L2 DS Spec | `qa-l2.mjs --spec …/design-system-spec.json --brief …/design-brief.json` | `14 PASS / 0 FAIL —— L2 QA ALL GREEN` | 0 | — |
+| L2 对比度 | `contrast-audit.mjs …/design-system-spec.json` | `通过 —— 正文对比度全达标，声称值与复算一致（CONTRAST AUDIT OK）` | 0 | — |
+| L3 离线预检 | `precheck.mjs plan-batch*.json`（16 份，不含 `-BAD`） | `346 步：通过 346 ｜ 错误 0 ｜ 装置缺口 0 ｜ 待核对 3` | 0（逐份） | — |
+| L3 在线核对 | `precheck.mjs --live`（3 份含字面 id） | `ok 外部引用全部存在于画布（3/3，id=7:353 存在）` | 0 | 收尾补跑 |
+| L4 Critic | `qa-critic.mjs --report …/critic-home-round2.json --brief … --spec …` | `39 PASS / 0 FAIL / 0 WARN —— L4 QA ALL GREEN` | 0 | — |
+| L4 布局 | `layout-audit.mjs` | **未核对** —— 当轮 readback 形状与 Bridge `depth` 语义不匹配，且**未留存回读产物**，**事后不可补** | — | **未核对** |
+| L5 Export | `qa-export.mjs --manifest …/export-manifest.json` | `364 PASS / 0 FAIL / 0 WARN —— L5 Export Gate ALL GREEN` | 0 | — |
+| 文档引用 | `check-refs.mjs` | `悬空 0 —— DOC REFS ALL GREEN`（扫 18 篇随包文档；运行期漏跑，收尾补跑首轮 **3 FAIL** → 归零）—— **不记绝对条数**：该数随文档增补而变（见 `lessons.md` #74） | 0 | 已补跑 |
+
+**L3 构建指标**
+
+| 指标 | 值 |
+|---|---|
+| 总 op 数 | **210**（组件层 191 + 页面层修复 19） |
+| 批量往返次数（`chunks`） | ≈ **25 次**（组件层 14 次 `/v1/batch` + 页面层 6 次 `run` + 幂等清理） |
+| 中途失败次数 / 断点 | **3 类运行期塌方**（见翻车点 #4/#5/#6）；其中最严重一条令 **10 个组件从画布消失** |
+| **预检拦下的错**（struct / contract / gap） | 运行期分批预检拦下 **0 条**（说明按 `bridge-ops.md` 写的计划静态是干净的） |
+| **若不预检，会在第几步炸** | 运行期未测量（未留错误版本计划）。**收尾用构造对照补齐**：运行 A 目录下留了两份**故意写错的对照片**（各 20 步）——BAD 版从 **step 8** 起连报 **9 条 FAIL**（含 `set-effects` 多写字段会被**静默丢弃**、`$nosuchname` 未知引用、`NO_AUTO_LAYOUT`），EXIT=1；BAD2 版报 `未知引用 "$7:353"`（字面 id 误加 `$` 前缀），EXIT=1 |
+
+**Critic**
+
+| 项 | 值 |
+|---|---|
+| 五维分数 | round1 `8.2 / 9.3 / 6.5 / 7.6 / 8.6` → round2 `8.4 / 9.5 / 8.8 / 8.2 / 8.8`（Layout / Color / Consistency / Commercial / Usability） |
+| average / round / action | `8.0` → **`8.7`** ｜ 2 轮（`round ≤ 3`）｜ `FIX` → **`PASS`** |
+| issue 条数（severity 分布） | round1 **6**（4 medium / 2 low）→ round2 **1**（low） |
+| 每轮修复的 targetLayer | round1 6 条中 **5 条 L3 / 1 条 L2**；round2 回写 L3 共 **19 ops** |
+| `_evidence` | `mode = structured+vision`（增益档已做）｜ `unassessed = []` |
+
+**手工成本**
+
+| 项 | 值 |
+|---|---|
+| 命令条数 / 漏跑条数 | — / **3 条**（`precheck --live` · `layout-audit` · `check-refs`） |
+| 漏跑返工耗时 | **0 分钟**（三者均未导致本轮结论错误，但使覆盖度留缺口） |
+| 记账耗时 | ≈ **8 分钟** |
+| 整条链路端到端耗时 | ≈ **110 分钟**；其中**纯等工具** ≈ 25 分钟（Bridge 超时重试、Figma 断连恢复占主要部分） |
+
+**翻车点**（**11 条**；全表与逐条复算见 `.vibe/d2-run-a/RUN-RECORD.md`，蒸馏后的不变量见 `lessons.md`）
+
+| # | 现象（摘） | 归因 | 是否 1.2 的债 | 处置 |
+|---|---|---|---|---|
+| 1 | `.vibe/token` 是旧值但探针报 FULL_MODE，`/v1/command` 返 401 | 契约错误 | 是（#49 在野复现） | 探针应增加「读一次需鉴权的 op」作为 FULL_MODE 必要条件 |
+| 2 | `#F2F2F7` 底 + `text.regular #6B7280` 正文只有 4.33:1 | 结构错误（自检复算发现，**非工具报出**） | 是（已知边界） | 改 `#F7F7F9`（4.52:1）；立「边界值必须记录余量」 |
+| 3 | 自造 `surface.glass` 色 token 被 QA2 判「未知颜色」 | 结构错误 | **是——新增隐式知识** | 玻璃改用 `fills{opacity}` + `BACKGROUND_BLUR`，**不进色彩 token 空间** |
+| 4 | 单批 31–117 ops 被静默 chunk，`$name` 跨 chunk 断裂 | 契约错误 | **是——新增隐式知识** | 拆批 ≤30；并实测出真正红线是**任务复杂度**而非 op 数 |
+| 5 | `append-child` 批量超时后**不回滚**，10 个组件从画布消失 | 契约错误（最严重：`run` 超时语义未声明） | **是——新增隐式知识** | 5 个一组 + 每批回读确认；`appendChild` 比 `create` 贵得多 |
+| 6 | `move-node` 只改 x/y **不改父级** → 导出 100% 空白的 PNG（6210 bytes） | 契约错误 | **是——新增隐式知识** | 改 `append-child`；立「**导出成功 ≠ 有内容**」，必须做像素直方图 |
+| 7 | `BACKGROUND_BLUR` 结构全绿（`effects`/`opacity` 都对）但导出图**完全看不出玻璃感** | **本轮最值钱的发现**：不是错误，是**负载参数缺少能否证它的观察通道** | **是——新增隐式知识** | 补 `Bg/Scene` 背景层 + A/B 像素对照（卡内 `#E8E8F9` vs 空底 `#F4F4F8`） |
+| 8 | `paintToHex()` 丢弃 `paint.opacity`，回读分不清 `#FFFFFF@100%` 与 `@72%` | **装置缺口**（工具能力缺失，非产品缺陷） | 否（属工具完善） | 记入盲区；L4「材质一致性」只能靠读图 |
+| 9 | `qa-critic` QA6 报 `FIX 自洽：average=8.5<8 或最低分 7.8<7` | 结构错误 | 是（校验器正确拦下） | 把分数如实下调，而不是「写 FIX、分数上放行」 |
+| 10 | `qa-export` QA5 报 10 条 typography 快照不符（手写 `"34/41 w600"`） | 结构错误 | 是（校验器正确拦下） | 改为脚本从 DS Spec 取值；**快照字段不许手写** |
+| 11 | 构建中改了 `figma-plugin/code.js`，被 QA7 冻结协议拦下 | 契约错误 | 是（**协议正确生效**） | `git checkout` 回退；改善需求改走「提需求」而非当场改冻结文件 |
+
+**盲区（本次没看到的）**
+
+- **装置缺口**：① `paintToHex()` 不回传 `paint.opacity` → 填充透明度**不可结构化观测**，只能读图；② 插件 `ping` 不返回 `figma.fileKey` 且 `code.js` 属冻结区 → **L5 Export Gate 的 `live-build` 档位在本环境无法通过**（本次唯一 FAIL）。这是「**闸门设计得比环境能力严**」的实例：Gate 规则没错，环境缺一个字段。
+- **未核对项**：`layout-audit` 未跑，且因**未留存回读产物**而**事后不可补**。
+- **不适用项**：无（本次为 `FULL_MODE`）。
+- **增益档未评估项**：`_evidence.unassessed = []`。
+
+---
+
+### 5.2 运行记录 — 运行 B（2026-09-17 填实）
+
+> **填实说明**：同 §5.1。**本表的证据强度高于原记录**——运行 B 期间漏跑的 `precheck --live` 已在收尾补跑并核到（12/12），`check-refs` 亦由首轮 9 FAIL 修正归零。原始记录见 `.vibe/d2-run-b/RUN-RECORD-B.md`。
+
+| 项 | 值 |
+|---|---|
+| 日期 / 执行者 | 2026-09-17 01:16 – 03:01（构建期） |
+| 选题（行业 / 平台 / 页数） | 大屏指挥中心 / Web 大屏 `1920×1080` / 单页 14 个组件帧 |
+| 档位（探针实测） | `FULL_MODE` |
+| 技能版本 | `1.2.0-dev` |
+| 产物目录 | `.vibe/d2-run-b/`（**不随包发布**） |
+| 端到端耗时 | ≈ 150 分钟（含**插件退化态**的系统性定位 ≈ 50 分钟） |
+
+**闸门留痕**
+
+| 闸门 | 命令 | 汇总行 | 退出码 | 归因 |
+|---|---|---|---|---|
+| 定档 | `runtime-check.mjs` | `"mode": "FULL_MODE"` | 0 | — |
+| 写通道自检 | `qa-plugin.mjs` | `全部通过：21 项` | 0 | — |
+| L2 DS Spec | `qa-l2.mjs --spec …/design-system-spec.json --brief …/design-brief.json` | `14 PASS / 0 FAIL —— L2 QA ALL GREEN` | 0 | — |
+| L2 对比度 | `contrast-audit.mjs …/design-system-spec.json` | `通过 —— 正文对比度全达标，声称值与复算一致（CONTRAST AUDIT OK）` | 0 | — |
+| L3 离线预检 | `precheck.mjs plan-batch*.json`（35 份） | `855 步：通过 855 ｜ 错误 0 ｜ 装置缺口 0 ｜ 待核对 12` | 0（逐份） | — |
+| L3 在线核对 | `precheck.mjs --live`（12 份含字面 id） | `ok 外部引用全部存在于画布（12/12）` | 0 | **收尾补跑**（运行期漏跑） |
+| L4 Critic | `qa-critic.mjs` | **未核对** —— 未生成 `critic-report.json`（当轮 L4 改走**读图 + `layout-audit`**） | — | **未核对** |
+| L4 布局 | `layout-audit.mjs …/readback.json --baseline 1920x1080 --scale 2,4,8,16,24 --font 14,20,22,26 --radius 2,4` | `共 1 条（去重前 1 条）：high 0 / medium 1`；`分类（按出现次数）：spacing 1`（AlertTicker 两端留白，**保留上报**） | 0 | 收编后重跑 |
+| L5 Export | `qa-export.mjs` | **未核对** —— 未生成 `export-manifest.json`（当轮改走逐组件 PNG 导出） | — | **未核对** |
+| 文档引用 | `check-refs.mjs` | `悬空 0 —— DOC REFS ALL GREEN`（扫 18 篇随包文档；运行期漏跑，收尾补跑首轮 **9 FAIL** → 归零）—— **不记绝对条数**：该数随文档增补而变（见 `lessons.md` #74） | 0 | 已补跑 |
+
+**L3 构建指标**
+
+| 指标 | 值 |
+|---|---|
+| 总 op 数 | **388**（26 个发车批次；含 168 格热力图） |
+| 计划文件总数 | 35（含迭代中被拆分废弃的整批计划） |
+| 批量往返次数（`chunks`） | ≈ **45 次** `/v1/batch`（26 次正式发车 + ≈ 19 次重试／修复／清理） |
+| 单批最大 / 最小 op 数 | 26（`3c` DeviceStatusGrid 宿主 / `5b0` 热力图宿主）｜ 5（`5d1` FaultList 第 3 行） |
+| 中途失败次数 / 断点 | **12 次插件退化态挂起** + 3 批「第 3 步稳定挂住」（翻车点 #13，我自己的 bug） |
+| **预检拦下的错**（struct / contract / gap） | **19 条** —— 首轮整批发车时 `effects[0].type` 未知 `「GLOW」`（合法仅 `DROP_SHADOW` / `INNER_SHADOW` / `LAYER_BLUR` / `BACKGROUND_BLUR`） |
+| **若不预检，会在第几步炸** | 该 19 条**全部在发车前被拦下**；若不拦，**5 个批次会在 `set-effects` 步整批 fail-fast** |
+
+**Critic** —— **未核对**（未生成 `critic-report.json`）。当轮 L4 由**人工读图 + `layout-audit`** 承担，抓出 **5 条真缺陷**并已修复（见翻车点 #15/#16/#17 与 §5.2 末「收编结果」）。
+
+**手工成本** —— **未记账**。运行 B 的记录里没有这一节（模板要求填，本轮漏了）——这本身是下一轮该补的一处（`d2-calibration` §3 的判据依赖它）。
+
+**翻车点**（**10 条**，编号 #9–#18；全表见 `.vibe/d2-run-b/RUN-RECORD-B.md` 与 `CHANGELOG.md` 运行 B 一节）
+
+| # | 现象（摘） | 归因 | 是否 1.2 的债 | 处置 |
+|---|---|---|---|---|
+| 9 | 首轮整批发车，**5 个批次共 19 处**被 `precheck` 拦下：`effects[0].type 未知「GLOW」` | **装置缺口 + 契约错误**：Figma **没有 GLOW 效果类型**，而 preset 的 `shadow.glow` 写的是 CSS 字符串，**没有任何文档说明怎么编码成 op** | **是——新增隐式知识** | 把 glow 编码为**零偏移同色 `DROP_SHADOW`** |
+| 10 | `create-text` 报 `The font "Microsoft YaHei Medium" could not be loaded` | 结构错误：DS Spec 的 `fontWeight: 500` 被直接映射成字体名 `"Medium"` | **是——新增隐式知识** | **字体降级是两个轴**（family 链 + weight），不是一个轴 |
+| 11 | 批次 `3b` 报 `unknown batch reference "$mp"`，整批 fail-fast 作废 | 契约错误：跨批父级写成 `"$mp"`，但 **`$name` 命名空间是 batch-local** | 是（`bridge-ops.md` §3.1 已写，本次**在野复现**） | 跨批只能用**字面 id**；统一用 `isLiteralId` 判定 |
+| 12 | **同一形态反复 12 次**：`/v1/batch` 返 `executed=0 / remaining=N`，画布实际落了 0–6 个节点，**再等也不会变多**；后续批次还会拿到**属于上一批的陈旧回执** | **契约错误（本轮最贵的一条）**：插件会话的**瞬时退化态**，不是容量上限、不是字体内容、不是页面大小 | **是——新增隐式知识** | 见 `.vibe/d2-run-b/RUN-RECORD-B.md`「插件退化态的系统性定位」（7 组隔离实验） |
+| 13 | 批次 `4b0` / `5c0` / `5d0` **稳定在第 3 步挂住**，每次只落「宿主帧 + TitleAccent + 标题」 | 结构错误（**我的错**，且我先误判成 #12） | 否（本轮自造） | 根因是自己代码里 `parentId` 漏了 `$` 前缀 → 改 `isLiteralId` 后**三批一次全绿**。教训：**连续多次「同一形态」失败要怀疑自己的代码** |
+| 14 | 回读采集脚本报 `NODE_NOT_FOUND: 13:794` | 结构错误：采集器按本地 id 登记表的**登记顺序**取根，而登记表是追加式的（重跑过的批会同时留失效旧 id 与有效新 id） | **是——新增隐式知识** | 改为**从 `get-page-summary` 现场发现根节点** |
+| 15 | TrendChart 有 **25 个子节点**（应为 16），9 个轴标签被建了两遍、**像素级完全重合** | 结构错误：`batch2b1` 重跑时**没先 `cleanPrevious`**，而 `create-*` 不幂等 | **是——新增隐式知识** | 立「**`run` 非幂等**」；删重份后重新导出，**PNG 的 md5 一字未变**（→ #68：读图对重合类缺陷原理性盲区） |
+| 16 | 热力图 **168 个格子画完了，却没有任何坐标轴标注** | 结构错误 | **是——新增隐式知识** | 补 7 行标 + 5 列标。**数值审计在原理上不可见**（几何完全合法） |
+| 17 | TitleBar 右侧 `2026-09-17 01:12:44`(x=1560..1791) 与 `OnlineDot`(x=1720)/`系统在线`(x=1738..1802) **重叠 71px** | 结构错误 | **是——新增隐式知识** | 修好后由 `layout-audit` 的 `overlap` 检查接管 |
+| 18 | `run`/batch 非幂等 + `cleanPrevious` **先删后建**：建帧那批一超时 → **旧帧已删、新帧没建成 → 组件彻底消失** | 契约错误：`cleanPrevious` 与超时重试组合出「净损失」 | 是（运行 A #5 同族） | 严格按「父批先于子批」重跑：`4b0→4b1` / `5c0→5c1` / `5d0→5d1` |
+
+**盲区（本次没看到的）**
+
+- **装置缺口**：无新增（运行 A 的两条仍在：`paint.opacity` 不可观测、`fileKey` 缺失）。
+- **未核对项**：**两条** —— `qa-critic`（未生成 `critic-report.json`）与 `qa-export`（未生成 `export-manifest.json`）。当轮 L4/L5 走了**替代路径**（读图 + 逐组件 PNG 导出），按 §3.4 **不得折算为通过**。
+- **不适用项**：无（本次为 `FULL_MODE`）。
+- **增益档未评估项**：无 `critic-report` 承载，故无此项可记。
+
+> **一处工具缺陷（收尾时发现，未修）**：`precheck.mjs --live` 的**汇总行不随后续在线核对更新** —— 上例中汇总行仍打印 `待核对 1`，而 B2 段已明确 `ok 16:2727 存在`。§6 要求的留痕恰是**汇总行**，故只看汇总行会把「**已经核过**」读成「**没核**」。这与 #72（「没查」与「查了没问题」不可区分）是**镜像的同一个病**。记入 1.3 候选。
 
 ---
 
