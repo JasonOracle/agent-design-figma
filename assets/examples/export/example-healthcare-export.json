@@ -2,8 +2,8 @@
   "project": "AI 智能健康管理",
   "version": "1.0.0",
   "source": {
-    "brief": "assets/examples/export/files/health-design-brief.json",
-    "dsSpec": "assets/examples/export/files/health-design-system-spec.json",
+    "brief": "assets/examples/export/files/healthcare-design-brief.json",
+    "dsSpec": "assets/examples/export/files/healthcare-design-system-spec.json",
     "figmaFileKey": "EXAMPLE-FILE-KEY",
     "rootNodeIds": [
       "5:110",
@@ -77,9 +77,9 @@
       "note": "节点树 JSON 快照待补导（当次构建以 get-node detail:true readback 189 节点完成审计，结构化数据在 qa-report.json）"
     },
     "designSpec": {
-      "brief": "assets/examples/export/files/health-design-brief.json",
-      "dsSpec": "assets/examples/export/files/health-design-system-spec.json",
-      "buildPlan": "assets/examples/export/files/health-build-log.json",
+      "brief": "assets/examples/export/files/healthcare-design-brief.json",
+      "dsSpec": "assets/examples/export/files/healthcare-design-system-spec.json",
+      "buildPlan": "assets/examples/export/files/healthcare-build-log.json",
       "criticReport": null
     }
   },

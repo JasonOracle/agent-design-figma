@@ -1,5 +1,5 @@
 {
-  "_source": "当次验证 L2 产物 —— assets/examples/export/files/health-design-brief.json → DS Spec，按冻结规则 §2/§4/§6 转换，Schema 引用 assets/templates/design-system-spec.json。绿地移动项目：generate-core 6 + create-local 7 + extend 0 + reject 0",
+  "_source": "当次验证 L2 产物 —— assets/examples/export/files/healthcare-design-brief.json → DS Spec，按冻结规则 §2/§4/§6 转换，Schema 引用 assets/templates/design-system-spec.json。绿地移动项目：generate-core 6 + create-local 7 + extend 0 + reject 0",
   "brand": {
     "name": "AI 智能健康管理",
     "industry": "医疗",

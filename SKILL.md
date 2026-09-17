@@ -150,7 +150,7 @@ Prompt → L1 Brief → L2 DS Spec → L3 Figma Build → L4 Critic（≥8 PASS�
 - 组件/Token 映射规则（A 直接/B 组合/C 不可自动）：`references/export-mapping.md`
 - few-shot：`assets/examples/export/example-{saas,health,highway}-export.json`
   - saas = 真实 live-build（真实构建产物回填）/ health = 真实 live-build（真实导出 PNG+SVG）/ highway = design-phase（critic 7.7 未过 Gate，exports 为空规划清单——Gate 规则的活教材）
-  - ⚠️ `health` **这个名字下住着两个不同项目**：核心示例 `example-health.json`/`.dsspec.json` 是「AI 型衣 / 美业」，而导出包里的随包副本 `assets/examples/export/files/health-design-*.json` 是「AI 智能健康管理 / 医疗」。两边各自自洽但互不相同（见 `references/lessons.md` #44 与 `CHANGELOG.md` 待决策项）——**出口校验只认清单自己声明的 `source.*`，不要与核心示例混读**。
+  - ✅ **`health` 的名实不符已在 1.2 收尾解决**：核心示例仍是 `example-health.json`/`.dsspec.json` 的「AI 型衣 / 美业」；导出包的随包副本已统一改名为 healthcare- 前缀（清单见 `assets/examples/export/example-healthcare-export.json`，内容为「AI 智能健康管理 / 医疗」）。**两者不再共用一个前缀**（原问题见 `references/lessons.md` #44）——但出口校验仍只认清单自己声明的 `source.*`，不要与核心示例混读。
 - 出口校验：交付物检查清单 QA1–QA9（Schema 真校验 / 文件存在 / node id 回读 / 映射完整 / Token 回溯 + **value 快照与 source 继承** / 无孤儿 + Export Gate 自洽 / 冻结零修改 / **身份一致** / **可追溯性**）＝ `node tools/qa-export.mjs`（**已落地**；仓库自带样例走 `--strict`，即零告警门禁）。**已经落地的层一律用脚本，不得再拿「人工核对过」当校验过的证据**：L2 = `node tools/qa-l2.mjs`、L4 = `node tools/qa-critic.mjs`、L5 = `node tools/qa-export.mjs`。
 
 ## L0 Runtime Capability（任何层执行前必须先跑）

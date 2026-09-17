@@ -132,7 +132,7 @@ node ~/.workbuddy/skills/agent-design-figma/tools/qa-plugin.mjs
 - `assets/examples/example-health.ops.json` — 一份真实的 L3 构建计划样例（42 步），可直接喂给 `precheck.mjs`
 - `assets/style-library/` — 四套 Style Preset（企业后台 / 政务大屏 / 品牌官网 / 现代 SaaS）
 - `assets/templates/` — 各类交付物的 JSON Schema
-- `assets/examples/` — 三个行业的完整示例（企业后台 / 美业 AI 试发 / 政务大屏）；另含 `assets/examples/export/files/` 下**一份医疗 App 的导出随包副本**——它与 `example-health.*` 同名但**不是同一个项目**（美业 vs 医疗），见 `references/lessons.md` #44
+- `assets/examples/` — 三个行业的完整示例（企业后台 / 美业 AI 试发 / 政务大屏）；另含 `assets/examples/export/files/` 下**一份医疗 App 的导出随包副本** —— 其清单与随包文件已统一改名为 healthcare- 前缀（清单见 `assets/examples/export/example-healthcare-export.json`），以与核心示例 `example-health.*`（美业）区分开，见 `references/lessons.md` #44
 
 ## 运行模式（自动判定，无需配置）
 
