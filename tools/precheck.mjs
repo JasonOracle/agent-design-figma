@@ -270,8 +270,12 @@ if (uniqExternal.length) {
 }
 
 console.log(bar);
+// 这一行是**离线汇总**。`--live` 时后面还要做在线核对，必须再打一次「最终汇总」（见文件末）——
+// 否则 §6 要求逐行粘的"汇总行"会停在核对**之前**的状态：汇总说「待核对 1」，
+// 紧接着的 B2 段却已 `ok 存在`，读的人把「已核过」记成「没核」（1.3 · B2 缺陷）。
+// 故 `--live` 时给这一行加标签，让它**不可能**被误当成最终结论。
 console.log(
-  `  ${steps.length} 步：通过 ${okSteps.length} ｜ 错误 ${errors.length} ｜ 装置缺口 ${gaps.length} ｜ 待核对 ${uniqExternal.length}`,
+  `${LIVE ? "  离线汇总  " : "  "}${steps.length} 步：通过 ${okSteps.length} ｜ 错误 ${errors.length} ｜ 装置缺口 ${gaps.length} ｜ 待核对 ${uniqExternal.length}`,
 );
 if (h.stats.autoVivified.length) {
   console.log(`  （离线装置按需造了 ${h.stats.autoVivified.length} 个虚拟节点，仅为了让流程跑下去；这不代表它们真的存在）`);
@@ -280,6 +284,10 @@ if (h.stats.autoVivified.length) {
 /* ---------------- 在线：B2 引用核对 ---------------- */
 
 let liveFailed = false;
+// 在线核对的可数结果 —— 供「最终汇总」行使用。分开记三个数才诚实：
+// 「已核对」「核出不存在」「未核对」是三种不同状态，合成一个「N 个引用」会丢掉信息。
+let liveChecked = 0;       // 已核对且**确认存在**的不同 id 数
+let liveMissingCount = 0;  // 已核对且**确认不存在**的不同 id 数
 if (LIVE) {
   console.log(bar);
   console.log("  B2 在线核对 —— 对上述外部引用逐个问真实画布");
@@ -332,6 +340,7 @@ if (LIVE) {
         const res = await api("/v1/command", { op: "get-node", params: { id: x.id, depth: 0 } });
         const err = res.body && res.body.error;
         if (res.status === 200 && res.body && res.body.ok) {
+          liveChecked++;
           if (!QUIET) console.log(`  ok    ${x.id} 存在（首次出现在 step ${x.step} 的 ${x.param}）`);
         } else if (err && err.code === "NODE_NOT_FOUND") {
           if (!missing.has(x.id)) missing.set(x.id, []);
@@ -346,6 +355,7 @@ if (LIVE) {
           console.log(`  FAIL  step ${u.step} (${u.op}) 的 ${u.param} = ${id} —— 画布上不存在这个节点`);
         }
       }
+      liveMissingCount = missing.size;
       // 注意顺序：只有在「没有任何意外响应」时才敢说"全部存在"。
       // 否则一次超时/掉线会被误报成"全部核过"，那是把没查说成查过了。
       if (unexpected) {
@@ -356,6 +366,33 @@ if (LIVE) {
         console.log(`  ok    外部引用全部存在于画布（${uniqExternal.length} 个）`);
       }
     }
+  }
+}
+
+/* ---------------- 在线核对后的最终汇总 ---------------- */
+
+/**
+ * 为什么必须再打一次汇总行（1.3 · B2）：
+ * `references/acceptance-criteria.md` §6 的留痕纪律要求逐行粘**工具汇总行 + 退出码**。
+ * 而上面那行「离线汇总」是在在线核对**之前**打印的 —— 它写「待核对 16」，核对完却没再更新。
+ * 于是产物里只剩一句过期的话，人把「已核过 16」记成「16 个没核」。
+ * 这与 `lessons.md` #72 是**镜像关系**：那次是「没查」看起来像「查了」，这次是「查了」看起来像「没查」。
+ * 同一个病根：**结论行的状态与它描述的事实脱节**。故凡有「先打印结论、后做核对」的结构，
+ * 核对完必须重打一次，且两次都要能分辨（给前一次加限定词）。
+ */
+if (LIVE) {
+  const verified = liveChecked;
+  const missingN = liveMissingCount;
+  const unverified = Math.max(0, uniqExternal.length - verified - missingN);
+  console.log(bar);
+  console.log(
+    `  最终汇总（含在线核对）  ${steps.length} 步：通过 ${okSteps.length} ｜ 错误 ${errors.length} ｜ ` +
+      `装置缺口 ${gaps.length} ｜ 外部引用 ${uniqExternal.length}（已核对 ${verified} ｜ 核出不存在 ${missingN} ｜ 未核对 ${unverified}）`,
+  );
+  // 「未核对 > 0」时把话说透：别让人把「没核」当「核过」。留着 checked 字段才敢这么说，
+  // 否则 unverified 无处可算（这正是 #72 ②「答案要落在产物里」的落地）。
+  if (unverified > 0 && !liveFailed) {
+    console.log(`  ⚠  仍有 ${unverified} 个外部引用**未核对** —— 不得记为"已核对"（核对是否中止看上面的 FAIL）`);
   }
 }
 
