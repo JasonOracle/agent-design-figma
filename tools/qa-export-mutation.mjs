@@ -54,10 +54,28 @@ copy("assets/templates/export-manifest.json");
 copy("assets/style-library");
 const EXAMPLES_DIR = path.join(TMP, "assets/examples");
 mkdirp(EXAMPLES_DIR);
+/**
+ * ⚠️ 这里有**两个**名字列表，不是一个 —— 2026-09-17 改名后必须分开，别再合回去。
+ *
+ * 起因（`references/lessons.md` #44）：`health` 这个前缀下曾同时住着两个**不同项目** ——
+ * 核心示例 `assets/examples/example-health.*`（AI 型衣 / 美业）与导出包随包副本
+ * `assets/examples/export/files/health-design-*.json`（AI 智能健康管理 / 医疗）。
+ * 1.2 收尾把**随包副本**统一改名成 `healthcare-` 前缀，核心示例保持 `health` 不变。
+ *
+ * 于是「核心示例目录名」与「随包清单文件名基」**不再一致**了：
+ *   · 核心示例目录仍是 `example-health/`（见 `CORE_EXAMPLES`）
+ *   · 随包清单已变成 `example-healthcare-export.json`（见 `EXPORT_NAMES`）
+ * 旧版拿一个 `["saas","health","highway"]` 兼作两用，改名后它照旧拼出
+ * `example-health-export.json` → ENOENT，整份变异测试**当场崩掉**。
+ * 教训与 #74 同族：改名的涟漪必须逐处追到**代码里的字面量**，不能只改资产与文档。
+ */
+const CORE_EXAMPLES = ["saas", "health", "highway"];      // assets/examples/example-<n>/（核心示例目录）
+const EXPORT_NAMES = ["saas", "healthcare", "highway"];   // assets/examples/export/example-<n>-export.json（随包清单）
+
 for (const f of fs.readdirSync(path.join(ROOT, "assets/examples"))) {
   if (/^example-.*\.json$/.test(f)) fs.copyFileSync(path.join(ROOT, "assets/examples", f), path.join(EXAMPLES_DIR, f));
 }
-for (const n of ["saas", "health", "highway"]) {
+for (const n of CORE_EXAMPLES) {
   const dir = path.join(ROOT, "assets/examples", `example-${n}`);
   if (!fs.existsSync(dir)) continue;
   mkdirp(path.join(EXAMPLES_DIR, `example-${n}`));
@@ -117,11 +135,14 @@ function run(args, cwd = TMP) {
 }
 
 const readManifest = (n) => JSON.parse(fs.readFileSync(path.join(MANIFEST_DIR, `example-${n}-export.json`), "utf8"));
+/** `health` 一族在随包清单里叫 `healthcare`（见上方 EXPORT_NAMES 的说明）—— 这里显式转一次名，
+ *  避免每个用例都要记住这件事；转换只作用于**随包清单**，不碰核心示例目录。 */
+const manifestKey = (coreName) => (coreName === "health" ? "healthcare" : coreName);
 
 let caseNo = 0;
 /** 变异一份清单并跑工具；mutate=null 表示不注入 */
 function runManifest(n, mutate, extra = []) {
-  const m = readManifest(n);
+  const m = readManifest(manifestKey(n));
   if (mutate) mutate(m);
   const p = path.join(MUT, `case-${++caseNo}.json`);
   fs.writeFileSync(p, JSON.stringify(m, null, 2));
@@ -145,7 +166,7 @@ function expectCase(label, r, wantCode, keyword) {
   const m = /结果：(\d+) PASS/.exec(r.out);
   check(!!m && Number(m[1]) >= 800, `基线断言数 ≥800（实际 ${m ? m[1] : "-"}）—— 防「只跑了一份清单」被当成全绿`);
   // 三份清单都要进统计
-  check(["saas", "health", "highway"].every((n) => r.out.includes(`example-${n}-export`)), "三份样例清单都被校验到");
+  check(EXPORT_NAMES.every((n) => r.out.includes(`example-${n}-export`)), "三份样例清单都被校验到");
 }
 
 /* ---------------- 1. QA1 Schema 真校验（用仓库真 Schema） ---------------- */
