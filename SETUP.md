@@ -67,11 +67,11 @@ git clone https://github.com/JasonOracle/agent-design-figma.git ~/.codebuddy/ski
 node ~/.workbuddy/skills/agent-design-figma/tools/runtime-check.mjs
 ```
 
-期望输出：
+期望输出（`version` 是技能版本，实跑时等于 `VERSION` 文件内容，此处为 1.2.0）：
 
 ```json
 {
-  "version": "1.2.0-dev",
+  "version": "1.2.0",
   "figmaRead": true,
   "figmaWrite": true,
   "executor": "figma-plugin-bridge",

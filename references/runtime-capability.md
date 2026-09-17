@@ -19,9 +19,12 @@ Skill 在执行任何层之前，必须先知道"这个环境能跑多远"。本
 
 ## 2. 输出契约（runtime-capability.json）
 
+> 下例中的 `version` 是**示例值**。实跑时它等于 `VERSION` 文件的内容（该文件是技能版本的唯一事实源），
+> 故升级版本后此处示例可能滞后——**以 `VERSION` 文件为准**。
+
 ```json
 {
-  "version": "1.2.0-dev",
+  "version": "1.2.0",
   "figmaRead": true,
   "figmaWrite": true,
   "executor": "figma-plugin-bridge",
