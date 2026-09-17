@@ -79,6 +79,11 @@ Design Brief JSON（L1 出口物）
 色值只能出自三个来源：
 
 1. **Style Preset 的 `visualSystem`**（`primaryColor` / `background` / `surface` / `textColors` / `stroke` / `chartColors`）
+   —— **取值为逐字照抄**，正本是 `assets/style-library/` 下与 `stylePresetId` 同名的 JSON
+   （四套 id 与文件对照见 §12.1）。**不得凭常识或同类框架（Ant / Element 等）的风格重建 preset 值**：
+   `preset:` 前缀声明的就是「这个值来自那份文件」，与文件不符即 `qa-l2` QA2 判 FAIL。
+   1.2 的独立盲测正是在这里翻车——执行者看不到 preset 文件，只能按 Ant Design 惯例猜了一套
+   文本灰阶与图表色，QA2 直接报出 10 项色值不符。
 2. **Brief 显式覆盖**（必须同步记录进 `sourceMapping.briefOverrides`）
 3. **白名单派生规则**（仅 §5 的四条）
 
@@ -347,6 +352,15 @@ KPI Tile → GIS Center → Monitoring Panels；数据即装饰，动效每屏 �
 ### 12.1 四套 Style Preset 均可作为 `stylePresetId`
 
 `premium-saas` / `enterprise-dashboard` / `gov-digital-screen` / **`web-marketing`**。
+
+**四套 preset 的正本文件**（色值 / 字体 / 圆角一律从对应文件**逐字取**，不得凭常识重建）：
+
+| `stylePresetId` | 正本文件 |
+|---|---|
+| `premium-saas` | `assets/style-library/premium-saas.json` |
+| `enterprise-dashboard` | `assets/style-library/enterprise-dashboard.json` |
+| `gov-digital-screen` | `assets/style-library/gov-digital-screen.json` |
+| `web-marketing` | `assets/style-library/web-marketing.json` |
 
 > `web-marketing` 与 `web-site` 平台配套（1.1 新增）。它与 `premium-saas` 的分界：**一个服务营销叙事页（Hero/区块节奏/转化路径），一个服务订阅制产品界面。**
 
