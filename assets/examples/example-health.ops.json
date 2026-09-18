@@ -1,0 +1,60 @@
+{
+  "_comment": "L3 构建计划的样例（AI 发型 App 首屏）。形状 = POST /v1/batch 的请求体，可直接喂给 tools/precheck.mjs 做开工前预检。演示要点：as/$name 串联节点、WRITE→READBACK、毛玻璃与投影混排、DS 组件→实例。",
+  "steps": [
+    { "op": "create-frame", "params": { "name": "hairstyle-app / 首页", "width": 390, "height": 844, "fill": "#F7F8FA" }, "as": "root" },
+    { "op": "set-name", "params": { "id": "$root", "name": "hairstyle-app / 首页" } },
+
+    { "op": "create-frame", "params": { "name": "NavBar", "parentId": "$root", "width": 390, "height": 96, "y": 0 }, "as": "nav" },
+    { "op": "set-auto-layout", "params": { "id": "$nav", "mode": "HORIZONTAL", "spacing": 12, "primaryAxisSizingMode": "FIXED", "counterAxisSizingMode": "FIXED" } },
+    { "op": "set-padding", "params": { "id": "$nav", "top": 48, "right": 20, "bottom": 12, "left": 20 } },
+    { "op": "set-fill", "params": { "id": "$nav", "color": "#FFFFFF" } },
+    { "op": "set-effects", "params": { "id": "$nav", "effects": [{ "type": "DROP_SHADOW", "color": "#101828", "opacity": 0.06, "x": 0, "y": 1, "blur": 2 }] } },
+
+    { "op": "create-text", "params": { "characters": "AI 发型", "parentId": "$nav", "fontSize": 20, "fontFamily": "Inter", "fontStyle": "Semi Bold", "fill": "#101828" }, "as": "navTitle" },
+    { "op": "set-text-align", "params": { "id": "$navTitle", "vertical": "CENTER" } },
+    { "op": "set-text-autoresize", "params": { "id": "$navTitle", "mode": "WIDTH_AND_HEIGHT" } },
+
+    { "op": "create-frame", "params": { "name": "HeroEntry", "parentId": "$root", "width": 350, "height": 168, "x": 20, "y": 112 }, "as": "hero" },
+    { "op": "set-corner-radius", "params": { "id": "$hero", "radius": 20 } },
+    { "op": "set-fill", "params": { "id": "$hero", "color": "#5A5CF0" } },
+    { "op": "set-effects", "params": { "id": "$hero", "effects": [{ "type": "BACKGROUND_BLUR", "radius": 24 }, { "type": "DROP_SHADOW", "color": "#5A5CF0", "opacity": 0.18, "x": 0, "y": 8, "blur": 24 }] } },
+    { "op": "set-auto-layout", "params": { "id": "$hero", "mode": "VERTICAL", "spacing": 8, "padding": 24 } },
+    { "op": "set-primary-axis-align", "params": { "id": "$hero", "align": "CENTER" } },
+
+    { "op": "create-text", "params": { "characters": "拍一张，看看你适合什么发型", "parentId": "$hero", "fontSize": 18, "fill": "#FFFFFF" }, "as": "heroTitle" },
+    { "op": "set-font-weight", "params": { "id": "$heroTitle", "weight": 600 } },
+    { "op": "set-text-align", "params": { "id": "$heroTitle", "horizontal": "CENTER" } },
+    { "op": "set-layout-sizing", "params": { "id": "$heroTitle", "horizontal": "FILL" } },
+
+    { "op": "create-rect", "params": { "name": "CameraEntry", "parentId": "$hero", "width": 120, "height": 40, "fill": "#FFFFFF", "cornerRadius": 20 }, "as": "camera" },
+    { "op": "set-layout-sizing", "params": { "id": "$camera", "horizontal": "HUG" } },
+
+    { "op": "create-text", "params": { "characters": "我的发型", "parentId": "$root", "fontSize": 16, "fill": "#101828", "y": 300 }, "as": "sectionTitle" },
+    { "op": "set-font-size", "params": { "id": "$sectionTitle", "size": 16 } },
+
+    { "op": "create-frame", "params": { "name": "Card/gallery", "parentId": "$root", "width": 168, "height": 200, "x": 20, "y": 336 }, "as": "card" },
+    { "op": "set-corner-radius", "params": { "id": "$card", "radius": 16 } },
+    { "op": "set-fill", "params": { "id": "$card", "color": "#FFFFFF" } },
+    { "op": "set-stroke", "params": { "id": "$card", "color": "#EAECF0", "strokeWeight": 1 } },
+
+    { "op": "create-ellipse", "params": { "name": "Avatar", "parentId": "$card", "width": 64, "height": 64, "x": 16, "y": 16, "fill": "#D9DBFF" }, "as": "avatar" },
+    { "op": "create-text", "params": { "characters": "法式短发", "parentId": "$card", "fontSize": 14, "fill": "#101828", "x": 16, "y": 96 }, "as": "cardLabel" },
+    { "op": "set-opacity", "params": { "id": "$cardLabel", "opacity": 0.88 } },
+
+    { "op": "duplicate-node", "params": { "id": "$card", "name": "Card/gallery copy", "parentId": "$root", "x": 202, "y": 336 }, "as": "card2" },
+    { "op": "resize-node", "params": { "id": "$card2", "width": 168, "height": 200 } },
+    { "op": "move-node", "params": { "id": "$avatar", "dx": 0, "dy": 4 } },
+
+    { "op": "create-component", "params": { "from": "$camera", "name": "DS/Button/Ghost" }, "as": "btnComp" },
+    { "op": "create-instance", "params": { "componentId": "$btnComp", "parentId": "$root", "x": 20, "y": 560 }, "as": "btnInst" },
+    { "op": "create-instance", "params": { "componentId": "1024:33", "parentId": "$root", "x": 20, "y": 620 } },
+    { "op": "get-node", "params": { "id": "1024:33", "depth": 1 } },
+
+    { "op": "get-node", "params": { "id": "$hero", "depth": 2, "detail": true } },
+
+    { "op": "delete-node", "params": { "id": "$card2" } },
+
+    { "op": "export-node", "params": { "id": "$root", "format": "PNG", "scale": 2 } },
+    { "op": "get-page-summary", "params": {} }
+  ]
+}

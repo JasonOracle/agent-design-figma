@@ -1,0 +1,190 @@
+{
+  "_source": "few-shot DS Spec 2/3 —— example-health.json（AI 型衣，mobile-app）的 brief → DS Spec 转换结果。绿地项目（无既有 DS），决策以 generate-core/extend 为主；radius 与字阶来自 Brief 显式覆盖，平台适配例外（§⑥.2）已在 Brief._assumptions 声明",
+  "brand": {
+    "name": "AI 型衣",
+    "industry": "美业",
+    "stylePresetId": "premium-saas",
+    "contentDensity": "balanced"
+  },
+  "platform": "mobile-app",
+  "tokens": {
+    "color": {
+      "brand": {
+        "primary": { "value": "#5A5CF0", "source": "brief:visualSystem.primaryColor", "note": "行业映射建议 #E8A0BF，Brief 按 AI 科技感取向显式选择品牌紫（已记录于 Brief._assumptions）" },
+        "hover":   { "value": "#6E70F2", "source": "derived:RD-1@tokens.color.brand.primary", "note": "与表面色 #FFFFFF 88:12 混合" },
+        "active":  { "value": "#5355DD", "source": "derived:RD-2@tokens.color.brand.primary", "note": "与 #000000 92:8 混合" }
+      },
+      "background": {
+        "page": { "value": "#FAFAFA", "source": "preset:premium-saas.visualSystem.background" }
+      },
+      "surface": {
+        "card": { "value": "#FFFFFF", "source": "preset:premium-saas.visualSystem.surface" }
+      },
+      "text": {
+        "primary":     { "value": "#111827", "source": "preset:premium-saas.visualSystem.textColors[0]" },
+        "regular":     { "value": "#6B7280", "source": "preset:premium-saas.visualSystem.textColors[1]" },
+        "secondary":   { "value": "#9CA3AF", "source": "preset:premium-saas.visualSystem.textColors[2]" },
+        "placeholder": { "value": "#9CA3AF", "source": "rule:TY-4(移动端无第四灰阶，placeholder 复用 textColors[2])" }
+      },
+      "border": {
+        "default": { "value": "#E5E7EB", "source": "preset:premium-saas.visualSystem.stroke" },
+        "divider": { "value": "#F2F3F5", "source": "derived:RD-3@tokens.color.border.default", "note": "与 surface #FFFFFF 50:50 混合" }
+      },
+      "status": {
+        "success": { "value": "#10B981", "source": "rule:ST-1@preset.chartColors(绿系)" },
+        "warning": { "value": "#F59E0B", "source": "rule:ST-1@preset.chartColors(黄系)" },
+        "danger":  { "value": "#EF4444", "source": "rule:ST-1@preset.chartColors(红系)" },
+        "info":    { "value": "#6366F1", "source": "rule:ST-1@preset.chartColors(蓝系)" }
+      },
+      "chart": {
+        "series1": { "value": "#5A5CF0", "source": "preset:premium-saas.visualSystem.chartColors[0]" },
+        "series2": { "value": "#10B981", "source": "preset:premium-saas.visualSystem.chartColors[1]" },
+        "series3": { "value": "#F59E0B", "source": "preset:premium-saas.visualSystem.chartColors[2]" },
+        "series4": { "value": "#EF4444", "source": "preset:premium-saas.visualSystem.chartColors[3]" },
+        "series5": { "value": "#6366F1", "source": "preset:premium-saas.visualSystem.chartColors[4]" }
+      }
+    },
+    "typography": {
+      "display": { "fontFamily": "PingFang SC + Inter", "size": 24, "lineHeight": 32, "weight": 500, "source": "brief:visualSystem.typography(24-32)" },
+      "heading": { "fontFamily": "PingFang SC + Inter", "size": 17, "lineHeight": 23, "weight": 500, "source": "brief:visualSystem.typography(17)+rule:TY-2(行高=size+6)" },
+      "body":    { "fontFamily": "PingFang SC + Inter", "size": 15, "lineHeight": 21, "weight": 400, "source": "brief:visualSystem.typography(15)+rule:TY-2" },
+      "caption": { "fontFamily": "PingFang SC + Inter", "size": 13, "lineHeight": 19, "weight": 400, "source": "brief:visualSystem.typography(13)+rule:TY-2" },
+      "number":  { "fontFamily": "Inter", "size": 15, "lineHeight": 21, "weight": 500, "fontStyle": "tabular-nums", "source": "rule:TY-1(数字用 Inter 等宽，取 body 字阶)" }
+    },
+    "spacing": {
+      "base":        { "value": 4, "source": "preset:premium-saas.visualSystem.spacing(8pt 网格)" },
+      "scale":       { "value": "4/8/12/16/24/32", "source": "preset:premium-saas.visualSystem.spacing" },
+      "cardPadding": { "value": 16, "source": "rule:SP-3(移动端卡片 padding 缺省 16)" },
+      "pagePadding": { "value": 16, "source": "rule:SP-3(移动端页面左右 padding 缺省 16)" }
+    },
+    "radius": {
+      "sm": { "value": 8,  "source": "brief:visualSystem.radius(8/12/16)", "note": "Brief 显式覆盖 preset 缺省 4/6/8（移动端大圆角，已记录于 Brief）" },
+      "md": { "value": 12, "source": "brief:visualSystem.radius(8/12/16)" },
+      "lg": { "value": 16, "source": "brief:visualSystem.radius(8/12/16)", "note": "图片卡大圆角" }
+    },
+    "shadow": {
+      "card":    { "value": "0 1px 2px rgba(0,0,0,0.04)",  "type": "drop", "usage": "内容卡默认", "source": "preset:premium-saas.visualSystem.shadow" },
+      "overlay": { "value": "0 4px 12px rgba(0,0,0,0.04)", "type": "drop", "usage": "浮层/底部弹层", "source": "preset:premium-saas.visualSystem.shadow" }
+    }
+  },
+  "components": [
+    { "name": "TabBar",          "briefRefs": ["TabBar"],          "category": "navigation",   "priority": "P0", "decision": "generate-core", "figmaNaming": "DS/Navigation/TabBar",          "basis": "绿地项目无既有 DS；移动端必需导航，preset coreComponents 无对应项，命中 CD-2b 平台必需组件生成规则（平台例外已在 Brief._assumptions 声明）", "states": ["default", "active"] },
+    { "name": "NavBar",          "briefRefs": ["NavBar"],          "category": "navigation",   "priority": "P0", "decision": "generate-core", "figmaNaming": "DS/Navigation/NavBar",          "basis": "preset coreComponents 命中，绿地首建", "states": ["default"] },
+    { "name": "Button",          "briefRefs": ["Button"],          "category": "form",         "priority": "P0", "decision": "generate-core", "figmaNaming": "DS/Form/Button",                "basis": "preset coreComponents 命中，绿地首建；移动端主按钮高度 44px（AC-2 触控红线）", "states": ["primary", "secondary", "disabled", "loading"] },
+    { "name": "Input",           "briefRefs": ["Input"],           "category": "form",         "priority": "P0", "decision": "generate-core", "figmaNaming": "DS/Form/Input",                 "basis": "preset coreComponents 命中，绿地首建", "states": ["default", "focus", "error", "disabled"] },
+    { "name": "Card",            "briefRefs": [],                  "category": "layout",       "priority": "P0", "decision": "generate-core", "figmaNaming": "DS/Layout/Card",                "basis": "rule:CD-3 基础原语补充：StyleGalleryCard/StylistCard/CouponCard 三个 extend 决策的共同基类，Brief 未显式列出但被依赖", "states": ["default", "hover"] },
+    { "name": "LoadingOverlay",  "briefRefs": ["LoadingOverlay"],  "category": "feedback",     "priority": "P0", "decision": "generate-core", "figmaNaming": "DS/Feedback/LoadingOverlay",    "basis": "AI 生成等待为全 App 关键路径，跨页复用 ≥3（首页/试发/预约），命中 CD-1 阈值", "states": ["default"] },
+    { "name": "StyleGalleryCard","briefRefs": ["StyleGalleryCard"],"category": "data-display", "priority": "P0", "decision": "extend", "figmaNaming": "DS/Layout/Card", "variants": ["image-gallery"], "basis": "与 Card 基类 80%+ 一致（图片区+标题+元信息），命中 CD-2：新增 image-gallery variant（radius.lg 全幅图）", "states": ["default", "hover"] },
+    { "name": "StylistCard",     "briefRefs": ["StylistCard"],     "category": "data-display", "priority": "P1", "decision": "extend", "figmaNaming": "DS/Layout/Card", "variants": ["persona-horizontal"], "basis": "与 Card 基类结构一致（头像+姓名+标签+行动点），命中 CD-2", "states": ["default"] },
+    { "name": "CouponCard",      "briefRefs": ["CouponCard"],      "category": "data-display", "priority": "P2", "decision": "extend", "figmaNaming": "DS/Layout/Card", "variants": ["coupon"], "basis": "与 Card 基类一致（金额区+条件区），命中 CD-2；P2 复用价值低但零成本 variant 可覆盖", "states": ["default"] },
+    { "name": "CameraEntry",     "briefRefs": ["CameraEntry"],     "category": "form",         "priority": "P0", "decision": "create-local", "figmaNaming": "Local/AiTryOn/CameraEntry", "basis": "拍照入口为试发流程特殊结构（大按钮+相机图形+AI 光效点缀），复用 Button token，命中 CD-3", "states": ["default", "pressed"] },
+    { "name": "BeforeAfterCompare", "briefRefs": ["BeforeAfterCompare"], "category": "data-display", "priority": "P1", "decision": "create-local", "figmaNaming": "Local/Compare/BeforeAfterCompare", "basis": "Before/After 滑动对比为页面特殊交互结构，全 App 唯一，命中 CD-3", "states": ["default"] },
+    { "name": "FaceShapePicker", "briefRefs": ["FaceShapePicker"], "category": "form",         "priority": "P1", "decision": "create-local", "figmaNaming": "Local/AiTryOn/FaceShapePicker", "basis": "脸型选择网格为流程专属结构，命中 CD-3", "states": ["default", "selected"] },
+    { "name": "StyleFilterChips","briefRefs": ["StyleFilterChips"],"category": "navigation",   "priority": "P1", "decision": "create-local", "figmaNaming": "Local/Home/StyleFilterChips", "basis": "仅首页+试发两页使用（复用 <3），未达 CD-1 generate-core 阈值，命中 CD-3 本地实现", "states": ["default", "active"] },
+    { "name": "BookingFlow",     "briefRefs": ["BookingFlow"],     "category": "form",         "priority": "P1", "decision": "create-local", "figmaNaming": "Local/Booking/BookingFlow", "basis": "预约流程容器为页面级组合结构（发型师列表+时段网格），由 Input/Button/StylistCard 实例拼装，命中 CD-3", "states": ["default"] }
+  ],
+  "layout": {
+    "pattern": "tab-flow",
+    "frameBaseline": "375x812",
+    "pages": [
+      {
+        "name": "首页",
+        "zones": [
+          { "name": "StatusBar",  "role": "系统状态栏", "size": "375x44", "order": 1, "notes": "rule:LD-5(iOS 状态栏 44)" },
+          { "name": "NavBar",     "role": "页标题导航", "size": "375x44", "order": 2, "notes": "rule:LD-5(iOS 导航栏 44)" },
+          { "name": "HeroEntry",  "role": "AI 试发入口大图", "size": "FILLx220(全幅出血)", "order": 3, "notes": "CameraEntry 本地组件挂载；出血 = pagePadding 0" },
+          { "name": "FilterChips", "role": "风格筛选", "size": "FILLx32", "order": 4 },
+          { "name": "GalleryFeed", "role": "精选画廊卡片流", "size": "FILLxFILL(2列 gap12)", "order": 5, "notes": "StyleGalleryCard 实例，卡片间距出自 Brief(12-16px 取 12)" },
+          { "name": "TabBar",     "role": "底部导航", "size": "375x90(56+safeArea34)", "order": 6, "notes": "rule:LD-5(TabBar 56 + 安全区)" }
+        ]
+      },
+      {
+        "name": "AI 试发",
+        "zones": [
+          { "name": "StatusBar",  "role": "系统状态栏", "size": "375x44", "order": 1 },
+          { "name": "NavBar",     "role": "流程导航（步骤指示）", "size": "375x44", "order": 2 },
+          { "name": "StepBody",   "role": "拍照/选脸型/生成 三步内容区", "size": "FILLxFILL", "order": 3, "notes": "CameraEntry / FaceShapePicker 本地组件按步切换" },
+          { "name": "TabBar",     "role": "底部导航", "size": "375x90", "order": 4 }
+        ]
+      },
+      {
+        "name": "效果对比",
+        "zones": [
+          { "name": "StatusBar",  "role": "系统状态栏", "size": "375x44", "order": 1 },
+          { "name": "NavBar",     "role": "页标题导航", "size": "375x44", "order": 2 },
+          { "name": "CompareBody", "role": "Before/After 全幅对比", "size": "FILLxFILL", "order": 3, "notes": "BeforeAfterCompare 本地组件；对比滑块为唯一动效（preset avoid：动效克制）" }
+        ]
+      },
+      {
+        "name": "预约到店",
+        "zones": [
+          { "name": "StatusBar",  "role": "系统状态栏", "size": "375x44", "order": 1 },
+          { "name": "NavBar",     "role": "页标题导航", "size": "375x44", "order": 2 },
+          { "name": "StylistList", "role": "发型师/门店列表", "size": "FILLxFILL", "order": 3, "notes": "StylistCard 实例纵列" },
+          { "name": "BookingBar", "role": "预约操作条", "size": "FILLx76", "order": 4, "notes": "BookingFlow 底部固定段 + Button.primary(44px)" },
+          { "name": "TabBar",     "role": "底部导航", "size": "375x90", "order": 5 }
+        ]
+      },
+      {
+        "name": "我的",
+        "zones": [
+          { "name": "StatusBar",  "role": "系统状态栏", "size": "375x44", "order": 1 },
+          { "name": "ProfileHead", "role": "用户头像与档案入口", "size": "FILLx120", "order": 2 },
+          { "name": "HistoryList", "role": "试发记录/脸型档案/优惠券", "size": "FILLxFILL", "order": 3, "notes": "CouponCard 实例挂载于优惠券分组" },
+          { "name": "TabBar",     "role": "底部导航", "size": "375x90", "order": 4 }
+        ]
+      }
+    ]
+  },
+  "responsive": {
+    "baseline": "375x812",
+    "breakpoints": [
+      { "name": "compact", "width": 320 },
+      { "name": "base",    "width": 375 },
+      { "name": "large",   "width": 414 }
+    ],
+    "rules": [
+      "移动端无桌面断点；卡片流在 320 档降为单列，414 档保持 2 列放宽 gap 至 16",
+      "全幅出血区（HeroEntry/CompareBody）跨三档恒为 pagePadding 0"
+    ]
+  },
+  "accessibility": {
+    "contrast": [
+      "text.primary #111827 on surface.card #FFFFFF = 17.7:1 PASS（正文）",
+      "text.regular #6B7280 on surface.card #FFFFFF = 4.8:1 PASS（正文）",
+      "text.secondary #9CA3AF on surface.card #FFFFFF = 2.5:1 FAIL-TEXT（仅占位符/标签，禁用于正文）",
+      "brand.primary #5A5CF0 on surface.card #FFFFFF = 5.0:1 PASS（按钮文字/链接可用）"
+    ],
+    "minFontSize": { "value": 11, "source": "brief:visualSystem.typography(最小字阶 11)" },
+    "touchTarget": { "value": 44, "source": "rule:AC-2(移动端触控目标 ≥44px；Button 44 / TabBar item 56)" },
+    "focusRing":   { "value": "2px #5A5CF0", "source": "rule:AC-3(focus ring 取 brand.primary 2px；移动端主要体现为 pressed 态)" },
+    "notes": ["AI 生成等待必须可取消（LoadingOverlay 附取消按钮），避免不可中断阻塞"]
+  },
+  "sourceMapping": {
+    "presetId": "premium-saas",
+    "rulesUsed": ["CD-1", "CD-2", "CD-2b", "CD-3", "RD-1", "RD-2", "RD-3", "ST-1", "TY-1", "TY-2", "TY-4", "SP-3", "LD-5", "AC-2", "AC-3"],
+    "briefOverrides": [
+      "tokens.radius ← brief:visualSystem.radius(8/12/16)，覆盖 preset 缺省 4/6/8",
+      "tokens.typography ← brief:visualSystem.typography(24-32-17-15-13-11)，覆盖 preset 字阶 26-32-16-14-13-12-11",
+      "tokens.color.brand.primary ← brief:visualSystem.primaryColor(#5A5CF0)，覆盖 preset 缺省 #5A5CF0"
+    ],
+    "existingDsRefs": [],
+    "assumptions": [
+      "继承 Brief._assumptions 全部 4 条（占位名/组件推导/平台适配例外/品牌紫取向）",
+      "L2 新增：Card 为 CD-3 规则补充的基础原语，Brief 未显式要求"
+    ]
+  },
+  "buildPlan": {
+    "strategy": "ds-first：绿地项目先按 generate-core 清单建 6 个核心 DS 组件（逐个 create-component + READBACK），再按页分区构建；每批 ≤30 ops，WRITE→READBACK，as: 映射逐批落盘 build-ids",
+    "batches": [
+      { "seq": 1, "target": "DS 首建：TabBar+NavBar+Button", "estOps": 26 },
+      { "seq": 2, "target": "DS 首建：Input+Card+LoadingOverlay", "estOps": 24 },
+      { "seq": 3, "target": "Card variants 扩展（gallery/persona/coupon）", "estOps": 18 },
+      { "seq": 4, "target": "首页：HeroEntry+FilterChips+GalleryFeed", "estOps": 28 },
+      { "seq": 5, "target": "AI 试发：CameraEntry+FaceShapePicker", "estOps": 24 },
+      { "seq": 6, "target": "效果对比：BeforeAfterCompare", "estOps": 16 },
+      { "seq": 7, "target": "预约到店：StylistList+BookingBar", "estOps": 22 },
+      { "seq": 8, "target": "我的：ProfileHead+HistoryList + 五级 QA 审计", "estOps": 20 }
+    ]
+  }
+}

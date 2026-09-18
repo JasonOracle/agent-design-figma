@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    font: 11px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color: var(--figma-color-text, #1f2937);
+    background: var(--figma-color-bg, #ffffff);
+    display: flex; flex-direction: column;
+  }
+  header {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--figma-color-border, #e5e7eb);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: #9ca3af; flex: none; }
+  .dot.ok { background: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,.18); }
+  .dot.bad { background: #ef4444; box-shadow: 0 0 0 3px rgba(239,68,68,.18); }
+  .dot.wait { background: #f59e0b; box-shadow: 0 0 0 3px rgba(245,158,11,.18); }
+  h1 { font-size: 12px; font-weight: 600; margin: 0; letter-spacing: .2px; }
+  #status { margin-left: auto; font-size: 10px; opacity: .7; text-align: right; }
+  .field { display: flex; gap: 6px; padding: 8px 12px; border-bottom: 1px solid var(--figma-color-border, #e5e7eb); }
+  .field label { font-size: 10px; opacity: .6; min-width: 32px; line-height: 24px; }
+  input {
+    flex: 1; min-width: 0; height: 24px; padding: 0 7px; font: inherit;
+    color: inherit; background: var(--figma-color-bg-secondary, #f9fafb);
+    border: 1px solid var(--figma-color-border, #e5e7eb); border-radius: 5px;
+  }
+  button {
+    height: 24px; padding: 0 10px; font: inherit; cursor: pointer; border-radius: 5px;
+    color: var(--figma-color-text-onbrand, #fff);
+    background: var(--figma-color-bg-brand, #0d99ff); border: none;
+  }
+  #meta { padding: 8px 12px; font-size: 10px; opacity: .75; border-bottom: 1px solid var(--figma-color-border, #e5e7eb); }
+  #meta b { font-weight: 600; }
+  #log { flex: 1; overflow: auto; padding: 6px 12px 12px; }
+  .row { padding: 3px 0; border-bottom: 1px dashed var(--figma-color-border, #f0f0f0); word-break: break-all; }
+  .row .t { opacity: .45; margin-right: 6px; }
+  .ok { color: #0f9d63; } .err { color: #dc2626; } .dim { opacity: .55; }
+</style>
+</head>
+<body>
+  <header>
+    <span id="dot" class="dot"></span>
+    <h1>agent-design-figma Bridge</h1>
+    <span id="status">booting…</span>
+  </header>
+
+  <div class="field">
+    <label>URL</label>
+    <input id="base" spellcheck="false" />
+  </div>
+  <div class="field">
+    <label>Token</label>
+    <input id="token" spellcheck="false" />
+    <button id="connect">Connect</button>
+  </div>
+
+  <div id="meta">page: <b id="page">-</b> · done: <b id="done">0</b> · failed: <b id="failed">0</b></div>
+  <div id="log"></div>
+
+<script>
+/* ------------------------------------------------------------------ *
+ * agent-design-figma Bridge - Figma plugin UI iframe
+ *
+ * This iframe is the only part of the plugin that has network access.
+ * It never touches the Plugin API itself: it long-polls the local
+ * bridge, forwards each command to the plugin MAIN THREAD over
+ * postMessage, and posts the main thread's answer back to the bridge.
+ *
+ * SAFETY GATE - read before changing anything here:
+ * Outside Figma this file is just a web page, and a web page that polls
+ * the bridge would silently steal commands and drop them (postMessage
+ * goes nowhere). So the poll loop is gated behind a handshake with the
+ * plugin main thread, and the bridge additionally refuses to hand out
+ * commands to a client that never registered itself.
+ * Never start polling before `hostReady` is true.
+ * ------------------------------------------------------------------ */
+
+var DEFAULT_TOKEN = ""; // 留空：把 Bridge 终端打印的 token 粘贴进输入框
+// Only the "localhost" spelling is accepted by Figma's manifest validator
+// ("http://127.0.0.1:45677" is rejected as an invalid URL), and the iframe CSP
+// is derived from allowedDomains - so the 127.0.0.1 form would be blocked anyway.
+var CANDIDATE_BASES = ["http://localhost:45677"];
+
+var el = function (id) { return document.getElementById(id); };
+var state = {
+  base: CANDIDATE_BASES[0],
+  token: DEFAULT_TOKEN,
+  clientId: "c" + Math.random().toString(36).slice(2, 10) + Date.now().toString(36),
+  hostReady: false,     // set only when the plugin main thread answers
+  running: false,
+  connected: false,
+  registered: false,
+  done: 0,
+  failed: 0,
+  page: "-",
+};
+
+function ts() {
+  var d = new Date();
+  return ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2) + ":" + ("0" + d.getSeconds()).slice(-2);
+}
+
+function log(text, cls) {
+  var row = document.createElement("div");
+  row.className = "row";
+  var t = document.createElement("span");
+  t.className = "t";
+  t.textContent = ts();
+  var body = document.createElement("span");
+  if (cls) body.className = cls;
+  body.textContent = text;
+  row.appendChild(t);
+  row.appendChild(body);
+  var box = el("log");
+  box.appendChild(row);
+  while (box.childNodes.length > 120) box.removeChild(box.firstChild);
+  box.scrollTop = box.scrollHeight;
+}
+
+function setStatus(kind, text) {
+  el("dot").className = "dot " + kind;
+  el("status").textContent = text;
+}
+
+function refreshMeta() {
+  el("page").textContent = state.page;
+  el("done").textContent = state.done;
+  el("failed").textContent = state.failed;
+}
+
+/* --- talk to the bridge ------------------------------------------- */
+
+async function fetchWithTimeout(url, options, ms, outerSignal) {
+  var ctrl = new AbortController();
+  var timer = setTimeout(function () { ctrl.abort(); }, ms);
+  // An in-flight poll must be cancellable from the outside: otherwise a
+  // reconnect leaves the old 20s long-poll hanging and it keeps stealing
+  // commands (see the generation guard in loop()).
+  if (outerSignal) {
+    if (outerSignal.aborted) ctrl.abort();
+    else outerSignal.addEventListener("abort", function () { ctrl.abort(); });
+  }
+  try {
+    var opts = Object.assign({}, options || {});
+    opts.signal = ctrl.signal;
+    return await fetch(url, opts);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/** Find a reachable bridge among the candidate loopback URLs. */
+async function resolveBase() {
+  var tried = [];
+  for (var i = 0; i < CANDIDATE_BASES.length; i++) {
+    var candidate = CANDIDATE_BASES[i];
+    try {
+      var res = await fetchWithTimeout(candidate + "/health", { method: "GET" }, 2500);
+      if (res.ok) {
+        var body = await res.json();
+        if (body && body.service === "agent-design-figma-bridge") return candidate;
+      }
+      tried.push(candidate + " -> HTTP " + res.status);
+    } catch (e) {
+      tried.push(candidate + " -> " + (e && e.message ? e.message : "unreachable"));
+    }
+  }
+  throw new Error(tried.join(" | "));
+}
+
+async function postJson(path, payload) {
+  var sep = path.indexOf("?") === -1 ? "?" : "&";
+  var res = await fetchWithTimeout(
+    state.base + path + sep + "token=" + encodeURIComponent(state.token),
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    },
+    15000
+  );
+  var text = await res.text();
+  var body = null;
+  try { body = text ? JSON.parse(text) : null; } catch (e) { body = { raw: text }; }
+  if (!res.ok) {
+    var msg = body && body.error && body.error.message ? body.error.message : "HTTP " + res.status;
+    var err = new Error(msg);
+    err.code = body && body.error ? body.error.code : undefined;
+    throw err;
+  }
+  return body;
+}
+
+/* --- main loop ----------------------------------------------------- */
+
+async function pollOnce(waitMs, signal) {
+  var res = await fetchWithTimeout(
+    state.base + "/v1/poll?token=" + encodeURIComponent(state.token) +
+      "&client=" + encodeURIComponent(state.clientId) + "&wait=" + waitMs,
+    { method: "GET" },
+    waitMs + 6000,
+    signal
+  );
+  if (res.status === 401) { var e = new Error("unauthorized (bad token)"); e.code = "UNAUTHORIZED"; throw e; }
+  if (res.status === 403) {
+    var e2 = new Error("not registered with the bridge yet");
+    e2.code = "CLIENT_NOT_REGISTERED";
+    throw e2;
+  }
+  if (!res.ok) throw new Error("poll failed: HTTP " + res.status);
+  var body = await res.json();
+  if (!body || !body.cmd) return false;
+
+  var cmd = body.cmd;
+  log("-> " + cmd.op + (cmd.params && Object.keys(cmd.params).length ? " " + JSON.stringify(cmd.params) : ""));
+  parent.postMessage({ pluginMessage: { type: "vibe:exec", id: cmd.id, op: cmd.op, params: cmd.params || {} } }, "*");
+  return true;
+}
+
+/**
+ * Register this client with the bridge. The bridge will not hand out any
+ * command to a client it has never seen, which is what stops a stray
+ * browser tab (or an IDE preview panel) from eating commands.
+ */
+async function register() {
+  state.base = await resolveBase();
+  await postJson("/v1/hello", {
+    clientId: state.clientId,
+    label: "figma-plugin-ui",
+    info: { page: state.page, plugin: "agent-design-figma Bridge (Dev)", editorType: "figma" },
+  });
+  state.registered = true;
+}
+
+/**
+ * EXACTLY ONE poll loop may exist at a time.
+ *
+ * Every (re)start bumps `generation`. A loop whose generation is stale aborts
+ * its own in-flight long-poll and exits, so a reconnect can never leave the
+ * old 20s long-poll alive to race for the same command. Without this, the old
+ * loop kept polling and the bridge ended up holding several long-polls from
+ * the same client, one of which could be handed a command after its socket
+ * had already died - the command then vanished (caller sees NO_RESULT).
+ */
+var generation = 0;
+
+async function loop() {
+  var myGen = ++generation;
+  state.running = true;
+  state.pollCtrl = new AbortController();
+  var ctrl = state.pollCtrl;
+  var backoff = 500;
+
+  while (state.running && myGen === generation) {
+    try {
+      if (!state.registered && myGen === generation) {
+        await register();
+        if (myGen !== generation) return;
+        state.connected = true;
+        setStatus("ok", "connected \u00b7 " + state.base.replace("http://", ""));
+        log("registered with bridge as " + state.clientId + " \u00b7 " + state.base, "ok");
+      }
+      await pollOnce(20000, ctrl.signal);
+      backoff = 500;
+    } catch (e) {
+      if (myGen !== generation) return;   // superseded: exit quietly, no log spam
+      state.connected = false;
+      state.registered = false;
+      var code = e && e.code;
+      setStatus("bad", code === "UNAUTHORIZED" ? "bad token" : "offline \u00b7 retrying");
+      log("bridge error" + (code ? " [" + code + "]" : "") + ": " + (e && e.message ? e.message : String(e)), "err");
+      await new Promise(function (r) { setTimeout(r, backoff); });
+      backoff = Math.min(backoff * 2, 5000);
+    }
+  }
+}
+
+/** Stop the running loop and make sure its in-flight long-poll dies with it. */
+function stopLoop() {
+  generation++;
+  state.running = false;
+  if (state.pollCtrl) {
+    try { state.pollCtrl.abort(); } catch (_) {}
+    state.pollCtrl = null;
+  }
+}
+
+async function reportResult(msg) {
+  var ok = !!msg.ok;
+  if (ok) { state.done++; log("<- " + msg.id + " ok", "ok"); }
+  else { state.failed++; log("<- " + msg.id + " ERROR: " + (msg.error && msg.error.message), "err"); }
+  refreshMeta();
+  try {
+    await postJson("/v1/result?client=" + encodeURIComponent(state.clientId), { id: msg.id, ok: ok, data: msg.data, error: msg.error });
+  } catch (e) {
+    log("failed to report result: " + (e && e.message ? e.message : String(e)), "err");
+  }
+}
+
+/* --- handshake with the plugin main thread ------------------------- */
+
+var helloAttempts = 0;
+function helloToHost() {
+  parent.postMessage({ pluginMessage: { type: "vibe:hello" } }, "*");
+}
+
+/** Called once, when the main thread proves it is there. */
+function onHostReady(msg) {
+  if (state.hostReady) {
+    state.page = msg.page || state.page;
+    refreshMeta();
+    return;
+  }
+  state.hostReady = true;
+  state.page = msg.page || "-";
+  refreshMeta();
+  log("main thread answered \u00b7 page \u201c" + state.page + "\u201d \u00b7 ops: " + (msg.ops || []).join(", "), "dim");
+  setStatus("wait", "connecting\u2026");
+  loop();
+}
+
+function bootHandshake() {
+  helloToHost();
+  var t = setInterval(function () {
+    if (state.hostReady) { clearInterval(t); return; }
+    helloAttempts++;
+    if (helloAttempts > 20) {
+      clearInterval(t);
+      setStatus("bad", "not hosted by Figma");
+      log("no answer from the plugin main thread - this page is NOT running inside Figma, so it stays inert and will never poll the bridge.", "err");
+      return;
+    }
+    helloToHost();
+  }, 1200);
+}
+
+/* --- wiring -------------------------------------------------------- */
+
+window.onmessage = function (event) {
+  var msg = event.data && event.data.pluginMessage;
+  if (!msg) return;
+  if (msg.type === "vibe:ready") { onHostReady(msg); return; }
+  if (msg.type === "vibe:fetch-asset") { fetchAssetForHost(msg); return; }
+  if (msg.type === "vibe:result") {
+    if (!state.hostReady) return;
+    reportResult(msg);
+  }
+};
+
+/* --- F2 · asset 字节取回 -------------------------------------------- */
+
+/**
+ * 主线程请求图片字节（set-image-fill 的前半程）：同域 GET /v1/asset 取回
+ * ArrayBuffer，转 base64 后 postMessage 回主线程（figma.base64Decode 在那边）。
+ * 无论成败都必须应答 —— 主线程在 30s 超时里等这一条，不应答就挂到超时。
+ */
+function fetchAssetForHost(msg) {
+  var url = state.base + "/v1/asset?token=" + encodeURIComponent(state.token) +
+    "&name=" + encodeURIComponent(msg.name || "");
+  var answer = function (payload) {
+    parent.postMessage({ pluginMessage: Object.assign({ type: "vibe:asset-bytes", reqId: msg.reqId }, payload) }, "*");
+  };
+  fetchWithTimeout(url, { method: "GET" }, 20000)
+    .then(function (res) {
+      if (!res.ok) {
+        return res.json().catch(function () { return null; }).then(function (body) {
+          answer({
+            ok: false,
+            code: body && body.error ? body.error.code : "HTTP_" + res.status,
+            error: body && body.error ? body.error.message : "HTTP " + res.status,
+          });
+        });
+      }
+      return res.arrayBuffer().then(function (buf) {
+        answer({ ok: true, base64: bufferToBase64(new Uint8Array(buf)) });
+      });
+    })
+    .catch(function (e) {
+      answer({ ok: false, code: "ASSET_FETCH_FAILED", error: e && e.message ? e.message : String(e) });
+    });
+}
+
+/** Uint8Array -> base64（分块转换，避免 String.fromCharCode 爆栈） */
+function bufferToBase64(bytes) {
+  var BIN = "";
+  var CHUNK = 0x8000;
+  for (var i = 0; i < bytes.length; i += CHUNK) {
+    BIN += String.fromCharCode.apply(null, bytes.subarray(i, i + CHUNK));
+  }
+  return btoa(BIN);
+}
+
+el("base").value = state.base;
+el("token").value = state.token;
+
+el("connect").onclick = function () {
+  if (!state.hostReady) { log("still no main thread; retrying handshake", "err"); bootHandshake(); return; }
+  stopLoop();                 // kill the old loop AND its hanging long-poll
+  state.connected = false;
+  state.registered = false;
+  state.base = el("base").value.trim() || CANDIDATE_BASES[0];
+  state.token = el("token").value.trim();
+  setStatus("wait", "connecting\u2026");
+  log("manual reconnect requested", "dim");
+  setTimeout(loop, 60);
+};
+
+setStatus("wait", "waiting for Figma host\u2026");
+refreshMeta();
+log("client id: " + state.clientId, "dim");
+bootHandshake();
+</script>
+</body>
+</html>

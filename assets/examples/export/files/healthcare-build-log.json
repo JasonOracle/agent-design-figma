@@ -1,0 +1,211 @@
+[
+ {
+  "batch": "b01-ds-statusbar-nav",
+  "ops": 24,
+  "ms": 344,
+  "created": {
+   "sb": "3:2",
+   "sbr": "3:4",
+   "DS_StatusBar": "3:11",
+   "nb": "3:12",
+   "DS_NavBar": "3:15"
+  }
+ },
+ {
+  "batch": "b02-ds-tabbar",
+  "ops": 29,
+  "ms": 275,
+  "created": {
+   "tb": "3:17",
+   "row": "3:18",
+   "i1": "3:19",
+   "ic1": "3:20",
+   "i2": "3:22",
+   "ic2": "3:23",
+   "i3": "3:25",
+   "ic3": "3:26",
+   "DS_TabBar": "3:29"
+  }
+ },
+ {
+  "batch": "b03-ds-button-1",
+  "ops": 25,
+  "ms": 62,
+  "created": {
+   "bp": "3:30",
+   "DS_BtnPrimary": "3:32",
+   "bs": "3:33",
+   "DS_BtnSecondary": "3:35",
+   "bd": "3:36",
+   "DS_BtnDisabled": "3:38"
+  }
+ },
+ {
+  "batch": "b04-ds-button-2-overlay",
+  "ops": 19,
+  "ms": 56,
+  "created": {
+   "bl": "3:39",
+   "DS_BtnLoading": "3:42",
+   "lo": "3:43",
+   "DS_LoadingOverlay": "3:46"
+  }
+ },
+ {
+  "batch": "b05-ds-input-1",
+  "ops": 27,
+  "ms": 67,
+  "created": {
+   "id1": "3:47",
+   "DS_InDefault": "3:49",
+   "if1": "3:50",
+   "DS_InFocus": "3:52",
+   "ie1": "3:53",
+   "DS_InError": "3:55"
+  }
+ },
+ {
+  "batch": "b06-ds-input-2-statcard",
+  "ops": 20,
+  "ms": 64,
+  "created": {
+   "ix": "3:56",
+   "DS_InDisabled": "3:58",
+   "sc": "3:59",
+   "scIcon": "3:60",
+   "scSpark": "3:63",
+   "DS_StatCard": "3:64"
+  }
+ },
+ {
+  "batch": "b01b-ds-statusbar-rebuild",
+  "ops": 16,
+  "ms": 123,
+  "created": {
+   "sb": "5:85",
+   "sbr": "5:87",
+   "DS_StatusBar": "5:94"
+  }
+ },
+ {
+  "batch": "b01c-ds-tabbar-rebuild",
+  "ops": 29,
+  "ms": 95,
+  "created": {
+   "tb": "5:96",
+   "row": "5:97",
+   "i1": "5:98",
+   "ic1": "5:99",
+   "i2": "5:101",
+   "ic2": "5:102",
+   "i3": "5:104",
+   "ic3": "5:105",
+   "DS_TabBar": "5:108"
+  }
+ },
+ {
+  "batch": "b07-home-shell-score",
+  "ops": 27,
+  "ms": 99,
+  "created": {
+   "pg": "5:110",
+   "pg_sb": "5:111",
+   "pg_nb": "5:120",
+   "ct": "5:123",
+   "pg_tb": "5:124",
+   "hs": "5:136",
+   "hst": "5:137",
+   "hsr": "5:138",
+   "hsc": "5:141"
+  }
+ },
+ {
+  "batch": "b08-home-vitals-build",
+  "ops": 14,
+  "ms": 73,
+  "created": {
+   "hss": "5:144",
+   "vr": "5:147",
+   "h_sc1": "5:148",
+   "h_sc2": "5:153",
+   "h_sc3": "5:158"
+  }
+ },
+ {
+  "batch": "b09-detail-shell-trend",
+  "ops": 18,
+  "ms": 82,
+  "created": {
+   "pg": "5:183",
+   "pg_sb": "5:184",
+   "pg_nb": "5:193",
+   "ct": "5:196",
+   "pg_tb": "5:197",
+   "tc": "5:209",
+   "tch": "5:210",
+   "tcp": "5:211"
+  }
+ },
+ {
+  "batch": "b10-detail-trend-metrics",
+  "ops": 22,
+  "ms": 86,
+  "created": {
+   "tcLine": "5:214",
+   "mr": "5:222",
+   "d_sc1": "5:223",
+   "d_sc2": "5:228",
+   "d_sc3": "5:233"
+  }
+ },
+ {
+  "batch": "b10c-detail-tabbar-active",
+  "ops": 4,
+  "ms": 17,
+  "created": {}
+ },
+ {
+  "batch": "b11-profile-shell-card",
+  "ops": 26,
+  "ms": 80,
+  "created": {
+   "pg": "5:239",
+   "pg_sb": "5:240",
+   "pg_nb": "5:249",
+   "ct": "5:252",
+   "pg_tb": "5:253",
+   "pc": "5:265",
+   "pav": "5:266",
+   "pcol": "5:269",
+   "pch": "5:271"
+  }
+ },
+ {
+  "batch": "b12-profile-chip-records",
+  "ops": 27,
+  "ms": 77,
+  "created": {
+   "c1": "5:272",
+   "rc": "5:274",
+   "rcR1": "5:275",
+   "rcR2": "5:278"
+  }
+ },
+ {
+  "batch": "b13-profile-records2-settings",
+  "ops": 27,
+  "ms": 83,
+  "created": {
+   "rcR3": "5:281",
+   "rcR4": "5:284",
+   "st": "5:287",
+   "stR1": "5:288"
+  }
+ },
+ {
+  "batch": "b14b-profile-tabbar-active",
+  "ops": 4,
+  "ms": 41,
+  "created": {}
+ }
+]

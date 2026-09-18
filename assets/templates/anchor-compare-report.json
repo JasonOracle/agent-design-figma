@@ -1,0 +1,154 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Anchor Compare Report",
+  "description": "F3② 锚点产品并置比对的机械证据报告：由 tools/anchor-compare.mjs 产出（同 Schema 双向：工具 --json 输出即本结构）。这是**可回放的证据，不是相似度评分**——「像不像锚点」的结论属读图项 R11（references/read-image-checklist.md）+ 人。装置协议正本 = references/anchor-compare.md。",
+  "type": "object",
+  "required": ["_meta", "provenance", "anchor", "canvas", "colorDelta", "familyDelta", "sizeDelta"],
+  "properties": {
+    "_meta": {
+      "type": "object",
+      "required": ["tool", "note"],
+      "properties": {
+        "tool": {
+          "type": "string",
+          "description": "产出本报告的工具路径（固定 tools/anchor-compare.mjs）"
+        },
+        "note": {
+          "type": "string",
+          "description": "必须声明「机械证据，非相似度评分」与色距口径（RGB 欧氏 = 粗糙代理，非感知色差）——H3 零目测评分的防线写进格式里"
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "description": "出处四件套——缺任何一件，比对结论都无法回放到具体快照（工具 J1/J2/J5 已挡）",
+      "required": ["source", "license", "snapshotSha256", "fetchedAt"],
+      "properties": {
+        "source": {
+          "type": "string",
+          "pattern": "^https?://",
+          "description": "锚点快照的来源 URL（如 nexu-io/open-design 的 design-systems/<brand>/DESIGN.md 原始地址）"
+        },
+        "license": {
+          "type": "string",
+          "minLength": 1,
+          "description": "锚点素材的许可证（该仓库主体为 Apache-2.0；个别子目录另有 LICENSE）——不记许可证等于不可分发地引用"
+        },
+        "snapshotSha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "description": "快照内容哈希：比对结论回放的根基（同内容 ⇒ 同哈希，变异测试已验稳定）"
+        },
+        "snapshotBytes": { "type": "number" },
+        "fetchedAt": {
+          "type": "string",
+          "description": "取快照的日期（ISO 日期）——锚点仓库会漂，结论只对「当时那份」负责"
+        },
+        "anchorFile": { "type": "string", "description": "快照落盘文件名" }
+      }
+    },
+    "anchor": {
+      "type": "object",
+      "description": "从锚点 DESIGN.md **声明**的 token（工具 J3 保证非空：色 ≥3 且字族 ≥1）",
+      "required": ["colorCount", "colors", "families", "sizes"],
+      "properties": {
+        "colorCount": { "type": "number" },
+        "colors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["hex"],
+            "properties": {
+              "name": { "type": ["string", "null"], "description": "锚点契约里该色的角色名（如 Brand Indigo）；提不出记 null" },
+              "hex": { "type": "string", "pattern": "^#[0-9a-f]{6}$" }
+            }
+          }
+        },
+        "families": { "type": "array", "items": { "type": "string" } },
+        "sizes": { "type": "array", "items": { "type": "number" } }
+      }
+    },
+    "canvas": {
+      "type": "object",
+      "description": "从画布回读**实际使用**的 token（工具 J4 保证色与字族均非空）",
+      "required": ["nodeTotal", "colorNodes", "colorCount", "colors", "families", "sizes"],
+      "properties": {
+        "nodeTotal": { "type": "number" },
+        "colorNodes": { "type": "number", "description": "带非空 fills/strokes 的节点数——画布色覆盖率的分母参照" },
+        "colorCount": { "type": "number" },
+        "colors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["hex", "count", "exact", "nearest"],
+            "properties": {
+              "hex": { "type": "string" },
+              "count": { "type": "number", "description": "该色出现次数（fills+strokes 的 paint 数）" },
+              "exact": { "type": "boolean", "description": "是否精确命中锚点色板" },
+              "nearest": {
+                "type": "object",
+                "required": ["hex", "distance"],
+                "properties": {
+                  "name": { "type": ["string", "null"] },
+                  "hex": { "type": "string" },
+                  "distance": { "type": "number", "description": "到最近锚点色的 RGB 欧氏距离（0-441.7，粗糙代理）" }
+                }
+              }
+            }
+          }
+        },
+        "families": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["value", "count"],
+            "properties": { "value": { "type": "string" }, "count": { "type": "number" } }
+          }
+        },
+        "sizes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["value", "count"],
+            "properties": { "value": { "type": "number" }, "count": { "type": "number" } }
+          }
+        }
+      }
+    },
+    "colorDelta": {
+      "type": "object",
+      "required": ["exactCount", "exactHexes", "offPaletteCount", "maxDistance", "meanDistance"],
+      "properties": {
+        "exactCount": { "type": "number" },
+        "exactHexes": { "type": "array", "items": { "type": "string" } },
+        "offPaletteCount": { "type": "number" },
+        "maxDistance": { "type": "number" },
+        "meanDistance": { "type": "number", "description": "全部画布色（含精确命中）的均距" }
+      }
+    },
+    "familyDelta": {
+      "type": "object",
+      "required": ["matched", "unmatched", "anchorOnly"],
+      "properties": {
+        "matched": { "type": "array", "items": { "type": "string" } },
+        "unmatched": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["family", "count"],
+            "properties": { "family": { "type": "string" }, "count": { "type": "number" } }
+          }
+        },
+        "anchorOnly": { "type": "array", "items": { "type": "string" }, "description": "锚点声明了、画布没用到的字族" }
+      }
+    },
+    "sizeDelta": {
+      "type": "object",
+      "required": ["matched", "unmatched"],
+      "properties": {
+        "matched": { "type": "array", "items": { "type": "number" } },
+        "unmatched": { "type": "array", "items": { "type": "number" } }
+      }
+    }
+  }
+}

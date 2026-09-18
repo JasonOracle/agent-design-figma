@@ -1,0 +1,86 @@
+{
+  "_source": "当次验证 L1 产物 —— 需求 Prompt：「AI 智能健康管理 App，移动端 iPhone 16 Pro 竖屏，高保真，参考 Apple Health / Linear / Arc Browser / 现代 AI App」。规则命中记录见各 source 注记，全部判断可追溯到 design-intelligence.md 规则表",
+  "product": {
+    "name": "AI 智能健康管理",
+    "industry": "医疗",
+    "targetUser": "关注自身健康的个人用户，日常查看体征指标（心率/睡眠/步数）并依据 AI 建议调整生活方式",
+    "platform": "mobile-app"
+  },
+  "productType": "consumer-health / self-care 移动应用（C 端健康管理，非临床）",
+  "designDirection": {
+    "style": "premium-saas",
+    "styleRouteBasis": "「现代 AI App」命中关键词「现代」（§① 优先级 3）；参考清单 Apple Health / Linear / Arc Browser 与 preset reference（Apple/Stripe/Linear/Vercel）自洽",
+    "keywords": ["现代", "克制", "医疗信任感", "数据可视化", "AI 智能感"],
+    "reference": ["Apple Health", "Linear", "Arc Browser"],
+    "avoid": ["渐变", "玻璃拟态", "重投影", "拟物", "密集表格", "情绪化插画", "3D", "霓虹"]
+  },
+  "informationArchitecture": {
+    "pages": [
+      {
+        "name": "首页",
+        "purpose": "回答「我现在健康状态如何」：AI Health Assistant 标题 + 健康评分卡 + 心率/睡眠/步数 + 今日建议",
+        "layout": "tab-flow + health-home"
+      },
+      {
+        "name": "数据详情",
+        "purpose": "回答「这段时间我的指标趋势如何、AI 怎么解读」：周趋势折线 + 健康指标卡 + AI 分析建议",
+        "layout": "tab-flow + detail-chart"
+      },
+      {
+        "name": "个人中心",
+        "purpose": "回答「我是谁、我的健康档案与设置」：用户 Profile + 健康档案 + 设置入口",
+        "layout": "tab-flow + profile"
+      }
+    ],
+    "layoutPattern": "tab-flow",
+    "contentDensity": "balanced"
+  },
+  "visualSystem": {
+    "colorMood": "清爽医疗信任感，AI 环节以品牌青点缀",
+    "primaryColor": "#0FB5AE",
+    "primaryColorBasis": "行业映射表医疗行（「健康」命中）→ #0FB5AE（§③）",
+    "accentColor": "#00B578",
+    "accentColorBasis": "行业映射表医疗行辅助色（§③ visualSystem 修正）",
+    "background": "#FAFAFA",
+    "typography": "Inter / PingFang SC（构建环境实测回退 Noto Sans SC）/ 字阶 26-32-16-14-13-12-11，标题 medium",
+    "spacing": "8pt 网格，卡片间距 12-16px",
+    "radius": "6/8/10（preset 4/6/8 + 医疗修正圆角+2，§③）"
+  },
+  "colorSource": {
+    "rule": "L1 只选不造（§⑤.4）：全部色值来自 Style Preset 或行业映射表，无新增色",
+    "primary": "industry-mapping:医疗 → #0FB5AE",
+    "accent": "industry-mapping:医疗辅助色 → #00B578（L2 映射至 status.success）",
+    "rest": "preset:premium-saas.visualSystem（background/surface/textColors/stroke/chartColors）"
+  },
+  "componentExpectation": [
+    { "name": "TabBar",           "type": "navigation",   "priority": "P0", "origin": "用户显式（底部 TabBar）+ §⑥.2 平台必需" },
+    { "name": "NavBar",           "type": "navigation",   "priority": "P0", "origin": "preset coreComponents（platform 适配保留）" },
+    { "name": "Button",           "type": "form",         "priority": "P0", "origin": "preset coreComponents" },
+    { "name": "Input",            "type": "form",         "priority": "P0", "origin": "preset coreComponents" },
+    { "name": "StatCard",         "type": "data-display", "priority": "P0", "origin": "preset coreComponents（心率/睡眠/步数三卡复用）" },
+    { "name": "HealthScoreCard",  "type": "data-display", "priority": "P0", "origin": "用户显式（健康评分 Card）" },
+    { "name": "TrendChart",       "type": "chart",        "priority": "P0", "origin": "用户显式（周趋势折线图）" },
+    { "name": "AdviceCard",       "type": "feedback",     "priority": "P0", "origin": "用户显式（今日建议模块 / AI 分析建议）" },
+    { "name": "VitalChart",       "type": "chart",        "priority": "P1", "origin": "行业映射表医疗行（§③）" },
+    { "name": "ProfileCard",      "type": "data-display", "priority": "P1", "origin": "用户显式（用户 Profile）" },
+    { "name": "HealthRecordList", "type": "data-display", "priority": "P1", "origin": "用户显式（健康档案）" },
+    { "name": "SettingsList",     "type": "data-display", "priority": "P1", "origin": "用户显式（设置入口）" },
+    { "name": "LoadingOverlay",   "type": "feedback",     "priority": "P0", "origin": "绿地 AI 应用基础件（AI 分析等待态）" }
+  ],
+  "typographySource": "preset:premium-saas.visualSystem.typography（§⑤.3 premium-saas = Inter 优先）",
+  "constraints": {
+    "device": "iPhone 16 Pro 竖屏 402×874pt（用户显式指定，覆盖 mobile 缺省 375×812）",
+    "colorRule": "禁止随机创造颜色：一切色值出自 preset / 行业映射 / 白名单派生规则",
+    "componentRule": "禁止随机创造组件：组件仅来自 preset coreComponents + 行业映射 + 用户显式提及",
+    "iconRule": "禁止第三方 icon：仅 inline SVG / native vector / 简单几何（设计智能规则 §3.3）",
+    "tokenRule": "脱离 Design Token 的任何尺寸/颜色/字号 = 违规，QA4 审计 unknownColors 必须 = []",
+    "buildRule": "batch ≤30 ops，WRITE→READBACK，READ before WRITE，禁止依赖历史 node id"
+  },
+  "_assumptions": [
+    "product.targetUser 为按行业惯例推导的画像，用户未提供原始用户研究",
+    "行业映射表追加组件 PatientCard/AppointmentPicker/ReportView 与「个人健康自管」场景不符（无患者/预约/报告单实体），按场景适配排除（同 §⑥.2 例外机制）",
+    "frameBaseline 采用用户显式指定的 402×874pt（iPhone 16 Pro），超出现有 LD-5 缺省 375×812，待 L2 声明",
+    "页面数据为演示占位值（如心率 72bpm、评分 86），用户未提供真实数据",
+    "字体：preset 声明 Inter/PingFang SC；Figma 桌面构建环境 CJK 实测可用字体为 Noto Sans SC（Stage 3 探测结论），L2 token 以 Noto Sans SC 落地"
+  ]
+}

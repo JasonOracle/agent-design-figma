@@ -1,0 +1,434 @@
+{
+  "project": "企业考试管理平台",
+  "version": "1.0.0",
+  "source": {
+    "brief": "assets/examples/example-saas.json",
+    "dsSpec": "assets/examples/example-saas.dsspec.json",
+    "figmaFileKey": "EXAMPLE-FILE-KEY",
+    "rootNodeIds": [
+      "19:330",
+      "19:192"
+    ]
+  },
+  "exports": {
+    "png": [
+      {
+        "nodeId": "19:330",
+        "name": "Reference Recreation / 企业考试管理平台",
+        "scale": 1,
+        "path": "assets/examples/export/files/saas-dashboard-baseline.png",
+        "bytes": 480000,
+        "existsCheck": true,
+        "note": "Stage 7 像素回归基准图（1920×1030）"
+      }
+    ],
+    "svg": [
+      {
+        "nodeId": "19:192",
+        "name": "Design System / 企业考试管理平台图标组",
+        "path": "assets/examples/export/files/saas-icons.svg",
+        "scope": "icon",
+        "existsCheck": false,
+        "note": "图标 SVG 由当次构建生成，未随示例打包（existsCheck=false，展示 live-build 的 svg 导出条目形态）"
+      }
+    ],
+    "figmaJson": {
+      "path": "assets/examples/export/files/saas-figma-tree.json",
+      "nodeCount": 207,
+      "contents": [
+        "node-tree",
+        "geometry",
+        "auto-layout",
+        "component-instance"
+      ],
+      "note": "Stage 5 真实 tree dump（25 VECTOR / 49 auto-layout / 14 instances），token-reference 切片由 dsSpec 承担"
+    },
+    "designSpec": {
+      "brief": "assets/examples/example-saas.json",
+      "dsSpec": "assets/examples/example-saas.dsspec.json",
+      "buildPlan": null,
+      "criticReport": "assets/examples/example-saas/critic-report.json"
+    }
+  },
+  "mapping": {
+    "components": [
+      {
+        "figmaComponent": "DS/Navigation/TopBar",
+        "dsName": "TopBar",
+        "class": "A-direct",
+        "frontendComponent": "DsTopBar",
+        "props": [
+          "title <- 文本覆写槽",
+          "tags <- TagsBar 路由驱动 tab"
+        ],
+        "variants": [
+          "default"
+        ]
+      },
+      {
+        "figmaComponent": "DS/Navigation/Sidebar",
+        "dsName": "Sidebar",
+        "class": "A-direct",
+        "frontendComponent": "DsSidebar",
+        "props": [
+          "items <- 6 槽位路由绑定（Stage 9.0 IA）",
+          "collapsed <- 折叠组"
+        ],
+        "variants": [
+          "default",
+          "collapsed"
+        ]
+      },
+      {
+        "figmaComponent": "DS/Navigation/Breadcrumb",
+        "dsName": "Breadcrumb",
+        "class": "A-direct",
+        "frontendComponent": "DsBreadcrumb",
+        "props": [
+          "items <- 面包屑数组"
+        ],
+        "variants": [
+          "default"
+        ]
+      },
+      {
+        "figmaComponent": "DS/Form/Button/*",
+        "dsName": "Button",
+        "class": "A-direct",
+        "frontendComponent": "DsButton",
+        "props": [
+          "variant: primary|secondary|disabled|loading <- 四态组件",
+          "size: md(30) <- 几何契约 h30"
+        ],
+        "variants": [
+          "primary",
+          "secondary",
+          "disabled",
+          "loading"
+        ]
+      },
+      {
+        "figmaComponent": "DS/Form/Input/*",
+        "dsName": "Input",
+        "class": "A-direct",
+        "frontendComponent": "DsInput",
+        "props": [
+          "status: default|focus|error|disabled <- 四态组件",
+          "size: md(30) <- 几何契约 h30"
+        ],
+        "variants": [
+          "default",
+          "focus",
+          "error",
+          "disabled"
+        ]
+      },
+      {
+        "figmaComponent": "DS/Form/Select",
+        "dsName": "Select",
+        "class": "A-direct",
+        "frontendComponent": "DsSelect",
+        "props": [
+          "options <- 下拉数据",
+          "keyboard <- ARIA combobox 路线（Stage 9.1 §9.1）"
+        ],
+        "variants": [
+          "default"
+        ]
+      },
+      {
+        "figmaComponent": "DS/DataDisplay/Table",
+        "dsName": "Table",
+        "class": "B-composite",
+        "frontendComponent": "DsTable",
+        "props": [
+          "columns <- Header(40) 列配置",
+          "rows <- TableRow(44)×N 实例",
+          "pagination <- Pagination 实例",
+          "selectedRow <- #F0F1FE 组件级派生底色"
+        ],
+        "variants": [
+          "default"
+        ],
+        "notes": "6 列固定组件；8 列扩展页走页内本地 Frame（Stage 9.2-B known limitation）"
+      },
+      {
+        "figmaComponent": "DS/Navigation/Pagination",
+        "dsName": "Pagination",
+        "class": "A-direct",
+        "frontendComponent": "DsPagination",
+        "props": [
+          "total/pageSize/current"
+        ],
+        "variants": [
+          "default"
+        ]
+      },
+      {
+        "figmaComponent": "DS/DataDisplay/Card",
+        "dsName": "Card",
+        "class": "A-direct",
+        "frontendComponent": "DsCard",
+        "props": [
+          "title",
+          "slot <- 内容槽"
+        ],
+        "variants": [
+          "default"
+        ]
+      },
+      {
+        "figmaComponent": "DS/DataDisplay/Badge",
+        "dsName": "Badge",
+        "class": "A-direct",
+        "frontendComponent": "DsBadge",
+        "props": [
+          "type: success|warning|danger|info <- 语义色映射"
+        ],
+        "variants": [
+          "success",
+          "warning",
+          "danger",
+          "info"
+        ]
+      },
+      {
+        "figmaComponent": "Local/ExamList/StateSpecimen",
+        "dsName": "State",
+        "class": "B-composite",
+        "frontendComponent": "DsStatePanel",
+        "props": [
+          "type: empty|error|loading <- 三态标本",
+          "action <- 重试按钮实例"
+        ],
+        "variants": [
+          "empty",
+          "error",
+          "loading"
+        ]
+      },
+      {
+        "figmaComponent": "DS/DataDisplay/ScoreBadge",
+        "dsName": "ScoreBadge",
+        "class": "A-direct",
+        "frontendComponent": "DsScoreBadge",
+        "props": [
+          "score <- 数值",
+          "threshold <- pass/fail 语义色"
+        ],
+        "variants": [
+          "pass",
+          "fail"
+        ]
+      },
+      {
+        "figmaComponent": "Local/ExamList/ExamCard",
+        "dsName": "ExamCard",
+        "class": "A-direct",
+        "frontendComponent": "DsExamCard",
+        "props": [
+          "exam <- U-/E- 前缀实体（契约与后端一致）"
+        ],
+        "variants": [
+          "default"
+        ]
+      },
+      {
+        "figmaComponent": "Local/Dashboard/KpiCard",
+        "dsName": "KpiCard",
+        "class": "A-direct",
+        "frontendComponent": "DsKpiCard",
+        "props": [
+          "label/value/trend <- 三槽（trend 含环比箭头）",
+          "height <- 300 固定（Stage 7 R1 教训）"
+        ],
+        "variants": [
+          "default"
+        ]
+      },
+      {
+        "figmaComponent": "Local/Dashboard/TrendChart",
+        "dsName": "TrendChart",
+        "class": "B-composite",
+        "frontendComponent": "DsLineChart",
+        "props": [
+          "series <- 双序列 12 月（stage6 geometry.js 同源）",
+          "hover <- 虚线+药丸+tooltip 组合规则",
+          "grid <- 网格线向量对齐柱图（Stage 7 FIGMA_SOURCE 发现）"
+        ],
+        "variants": [
+          "default",
+          "empty"
+        ],
+        "notes": "贝塞尔/扇形几何由 geometry.js 生成，禁手写 path"
+      }
+    ],
+    "layoutRules": [
+      "auto-layout vertical + counterAxisAlignItems MIN → flex flex-col items-start",
+      "Sidebar 180 固定 + Content FILL → w-[180px] + flex-1",
+      "Header 40 / TableRow 44 / Button-Input 30 → h-10/h-11/h-[30px]（几何契约）",
+      "实例文本覆写槽 → props/slot（icon/value/label 命名直接沿用 readback 命名）"
+    ]
+  },
+  "tokens": {
+    "color": [
+      {
+        "dsToken": "tokens.color.brand.primary",
+        "value": "#5A5CF0",
+        "cssVariable": "--ds-color-brand-primary",
+        "source": "preset:enterprise-dashboard.visualSystem.primaryColor"
+      },
+      {
+        "dsToken": "tokens.color.brand.hover",
+        "value": "#6E70F2",
+        "cssVariable": "--ds-color-brand-hover",
+        "source": "derived:RD-1@tokens.color.brand.primary"
+      },
+      {
+        "dsToken": "tokens.color.brand.active",
+        "value": "#5355DD",
+        "cssVariable": "--ds-color-brand-active",
+        "source": "derived:RD-2@tokens.color.brand.primary"
+      },
+      {
+        "dsToken": "tokens.color.text.primary",
+        "value": "#303133",
+        "cssVariable": "--ds-color-text-primary",
+        "source": "preset:enterprise-dashboard.visualSystem.textColors"
+      },
+      {
+        "dsToken": "tokens.color.text.regular",
+        "value": "#606266",
+        "cssVariable": "--ds-color-text-regular",
+        "source": "preset:enterprise-dashboard.visualSystem.textColors"
+      },
+      {
+        "dsToken": "tokens.color.text.secondary",
+        "value": "#909399",
+        "cssVariable": "--ds-color-text-secondary",
+        "source": "preset:enterprise-dashboard.visualSystem.textColors"
+      },
+      {
+        "dsToken": "tokens.color.background.page",
+        "value": "#F2F3F5",
+        "cssVariable": "--ds-color-background-page",
+        "source": "preset:enterprise-dashboard.visualSystem.background"
+      },
+      {
+        "dsToken": "tokens.color.surface.card",
+        "value": "#FFFFFF",
+        "cssVariable": "--ds-color-surface-card",
+        "source": "preset:enterprise-dashboard.visualSystem.surface"
+      },
+      {
+        "dsToken": "tokens.color.border.default",
+        "value": "#E4E7ED",
+        "cssVariable": "--ds-color-border-default",
+        "source": "preset:enterprise-dashboard.visualSystem.stroke"
+      },
+      {
+        "dsToken": "tokens.color.border.divider",
+        "value": "#F2F3F6",
+        "cssVariable": "--ds-color-border-divider",
+        "source": "derived:RD-3@tokens.color.border.default"
+      },
+      {
+        "dsToken": "tokens.color.status.success",
+        "value": "#91CC75",
+        "cssVariable": "--ds-color-status-success",
+        "source": "rule:ST-1@preset.chartColors"
+      },
+      {
+        "dsToken": "tokens.color.status.danger",
+        "value": "#EE6666",
+        "cssVariable": "--ds-color-status-danger",
+        "source": "rule:ST-1@preset.chartColors"
+      }
+    ],
+    "typography": [
+      {
+        "dsToken": "tokens.typography.display",
+        "cssVariable": "--ds-typography-display",
+        "source": "preset:enterprise-dashboard.visualSystem.typography(26-32)"
+      },
+      {
+        "dsToken": "tokens.typography.heading",
+        "cssVariable": "--ds-typography-heading",
+        "source": "preset:enterprise-dashboard.visualSystem.typography(16-24)"
+      },
+      {
+        "dsToken": "tokens.typography.body",
+        "value": "14/20/400",
+        "cssVariable": "--ds-typography-body",
+        "source": "preset:enterprise-dashboard.visualSystem.typography(14-20)"
+      },
+      {
+        "dsToken": "tokens.typography.caption",
+        "cssVariable": "--ds-typography-caption",
+        "source": "preset:enterprise-dashboard.visualSystem.typography(12-18)"
+      },
+      {
+        "dsToken": "tokens.typography.number",
+        "cssVariable": "--ds-typography-number",
+        "source": "rule:TY-1@preset.typography(数字用 Inter 等宽，取字阶 16-24)"
+      }
+    ],
+    "spacing": [
+      {
+        "dsToken": "tokens.spacing.base",
+        "value": 4,
+        "cssVariable": "--ds-spacing-base",
+        "source": "preset:enterprise-dashboard.visualSystem.spacing"
+      },
+      {
+        "dsToken": "tokens.spacing.scale",
+        "value": "4/8/12/16/24/32",
+        "cssVariable": "--ds-spacing-scale",
+        "source": "preset:enterprise-dashboard.visualSystem.spacing"
+      },
+      {
+        "dsToken": "tokens.spacing.cardPadding",
+        "value": 16,
+        "cssVariable": "--ds-spacing-card-padding",
+        "source": "preset:enterprise-dashboard.visualSystem.spacing"
+      }
+    ],
+    "radius": [
+      {
+        "dsToken": "tokens.radius.sm",
+        "value": 2,
+        "cssVariable": "--ds-radius-sm",
+        "source": "preset:enterprise-dashboard.visualSystem.radius"
+      },
+      {
+        "dsToken": "tokens.radius.md",
+        "value": 4,
+        "cssVariable": "--ds-radius-md",
+        "source": "preset:enterprise-dashboard.geometry.cardRadius"
+      },
+      {
+        "dsToken": "tokens.radius.lg",
+        "value": 6,
+        "cssVariable": "--ds-radius-lg",
+        "source": "preset:enterprise-dashboard.visualSystem.radius"
+      }
+    ],
+    "shadow": [
+      {
+        "dsToken": "tokens.shadow.card",
+        "cssVariable": "--ds-shadow-card",
+        "source": "preset:enterprise-dashboard.visualSystem.shadow"
+      }
+    ]
+  },
+  "audit": {
+    "qaPassed": "Stage 5-9 全阶段 QA：几何/Token/交互 24 PASS 0 FAIL（Stage 8）+ 像素回归 5.691% / SSIM 0.9037（Stage 7）",
+    "criticScore": 8.7,
+    "freezeStatus": "passed"
+  },
+  "_meta": {
+    "generatedAt": "2026-09-15T22:50:00+08:00",
+    "status": "live-build",
+    "note": "案例：Figma Dashboard(19:330) → PNG 基准 → DS Mapping → Vue 组件（真实代码拆分的 17→10 SFC 同源）"
+  }
+}
