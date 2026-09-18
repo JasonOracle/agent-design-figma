@@ -1,0 +1,56 @@
+{
+  "_source": "few-shot 示例 1/3 —— 源自实测企业后台项目（企业考试管理后台），是三套示例中唯一有完整实现与 QA 数据支撑的样本",
+  "product": {
+    "name": "企业考试管理平台",
+    "industry": "教育",
+    "targetUser": "学校教务管理员与教师，日常管理考试、题库与学生成绩",
+    "platform": "web-admin"
+  },
+  "designDirection": {
+    "style": "enterprise-dashboard",
+    "keywords": ["效率", "可预测结构", "表格优先", "克制蓝紫", "状态语义色"],
+    "reference": ["Element Plus", "Ant Design Pro"],
+    "avoid": ["营销式大图", "超圆角(>8px)", "情绪化插画", "渐变", "玻璃拟态", "大阴影", "3D", "霓虹"]
+  },
+  "informationArchitecture": {
+    "pages": [
+      { "name": "登录页", "purpose": "回答「我是谁」，凭据进入工作台", "layout": "centered-form" },
+      { "name": "工作台 Dashboard", "purpose": "回答「现在整体状况如何」：KPI、趋势图、待办", "layout": "sidebar-content + grid-kpi" },
+      { "name": "用户管理", "purpose": "回答「账号有哪些、状态如何」，支持搜索筛选分页", "layout": "sidebar-content + filter-table" },
+      { "name": "考试管理", "purpose": "回答「考试有哪些、进行到哪」，8 列数据表", "layout": "sidebar-content + filter-table" },
+      { "name": "考试详情", "purpose": "回答「这场考试的详情与成绩」：信息卡 + 信息/成绩双 Tab", "layout": "sidebar-content + tabs" },
+      { "name": "系统设置", "purpose": "回答「平台参数怎么配」：基础/AI/通知三组设置", "layout": "sidebar-content + form-cards" }
+    ],
+    "layoutPattern": "sidebar-content",
+    "contentDensity": "dense"
+  },
+  "visualSystem": {
+    "colorMood": "冷静专业蓝紫，中性灰阶承载信息层级",
+    "primaryColor": "#5A5CF0",
+    "background": "#F2F3F5",
+    "typography": "系统栈（PingFang SC + Inter 数字）/ 26-32-16-24-14-20-13-20-12-18-11-16",
+    "spacing": "8pt 网格 (4/8/12/16/24/32)",
+    "radius": "2/4/6"
+  },
+  "componentExpectation": [
+    { "name": "TopBar", "type": "navigation", "priority": "P0" },
+    { "name": "Sidebar", "type": "navigation", "priority": "P0" },
+    { "name": "Breadcrumb", "type": "navigation", "priority": "P0" },
+    { "name": "Button", "type": "form", "priority": "P0" },
+    { "name": "Input", "type": "form", "priority": "P0" },
+    { "name": "Select", "type": "form", "priority": "P0" },
+    { "name": "Table", "type": "data-display", "priority": "P0" },
+    { "name": "Pagination", "type": "navigation", "priority": "P0" },
+    { "name": "Card", "type": "layout", "priority": "P0" },
+    { "name": "Badge", "type": "feedback", "priority": "P0" },
+    { "name": "EmptyState", "type": "feedback", "priority": "P0" },
+    { "name": "ErrorState", "type": "feedback", "priority": "P0" },
+    { "name": "LoadingState", "type": "feedback", "priority": "P0" },
+    { "name": "ExamCard", "type": "data-display", "priority": "P1" },
+    { "name": "ScoreBadge", "type": "feedback", "priority": "P1" },
+    { "name": "CourseTable", "type": "data-display", "priority": "P2" },
+    { "name": "KpiCard", "type": "data-display", "priority": "P1" },
+    { "name": "TrendChart", "type": "chart", "priority": "P1" }
+  ],
+  "_assumptions": []
+}

@@ -1,0 +1,446 @@
+{
+  "project": "AI 智能健康管理",
+  "version": "1.0.0",
+  "source": {
+    "brief": "assets/examples/export/files/healthcare-design-brief.json",
+    "dsSpec": "assets/examples/export/files/healthcare-design-system-spec.json",
+    "figmaFileKey": "EXAMPLE-FILE-KEY",
+    "rootNodeIds": [
+      "5:110",
+      "5:183",
+      "5:239"
+    ]
+  },
+  "exports": {
+    "png": [
+      {
+        "nodeId": "5:110",
+        "name": "AI Health / Home (402x874)",
+        "scale": 2,
+        "path": "assets/examples/export/files/home@2x.png",
+        "bytes": 100295,
+        "existsCheck": true
+      },
+      {
+        "nodeId": "5:183",
+        "name": "AI Health / Detail (402x874)",
+        "scale": 2,
+        "path": "assets/examples/export/files/detail@2x.png",
+        "bytes": 95324,
+        "existsCheck": true
+      },
+      {
+        "nodeId": "5:239",
+        "name": "AI Health / Profile (402x874)",
+        "scale": 2,
+        "path": "assets/examples/export/files/profile@2x.png",
+        "bytes": 79346,
+        "existsCheck": true
+      }
+    ],
+    "svg": [
+      {
+        "nodeId": "5:110",
+        "name": "AI Health / Home",
+        "path": "assets/examples/export/files/home.svg",
+        "bytes": 218025,
+        "scope": "page",
+        "existsCheck": true
+      },
+      {
+        "nodeId": "5:183",
+        "name": "AI Health / Detail",
+        "path": "assets/examples/export/files/detail.svg",
+        "bytes": 166669,
+        "scope": "page",
+        "existsCheck": true
+      },
+      {
+        "nodeId": "5:239",
+        "name": "AI Health / Profile",
+        "path": "assets/examples/export/files/profile.svg",
+        "bytes": 120932,
+        "scope": "page",
+        "existsCheck": true
+      }
+    ],
+    "figmaJson": {
+      "path": null,
+      "nodeCount": 189,
+      "contents": [
+        "node-tree",
+        "geometry",
+        "auto-layout",
+        "component-instance",
+        "token-reference"
+      ],
+      "note": "节点树 JSON 快照待补导（当次构建以 get-node detail:true readback 189 节点完成审计，结构化数据在 qa-report.json）"
+    },
+    "designSpec": {
+      "brief": "assets/examples/export/files/healthcare-design-brief.json",
+      "dsSpec": "assets/examples/export/files/healthcare-design-system-spec.json",
+      "buildPlan": "assets/examples/export/files/healthcare-build-log.json",
+      "criticReport": null
+    }
+  },
+  "mapping": {
+    "components": [
+      {
+        "figmaComponent": "DS/Navigation/TabBar (5:108)",
+        "dsName": "TabBar",
+        "class": "A-direct",
+        "frontendComponent": "DsTabBar",
+        "props": [
+          "items <- 3 Tab（首页/数据/个人中心）",
+          "active <- 激活态（RD 主色）",
+          "height <- 90 + item 56（AC-2）"
+        ],
+        "variants": [
+          "default",
+          "active"
+        ]
+      },
+      {
+        "figmaComponent": "DS/Navigation/NavBar (3:15)",
+        "dsName": "NavBar",
+        "class": "A-direct",
+        "frontendComponent": "DsNavBar",
+        "props": [
+          "title <- 页面标题覆写",
+          "back <- 二级页返回"
+        ],
+        "variants": [
+          "default"
+        ]
+      },
+      {
+        "figmaComponent": "DS/Form/Button/Primary|Secondary|Disabled|Loading (3:32/35/38/42)",
+        "dsName": "Button",
+        "class": "A-direct",
+        "frontendComponent": "DsButton",
+        "props": [
+          "variant: primary|secondary|disabled|loading <- 四态组件",
+          "height <- 44（AC-2 触控红线）"
+        ],
+        "variants": [
+          "primary",
+          "secondary",
+          "disabled",
+          "loading"
+        ]
+      },
+      {
+        "figmaComponent": "DS/Form/Input/Default|Focus|Error|Disabled (3:49/52/55/58)",
+        "dsName": "Input",
+        "class": "A-direct",
+        "frontendComponent": "DsInput",
+        "props": [
+          "status: default|error <- 状态组件",
+          "focus <- 交互态进 CSS :focus"
+        ],
+        "variants": [
+          "default",
+          "focus",
+          "error",
+          "disabled"
+        ]
+      },
+      {
+        "figmaComponent": "DS/DataDisplay/StatCard (3:64)",
+        "dsName": "StatCard",
+        "class": "A-direct",
+        "frontendComponent": "DsStatCard",
+        "props": [
+          "icon <- icon 覆写槽 (3:60)",
+          "value <- value 覆写槽 (3:61)",
+          "label <- label 覆写槽 (3:62)",
+          "spark <- sparkline 槽 (3:63)"
+        ],
+        "variants": [
+          "default"
+        ],
+        "notes": "四槽命名来自构建期 readback，直接映射 props"
+      },
+      {
+        "figmaComponent": "DS/Feedback/LoadingOverlay (3:46)",
+        "dsName": "LoadingOverlay",
+        "class": "A-direct",
+        "frontendComponent": "DsLoadingOverlay",
+        "props": [
+          "visible <- v-if 挂载点"
+        ],
+        "variants": [
+          "default"
+        ]
+      },
+      {
+        "figmaComponent": "Local/Home/HealthScoreCard (5:136)",
+        "dsName": "HealthScoreCard",
+        "class": "B-composite",
+        "frontendComponent": "DsHealthScoreCard",
+        "props": [
+          "score <- 环形评分（ring stroke 主色 6px）",
+          "meta <- hsr/hsc/hss 三指标",
+          "aiRow <- AI 建议行"
+        ],
+        "variants": [
+          "default"
+        ],
+        "notes": "环形 = create-ellipse stroke（fill clear），禁灰色默认盘（真实 Critic Loop 教训）"
+      },
+      {
+        "figmaComponent": "Local/Detail/TrendChart (5:209)",
+        "dsName": "TrendChart",
+        "class": "B-composite",
+        "frontendComponent": "DsTrendChart",
+        "props": [
+          "days <- 7 日标签（日/一…六）",
+          "line <- VECTOR M/L/Q/C/Z 主色折线",
+          "grid <- 档位网格"
+        ],
+        "variants": [
+          "default",
+          "empty"
+        ]
+      },
+      {
+        "figmaComponent": "DS/StatCard 内部 sparkline (3:63)",
+        "dsName": "VitalChart",
+        "class": "B-composite",
+        "frontendComponent": "DsVitalSparkline",
+        "props": [
+          "points <- 迷你趋势点列",
+          "color <- chart series 语义"
+        ],
+        "variants": [
+          "default"
+        ],
+        "notes": "sparkline 活在 StatCard 内部，随实例覆写出现（I<inst>;3:63）"
+      },
+      {
+        "figmaComponent": "Local/Detail/AdviceCard (6:301)",
+        "dsName": "AdviceCard",
+        "class": "A-direct",
+        "frontendComponent": "DsAdviceCard",
+        "props": [
+          "title <- AI 分析标题",
+          "lines <- 建议正文数组"
+        ],
+        "variants": [
+          "default"
+        ]
+      },
+      {
+        "figmaComponent": "Local/Profile/ProfileCard (5:265)",
+        "dsName": "ProfileCard",
+        "class": "B-composite",
+        "frontendComponent": "DsProfileCard",
+        "props": [
+          "avatar <- pav 头像",
+          "meta <- 168px FIXED 宽（Loop3 修复值）",
+          "chips <- 标签组"
+        ],
+        "variants": [
+          "default"
+        ]
+      },
+      {
+        "figmaComponent": "Local/Profile/HealthRecordList (5:274)",
+        "dsName": "HealthRecordList",
+        "class": "B-composite",
+        "frontendComponent": "DsHealthRecordList",
+        "props": [
+          "rows <- rcR1..R4 本地行（44px 触控）"
+        ],
+        "variants": [
+          "default"
+        ]
+      },
+      {
+        "figmaComponent": "Local/Profile/SettingsList (5:287)",
+        "dsName": "SettingsList",
+        "class": "B-composite",
+        "frontendComponent": "DsSettingsList",
+        "props": [
+          "rows <- stR1..R3 + listRow(name,value,chevron)"
+        ],
+        "variants": [
+          "default"
+        ]
+      }
+    ],
+    "layoutRules": [
+      "页壳固定四段：StatusBar 54 / NavBar 44 / content 686 FIXED / TabBar 90 → 402×874 页框 FIXED（禁 HUG）",
+      "set-layout-sizing FILL → flex-1 / w-full（父容器须为 auto-layout）",
+      "content 402×686 FIXED → 主轴 flex-col + 内部区块 FILL",
+      "文本行高 FIXED → leading-[Npx]（Figma 默认自动行高 ≈16px 陷阱）",
+      "移动端可点元素 ≥44×44 → min-w/min-h 契约（AC-2）"
+    ]
+  },
+  "tokens": {
+    "color": [
+      {
+        "dsToken": "tokens.color.brand.primary",
+        "value": "#0FB5AE",
+        "cssVariable": "--ds-color-brand-primary",
+        "source": "brief:visualSystem.primaryColor"
+      },
+      {
+        "dsToken": "tokens.color.brand.hover",
+        "value": "#2CBEB8",
+        "cssVariable": "--ds-color-brand-hover",
+        "source": "derived:RD-1@tokens.color.brand.primary"
+      },
+      {
+        "dsToken": "tokens.color.brand.active",
+        "value": "#0EA7A0",
+        "cssVariable": "--ds-color-brand-active",
+        "source": "derived:RD-2@tokens.color.brand.primary"
+      },
+      {
+        "dsToken": "tokens.color.text.primary",
+        "value": "#111827",
+        "cssVariable": "--ds-color-text-primary",
+        "source": "preset:premium-saas.visualSystem.textColors"
+      },
+      {
+        "dsToken": "tokens.color.text.regular",
+        "value": "#6B7280",
+        "cssVariable": "--ds-color-text-regular",
+        "source": "preset:premium-saas.visualSystem.textColors"
+      },
+      {
+        "dsToken": "tokens.color.text.secondary",
+        "value": "#9CA3AF",
+        "cssVariable": "--ds-color-text-secondary",
+        "source": "preset:premium-saas.visualSystem.textColors"
+      },
+      {
+        "dsToken": "tokens.color.background.page",
+        "value": "#FAFAFA",
+        "cssVariable": "--ds-color-background-page",
+        "source": "preset:premium-saas.visualSystem.background"
+      },
+      {
+        "dsToken": "tokens.color.surface.card",
+        "value": "#FFFFFF",
+        "cssVariable": "--ds-color-surface-card",
+        "source": "preset:premium-saas.visualSystem.surface"
+      },
+      {
+        "dsToken": "tokens.color.border.default",
+        "value": "#E5E7EB",
+        "cssVariable": "--ds-color-border-default",
+        "source": "preset:premium-saas.visualSystem.stroke"
+      },
+      {
+        "dsToken": "tokens.color.border.divider",
+        "value": "#F2F3F5",
+        "cssVariable": "--ds-color-border-divider",
+        "source": "derived:RD-3@tokens.color.border.default"
+      },
+      {
+        "dsToken": "tokens.color.status.success",
+        "value": "#00B578",
+        "cssVariable": "--ds-color-status-success",
+        "source": "rule:industry-mapping(医疗辅助色)"
+      },
+      {
+        "dsToken": "tokens.color.status.danger",
+        "value": "#EF4444",
+        "cssVariable": "--ds-color-status-danger",
+        "source": "rule:ST-1@preset.chartColors"
+      }
+    ],
+    "typography": [
+      {
+        "dsToken": "tokens.typography.display",
+        "cssVariable": "--ds-typography-display",
+        "source": "preset:premium-saas.visualSystem.typography(26-32)"
+      },
+      {
+        "dsToken": "tokens.typography.heading",
+        "cssVariable": "--ds-typography-heading",
+        "source": "preset:premium-saas.visualSystem.typography(16)+rule:TY-2(行高=size+6)"
+      },
+      {
+        "dsToken": "tokens.typography.body",
+        "value": "14/20/400",
+        "cssVariable": "--ds-typography-body",
+        "source": "preset:premium-saas.visualSystem.typography(14)+rule:TY-2"
+      },
+      {
+        "dsToken": "tokens.typography.caption",
+        "cssVariable": "--ds-typography-caption",
+        "source": "preset:premium-saas.visualSystem.typography(13)+rule:TY-2"
+      },
+      {
+        "dsToken": "tokens.typography.number",
+        "cssVariable": "--ds-typography-number",
+        "source": "rule:TY-1(数字等宽语义，字阶取 heading 档)"
+      }
+    ],
+    "spacing": [
+      {
+        "dsToken": "tokens.spacing.base",
+        "value": 4,
+        "cssVariable": "--ds-spacing-base",
+        "source": "preset:premium-saas.visualSystem.spacing"
+      },
+      {
+        "dsToken": "tokens.spacing.scale",
+        "value": "4/8/12/16/24/32",
+        "cssVariable": "--ds-spacing-scale",
+        "source": "preset:premium-saas.visualSystem.spacing"
+      },
+      {
+        "dsToken": "tokens.spacing.cardPadding",
+        "value": 16,
+        "cssVariable": "--ds-spacing-card-padding",
+        "source": "rule:SP-3(移动端卡片 padding 缺省 16)"
+      }
+    ],
+    "radius": [
+      {
+        "dsToken": "tokens.radius.sm",
+        "value": 6,
+        "cssVariable": "--ds-radius-sm",
+        "source": "brief:visualSystem.radius(6/8/10)"
+      },
+      {
+        "dsToken": "tokens.radius.md",
+        "value": 8,
+        "cssVariable": "--ds-radius-md",
+        "source": "brief:visualSystem.radius(6/8/10)"
+      },
+      {
+        "dsToken": "tokens.radius.lg",
+        "value": 10,
+        "cssVariable": "--ds-radius-lg",
+        "source": "brief:visualSystem.radius(6/8/10)"
+      }
+    ],
+    "shadow": [
+      {
+        "dsToken": "tokens.shadow.card",
+        "cssVariable": "--ds-shadow-card",
+        "source": "preset:premium-saas.visualSystem.shadow"
+      },
+      {
+        "dsToken": "tokens.shadow.overlay",
+        "cssVariable": "--ds-shadow-overlay",
+        "source": "preset:premium-saas.visualSystem.shadow"
+      }
+    ]
+  },
+  "audit": {
+    "qaPassed": "当次验证 QA1-QA5：37 PASS / 0 FAIL",
+    "criticScore": 8.7,
+    "freezeStatus": "passed"
+  },
+  "_meta": {
+    "generatedAt": "2026-09-15T22:55:00+08:00",
+    "status": "live-build",
+    "note": "案例：Mobile Frame 402×874 → SVG/PNG @2x（真实导出）→ Vue Mobile Component Mapping（create-local → 页面子组件，generate-core → Ds* 组件）；L4 终审 8.7 见 示例内置 critic-report.json"
+  }
+}

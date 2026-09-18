@@ -1,0 +1,162 @@
+{
+  "_source": "few-shot DS Spec 3/3 —— example-highway.json（河南高速智慧养护决策平台，big-screen）的 brief → DS Spec 转换结果。绿地深色项目；RD-1 派生使用深色主题变体（混合基 = background 而非 #FFFFFF）；caption 按 TY-3 提升至 14px（preset 禁 <14px）",
+  "brand": {
+    "name": "河南高速智慧养护决策平台",
+    "industry": "交通",
+    "stylePresetId": "gov-digital-screen",
+    "contentDensity": "dense"
+  },
+  "platform": "big-screen",
+  "tokens": {
+    "color": {
+      "brand": {
+        "primary": { "value": "#00D4FF", "source": "preset:gov-digital-screen.visualSystem.primaryColor" },
+        "hover":   { "value": "#01BEE8", "source": "derived:RD-1@tokens.color.brand.primary", "note": "深色主题变体：与 background #0A1A3C 88:12 混合" },
+        "active":  { "value": "#00C3EB", "source": "derived:RD-2@tokens.color.brand.primary", "note": "与 #000000 92:8 混合" }
+      },
+      "background": {
+        "page": { "value": "#0A1A3C", "source": "preset:gov-digital-screen.visualSystem.background" }
+      },
+      "surface": {
+        "card": { "value": "#0F2547", "source": "preset:gov-digital-screen.visualSystem.surface" }
+      },
+      "text": {
+        "primary":     { "value": "#E6F1FF", "source": "preset:gov-digital-screen.visualSystem.textColors[0]" },
+        "regular":     { "value": "#8FB3D9", "source": "preset:gov-digital-screen.visualSystem.textColors[1]" },
+        "secondary":   { "value": "#5A7CA6", "source": "preset:gov-digital-screen.visualSystem.textColors[2]" },
+        "placeholder": { "value": "#5A7CA6", "source": "rule:TY-4(大屏无第四灰阶，placeholder 复用 textColors[2])" }
+      },
+      "border": {
+        "default": { "value": "#1E3A5F", "source": "preset:gov-digital-screen.visualSystem.stroke" },
+        "divider": { "value": "#173053", "source": "derived:RD-3@tokens.color.border.default", "note": "与 surface #0F2547 50:50 混合（RD-3 深色变体：混合基取 surface 而非 #FFFFFF）" }
+      },
+      "status": {
+        "success": { "value": "#2EE6A6", "source": "rule:ST-1@preset.chartColors(绿系)" },
+        "warning": { "value": "#FFB547", "source": "rule:ST-1@preset.chartColors(橙系)" },
+        "danger":  { "value": "#FF5C5C", "source": "rule:ST-1@preset.chartColors(红系)" },
+        "info":    { "value": "#3D7EFF", "source": "rule:ST-1@preset.chartColors(蓝系)" }
+      },
+      "chart": {
+        "series1": { "value": "#00D4FF", "source": "preset:gov-digital-screen.visualSystem.chartColors[0]" },
+        "series2": { "value": "#3D7EFF", "source": "preset:gov-digital-screen.visualSystem.chartColors[1]" },
+        "series3": { "value": "#2EE6A6", "source": "preset:gov-digital-screen.visualSystem.chartColors[2]" },
+        "series4": { "value": "#FFB547", "source": "preset:gov-digital-screen.visualSystem.chartColors[3]" },
+        "series5": { "value": "#FF5C5C", "source": "preset:gov-digital-screen.visualSystem.chartColors[4]" }
+      }
+    },
+    "typography": {
+      "display": { "fontFamily": "DIN Alternate / 科技数字字体", "size": 26, "lineHeight": 34, "weight": 700, "source": "preset:gov-digital-screen.visualSystem.typography+rule:TY-2" },
+      "heading": { "fontFamily": "PingFang SC / Microsoft YaHei", "size": 20, "lineHeight": 28, "weight": 500, "source": "rule:TY-3(preset 数字强调档 20)+rule:TY-2" },
+      "body":    { "fontFamily": "PingFang SC / Microsoft YaHei", "size": 14, "lineHeight": 20, "weight": 400, "source": "preset:gov-digital-screen.visualSystem.typography(最小 14px 红线)+rule:TY-2" },
+      "caption": { "fontFamily": "PingFang SC / Microsoft YaHei", "size": 14, "lineHeight": 20, "weight": 400, "source": "rule:TY-3(preset 禁 <14px，caption 从常规 12 提升至 14)" },
+      "number":  { "fontFamily": "DIN Alternate", "size": 22, "lineHeight": 30, "weight": 700, "fontStyle": "tabular-nums", "source": "preset:gov-digital-screen.visualSystem.typography(数字 20-26 强调，取 22)+rule:TY-2" }
+    },
+    "spacing": {
+      "base":        { "value": 8, "source": "preset:gov-digital-screen.visualSystem.spacing(8pt 网格)" },
+      "scale":       { "value": "8/16/24", "source": "preset:gov-digital-screen.visualSystem.spacing(面板间距 16-24)" },
+      "cardPadding": { "value": 16, "source": "preset:gov-digital-screen.visualSystem.spacing(面板内 padding 16)" }
+    },
+    "radius": {
+      "sm": { "value": 2, "source": "preset:gov-digital-screen.visualSystem.radius(2/4)" },
+      "md": { "value": 4, "source": "preset:gov-digital-screen.visualSystem.radius(2/4)" }
+    },
+    "shadow": {
+      "glow": { "value": "0 0 8px rgba(0,212,255,0.6)", "type": "glow", "usage": "仅限 GlowMetric 关键指标与 MapPanel 热区；数据即装饰，禁止扩散到普通卡片", "source": "preset:gov-digital-screen.visualSystem.shadow" }
+    }
+  },
+  "components": [
+    { "name": "TitleBar",     "briefRefs": ["TitleBar"],     "category": "navigation",   "priority": "P0", "decision": "generate-core", "figmaNaming": "DS/Navigation/TitleBar",     "basis": "绿地项目；preset coreComponents P0 命中，三屏共用，命中 CD-2b/CD-1", "states": ["default"] },
+    { "name": "KpiTile",      "briefRefs": ["KpiTile"],      "category": "data-display", "priority": "P0", "decision": "generate-core", "figmaNaming": "DS/DataDisplay/KpiTile",      "basis": "preset P0 命中，跨屏复用 ≥3，命中 CD-1", "states": ["default"] },
+    { "name": "GlowMetric",   "briefRefs": ["GlowMetric"],   "category": "data-display", "priority": "P0", "decision": "generate-core", "figmaNaming": "DS/DataDisplay/GlowMetric",   "basis": "preset P0 命中；shadow.glow 唯一合法使用者之一", "states": ["default", "alert"] },
+    { "name": "MapPanel",     "briefRefs": ["MapPanel"],     "category": "chart",        "priority": "P0", "decision": "generate-core", "figmaNaming": "DS/Chart/MapPanel",           "basis": "preset P0 命中；路况底图按 矢量 M/L/Q/C/Z 近似实现规则", "states": ["default", "heat"] },
+    { "name": "TrendChart",   "briefRefs": ["TrendChart"],   "category": "chart",        "priority": "P0", "decision": "generate-core", "figmaNaming": "DS/Chart/TrendChart",         "basis": "preset P0 命中，跨屏复用 ≥3", "states": ["default", "empty"] },
+    { "name": "GaugeChart",   "briefRefs": ["GaugeChart"],   "category": "chart",        "priority": "P0", "decision": "generate-core", "figmaNaming": "DS/Chart/GaugeChart",         "basis": "preset P0 命中；弧线用三次贝塞尔近似（10.1 §3.3 无 A 命令）", "states": ["default"] },
+    { "name": "RankList",     "briefRefs": ["RankList"],     "category": "data-display", "priority": "P0", "decision": "generate-core", "figmaNaming": "DS/DataDisplay/RankList",     "basis": "preset P0 命中，总览/专题双屏复用", "states": ["default"] },
+    { "name": "AlertTicker",  "briefRefs": ["AlertTicker"],  "category": "feedback",     "priority": "P1", "decision": "generate-core", "figmaNaming": "DS/Feedback/AlertTicker",     "basis": "preset coreComponents 命中，总览/设备双屏复用 ≥3，命中 CD-1", "states": ["default", "critical"] },
+    { "name": "MapPanel",     "briefRefs": ["RoadStatusMap"], "category": "chart",       "priority": "P1", "decision": "extend", "figmaNaming": "DS/Chart/MapPanel", "variants": ["road-status"], "basis": "与 MapPanel 80%+ 一致（底图+路况着色），命中 CD-2：新增 road-status variant，不新建组件", "states": ["default", "heat"] },
+    { "name": "TrendChart",   "briefRefs": ["CostTrendChart"], "category": "chart",      "priority": "P1", "decision": "extend", "figmaNaming": "DS/Chart/TrendChart", "variants": ["cost-dual-axis"], "basis": "与 TrendChart 结构一致（仅双轴+费用单位），命中 CD-2", "states": ["default", "empty"] },
+    { "name": "MaintenanceProjectList", "briefRefs": ["MaintenanceProjectList"], "category": "data-display", "priority": "P1", "decision": "create-local", "figmaNaming": "Local/Project/MaintenanceProjectList", "basis": "工程条目结构专属（进度条+费用+里程碑），仅专题屏使用，复用 <3 命中 CD-3", "states": ["default"] },
+    { "name": "DeviceMonitor", "briefRefs": ["DeviceMonitor"], "category": "data-display", "priority": "P1", "decision": "create-local", "figmaNaming": "Local/Device/DeviceMonitor", "basis": "设备状态矩阵网格为设备屏特殊结构，复用 <3 命中 CD-3", "states": ["default", "offline"] },
+    { "name": "AlertPanel",   "briefRefs": ["AlertPanel"],   "category": "feedback",     "priority": "P1", "decision": "create-local", "figmaNaming": "Local/Overview/AlertPanel", "basis": "告警详情面板仅设备屏使用（AlertTicker 已覆盖滚动告警），复用 <3 命中 CD-3", "states": ["default", "critical"] },
+    { "name": "TimeRangeTabs", "briefRefs": ["TimeRangeTabs"], "category": "navigation",  "priority": "P1", "decision": "create-local", "figmaNaming": "Local/Common/TimeRangeTabs", "basis": "仅专题/设备两屏使用（复用 <3），未达 CD-1 阈值，命中 CD-3 本地实现", "states": ["default", "active"] }
+  ],
+  "layout": {
+    "pattern": "full-bleed-screen",
+    "frameBaseline": "1920x1080（出图 3840x2160 @2x）",
+    "pages": [
+      {
+        "name": "养护总览驾驶舱",
+        "zones": [
+          { "name": "TitleBar",   "role": "标题栏",       "size": "1920x86", "order": 1, "notes": "高度占比 8%（preset geometry，1080×8%≈86 取整，rule:GEO-1 尺寸取整到 px）" },
+          { "name": "LeftPanel",  "role": "左侧监控面板", "size": "480xFILL(25%)", "order": 2, "notes": "KpiTile×4 + TrendChart + RankList，面板间距 16（preset）" },
+          { "name": "CenterMap",  "role": "路网 GIS 地图", "size": "FILLxFILL(960)", "order": 3, "notes": "MapPanel 实例；图表/地图面积占比 ≥50%（preset geometry 红线）；热区可用 shadow.glow" },
+          { "name": "RightPanel", "role": "右侧监控面板", "size": "480xFILL(25%)", "order": 4, "notes": "GlowMetric + GaugeChart + AlertTicker" }
+        ],
+        "notes": "chartRatio 红线：中央地图 960x994 ≈ 全屏 47% + 两侧图表面积，合计 ≥50%"
+      },
+      {
+        "name": "养护专题屏",
+        "zones": [
+          { "name": "TitleBar",     "role": "标题栏",         "size": "1920x86", "order": 1 },
+          { "name": "LeftPanel",    "role": "工程列表+费用趋势", "size": "480xFILL(25%)", "order": 2, "notes": "MaintenanceProjectList 本地组件 + TrendChart(cost-dual-axis variant)" },
+          { "name": "CenterTrend",  "role": "费用/进度双趋势", "size": "FILLxFILL", "order": 3, "notes": "TimeRangeTabs 本地组件置顶" },
+          { "name": "RightPanel",   "role": "进度排名",        "size": "480xFILL(25%)", "order": 4, "notes": "RankList 实例（进度列覆写）" }
+        ]
+      },
+      {
+        "name": "设备物联屏",
+        "zones": [
+          { "name": "TitleBar",   "role": "标题栏",       "size": "1920x86", "order": 1 },
+          { "name": "KpiRow",     "role": "设备 KPI 行",  "size": "FILLx112(4列 gap16)", "order": 2, "notes": "GlowMetric×4，在线率数字用 tokens.typography.number" },
+          { "name": "MonitorGrid", "role": "设备状态矩阵", "size": "FILLxFILL", "order": 3, "notes": "DeviceMonitor 本地组件；离线态用 status.danger" },
+          { "name": "AlertRail",  "role": "告警详情栏",   "size": "360xFILL", "order": 4, "notes": "AlertPanel 本地组件；AlertTicker 置底滚动" }
+        ]
+      }
+    ]
+  },
+  "responsive": {
+    "baseline": "1920x1080 固定分辨率大屏",
+    "breakpoints": [],
+    "rules": [
+      "大屏无响应式断点；设计基准 1920x1080，出图 3840x2160 @2x（preset geometry）",
+      "值守环境分辨率漂移时由播放端等比缩放，不做布局重排"
+    ]
+  },
+  "accessibility": {
+    "contrast": [
+      "text.primary #E6F1FF on background.page #0A1A3C = 15.0:1 PASS（标题/正文）",
+      "text.regular #8FB3D9 on surface.card #0F2547 = 7.0:1 PASS（面板正文）",
+      "text.secondary #5A7CA6 on surface.card #0F2547 = 3.5:1 PASS-LARGE（仅装饰性标签，禁用于数据正文）",
+      "brand.primary #00D4FF on background.page #0A1A3C = 9.7:1 PASS（数据高亮）",
+      "远距可读红线：3m 视距下正文字号 ≥14px、关键指标数字 ≥20px（preset avoid + typography 红线）"
+    ],
+    "minFontSize": { "value": 14, "source": "rule:TY-3(preset avoid 禁 <14px，高于常规 11/12 下限)" },
+    "touchTarget": { "value": 0, "source": "rule:AC-4(big-screen 无触控目标要求，值守+遥控场景不适用)" },
+    "focusRing":   { "value": "none", "source": "rule:AC-4(大屏无键盘焦点场景)" },
+    "notes": ["动效每屏 ≤2 处（preset avoid 红线）：总览屏动效=AlertTicker 滚动+地图热区呼吸；其余屏动效=时间轴轮播"]
+  },
+  "sourceMapping": {
+    "presetId": "gov-digital-screen",
+    "rulesUsed": ["CD-1", "CD-2", "CD-2b", "CD-3", "RD-1-dark", "RD-2", "RD-3-dark", "ST-1", "TY-2", "TY-3", "TY-4", "GEO-1", "AC-4"],
+    "briefOverrides": [],
+    "existingDsRefs": [],
+    "assumptions": [
+      "继承 Brief._assumptions 全部 3 条（子屏拆分推导/指标组件推导/未做行业覆盖）",
+      "RD-1/RD-3 使用深色主题变体：混合基为 background/surface，派生规则在深色主题下的适配为本 Spec 首次声明"
+    ]
+  },
+  "buildPlan": {
+    "strategy": "ds-first：绿地深色项目先铺页面深色底（background token），再按 generate-core 清单建 8 个核心 DS 组件，再三屏分区构建；每批 ≤30 ops，WRITE→READBACK，as: 映射逐批落盘 build-ids",
+    "batches": [
+      { "seq": 1,  "target": "DS 首建：TitleBar+KpiTile+GlowMetric", "estOps": 26 },
+      { "seq": 2,  "target": "DS 首建：MapPanel+TrendChart", "estOps": 28 },
+      { "seq": 3,  "target": "DS 首建：GaugeChart+RankList+AlertTicker", "estOps": 24 },
+      { "seq": 4,  "target": "MapPanel/TrendChart variants 扩展（road-status/cost-dual-axis）", "estOps": 16 },
+      { "seq": 5,  "target": "总览屏：深色底+TitleBar+LeftPanel", "estOps": 26 },
+      { "seq": 6,  "target": "总览屏：CenterMap+RightPanel", "estOps": 24 },
+      { "seq": 7,  "target": "专题屏：LeftPanel+CenterTrend+RightPanel", "estOps": 28 },
+      { "seq": 8,  "target": "设备屏：KpiRow+MonitorGrid+AlertRail", "estOps": 26 },
+      { "seq": 9,  "target": "五级 QA 审计（深色 token 双通道扫描）", "estOps": 14 }
+    ]
+  }
+}

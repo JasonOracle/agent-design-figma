@@ -1,0 +1,53 @@
+{
+  "_source": "few-shot 示例 3/3 —— 河南高速智慧养护大屏（交通行业 big-screen）项目需求整理。历史会话细节不可考，页面模块与数据指标为按高速养护 IOC 领域惯例重建，使用前可由用户修正",
+  "product": {
+    "name": "河南高速智慧养护决策平台",
+    "industry": "交通",
+    "targetUser": "高速集团养护管理层与调度指挥人员，大屏值守 + 决策汇报",
+    "platform": "big-screen"
+  },
+  "designDirection": {
+    "style": "gov-digital-screen",
+    "keywords": ["深空科技蓝", "Cyan glow", "路况即地图", "远距可读", "决策导向"],
+    "reference": ["智慧城市 IOC", "高速指挥中心", "数字孪生驾驶舱"],
+    "avoid": ["纯白大面积区块", "浅色主题", "营销文案", "玻璃拟态卡片", "动效堆砌(单屏≤2处)", "小字号(<14px)"]
+  },
+  "informationArchitecture": {
+    "pages": [
+      { "name": "养护总览驾驶舱", "purpose": "回答「全省路网养护状况整体如何」：路网地图 + KPI + 异常告警", "layout": "full-bleed-screen + center-map" },
+      { "name": "养护专题屏", "purpose": "回答「养护工程进展与费用」：工程列表 + 费用趋势 + 进度排名", "layout": "full-bleed-screen + left-right-panels" },
+      { "name": "设备物联屏", "purpose": "回答「传感器与设备在线率」：设备状态矩阵 + 实时数据流", "layout": "full-bleed-screen + grid-monitor" }
+    ],
+    "layoutPattern": "full-bleed-screen",
+    "contentDensity": "dense"
+  },
+  "visualSystem": {
+    "colorMood": "深空科技蓝，数据高亮如信号灯",
+    "primaryColor": "#00D4FF",
+    "background": "#0A1A3C",
+    "typography": "标题 DIN/科技数字字体（数字等宽），正文系统栈 / 数字 20-26px 强调 / 最小 14px",
+    "spacing": "8pt 网格，面板间距 16-24px",
+    "radius": "2/4"
+  },
+  "componentExpectation": [
+    { "name": "TitleBar", "type": "navigation", "priority": "P0" },
+    { "name": "KpiTile", "type": "data-display", "priority": "P0" },
+    { "name": "GlowMetric", "type": "data-display", "priority": "P0" },
+    { "name": "MapPanel", "type": "chart", "priority": "P0" },
+    { "name": "TrendChart", "type": "chart", "priority": "P0" },
+    { "name": "GaugeChart", "type": "chart", "priority": "P0" },
+    { "name": "RankList", "type": "data-display", "priority": "P0" },
+    { "name": "RoadStatusMap", "type": "chart", "priority": "P1" },
+    { "name": "MaintenanceProjectList", "type": "data-display", "priority": "P1" },
+    { "name": "CostTrendChart", "type": "chart", "priority": "P1" },
+    { "name": "DeviceMonitor", "type": "data-display", "priority": "P1" },
+    { "name": "AlertPanel", "type": "feedback", "priority": "P1" },
+    { "name": "AlertTicker", "type": "feedback", "priority": "P1" },
+    { "name": "TimeRangeTabs", "type": "navigation", "priority": "P1" }
+  ],
+  "_assumptions": [
+    "informationArchitecture: 子屏数量与主题（养护/设备）按高速养护 IOC 惯例推导，用户未提供原始大屏拆分方案",
+    "componentExpectation: 数据指标类组件按养护领域（路况/工程/费用/设备）推导",
+    "visualSystem: 沿用 gov-digital-screen 预设，未做行业覆盖（交通行业映射的大屏色与本 Preset 一致）"
+  ]
+}

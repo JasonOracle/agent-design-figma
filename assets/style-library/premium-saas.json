@@ -1,0 +1,32 @@
+{
+  "id": "premium-saas",
+  "name": "Premium SaaS / 现代订阅制产品",
+  "keywords": ["克制", "大留白", "高级感", "微阴影", "高对比排版"],
+  "reference": ["Apple", "Stripe", "Linear", "Vercel"],
+  "avoid": ["渐变", "玻璃拟态", "重投影", "拟物", "密集表格", "情绪化插画", "3D", "霓虹"],
+  "visualSystem": {
+    "colorMood": "黑白灰为基底，品牌色仅用于关键动作与数据强调",
+    "primaryColor": "#5A5CF0",
+    "background": "#FAFAFA",
+    "surface": "#FFFFFF",
+    "textColors": ["#111827", "#6B7280", "#9CA3AF"],
+    "stroke": "#E5E7EB",
+    "chartColors": ["#5A5CF0", "#10B981", "#F59E0B", "#EF4444", "#6366F1"],
+    "typography": "Inter（首选，跨平台恒可用）/ SF Pro（中文降级链 PingFang SC → Microsoft YaHei → Inter 兜底；Windows 无 PingFang SC，必须按链依次探测）/ 字阶 26-32-16-14-13-12-11，标题 medium 不用 bold",
+    "spacing": "8pt 网格，区块间距 48-80px，页面水平 padding ≥80px",
+    "radius": "4/6/8",
+    "shadow": "0 1px 2px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04)"
+  },
+  "layoutPattern": "top-nav-content",
+  "contentDensity": "sparse",
+  "coreComponents": [
+    { "name": "NavBar", "type": "navigation", "priority": "P0" },
+    { "name": "HeroSection", "type": "layout", "priority": "P0" },
+    { "name": "Button", "type": "form", "priority": "P0" },
+    { "name": "Input", "type": "form", "priority": "P0" },
+    { "name": "PricingCard", "type": "data-display", "priority": "P0" },
+    { "name": "FeatureGrid", "type": "layout", "priority": "P0" },
+    { "name": "StatCard", "type": "data-display", "priority": "P1" },
+    { "name": "Footer", "type": "navigation", "priority": "P1" }
+  ]
+}

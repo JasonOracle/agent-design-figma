@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Export Not Run",
+  "description": "A4 诚实降级记录：L5 Export 闸门在「export-manifest.json 不存在」时产出的 NOT_RUN 留痕（qa-export --if-absent not-run，退出码 3）。机器可读的「没查」形态——不是 PASS（没查不得折算为通过），也不是 FAIL（没有产物可查不是产物缺陷）。补齐清单后必须复跑正式闸门。「有清单但缺环境凭证」的另一降级形态由 QA3 的 figmaFileKey=null + _meta.note 承载（D2/D4）。",
+  "type": "object",
+  "required": ["status", "gate", "manifest", "manifestExists", "reason", "decision", "emittedBy"],
+  "properties": {
+    "status": {
+      "type": "string",
+      "const": "NOT_RUN",
+      "description": "固定值——本记录声明的是「闸门未执行」，不是「闸门通过」"
+    },
+    "gate": {
+      "type": "string",
+      "const": "qa-export (L5 Export Gate)",
+      "description": "哪个闸门没跑成"
+    },
+    "manifest": {
+      "type": "string",
+      "description": "期望存在却不存在的清单路径（绝对路径）——供复核者定位"
+    },
+    "manifestExists": {
+      "type": "boolean",
+      "const": false,
+      "description": "产出本记录的前提就是清单不存在；若为 true 说明记录被误用"
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1,
+      "description": "人写的「为什么没清单」（如：L5 改走逐组件 PNG，未生成清单）——不许静默，空话拦截在 CLI 侧"
+    },
+    "decision": {
+      "type": "string",
+      "pattern": "^UNVERIFIED",
+      "description": "固定裁决前缀：未核对，不得折算为通过；补齐清单后必须复跑正式闸门"
+    },
+    "emittedBy": {
+      "type": "string",
+      "description": "产出本记录的工具与模式（可回放）"
+    },
+    "note": {
+      "type": "string",
+      "description": "补充说明（如指向另一种降级形态）"
+    }
+  }
+}

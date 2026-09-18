@@ -1,0 +1,67 @@
+{
+  "project": "河南高速智慧养护决策平台",
+  "page": "养护总览驾驶舱",
+  "scores": {
+    "layout": 8,
+    "color": 7,
+    "consistency": 8.5,
+    "commercial": 8,
+    "usability": 7
+  },
+  "average": 7.7,
+  "issues": [
+    {
+      "severity": "high",
+      "location": "KpiTile 副标题 / RankList 行说明",
+      "evidence": "text.secondary #5A7CA6 on surface.card #0F2547 对比度实测 3.5:1 < 4.5:1（WCAG AA，逐节点实算；L2 对该 token 的 accessibility 声明只授权装饰性标签，此处用于正文级说明文字），3 轮修复后仍不达标",
+      "evidenceNodeIds": ["GlowMetric/kpi-sub-02", "RankList/row-note-05"],
+      "suggestion": "text.secondary 在深色主题需加深至对比度 ≥4.5:1（保持蓝灰色相），重算 hover/divider 派生值（RD 深色变体）并全页重扫",
+      "targetLayer": "L2"
+    },
+    {
+      "severity": "medium",
+      "location": "KpiTile（6 个普通指标瓦片）",
+      "evidence": "glow 阴影用于全部 6 个瓦片，超出 L2 shadow.glow.usage 约束『仅限 GlowMetric 关键指标与 MapPanel 热区』（set-effects readback）",
+      "evidenceNodeIds": ["KpiTile/tile-01..06"],
+      "suggestion": "仅保留充电桩在线率、养护及时率 2 个核心 KPI 的 glow；其余改 shadow.card",
+      "targetLayer": "L2"
+    },
+    {
+      "severity": "medium",
+      "location": "AlertTicker 与 RankList 间距",
+      "evidence": "实测 gap 13px，非 spacing.scale 档位（8/16/24），与左侧 MapPanel 的 16px 不一致",
+      "evidenceNodeIds": ["AlertTicker", "RankList"],
+      "suggestion": "对齐 16 档位（set-item-spacing），重建受影响容器",
+      "targetLayer": "L3"
+    },
+    {
+      "severity": "low",
+      "location": "TitleBar 主标题",
+      "evidence": "28px 在 typography 档位外（本页档位 14/20/22/26），readback fontSize=28",
+      "evidenceNodeIds": ["TitleBar/main-title"],
+      "suggestion": "归档到 display 26 档，或如确需 28px 须在 L2 新增 TY 值并带 source（rule: 大屏标题场景）",
+      "targetLayer": "L2"
+    }
+  ],
+  "action": "STOP_MAX_LOOP",
+  "_loop": {
+    "round": 3,
+    "maxLoop": 3,
+    "history": [7.2, 7.5, 7.7],
+    "note": "Round1 发现 7 项（color 6.5 / usability 6.5）。Round2 修复 4 项：glow 收敛、间距档位、AlertTicker 层级、密度调优 → color 7 / usability 7。Round3 修复 2 项但 text.secondary 对比度受深色底限制，改 3 次仍未达 4.5:1（色相被品牌约束锁死）。达 CL-3 上限，按 CL-4 禁止第 4 轮自动优化 → STOP_MAX_LOOP，转人工决策：深色主题下接受 AA-large 豁免或调整品牌色相（L1 级决策）"
+  },
+  "_meta": {
+    "reviewer": "agent (structured-only；visual-critic.md §1 + 深色主题锚点 Linear / gov-digital-screen preset)",
+    "reviewedAt": "2026-09-15T21:30:00+08:00",
+    "inputs": ["assets/examples/example-highway.json", "assets/examples/example-highway.dsspec.json", "派生色（RD）深色变体规则"]
+  },
+  "_evidence": {
+    "mode": "structured-only",
+    "unassessed": [
+      "Consistency §1.3 icon 风格（线性 vs 面性）：尺寸与描边可测，风格归属需读图",
+      "Commercial §1.4 商业产品相似度 40%：需与政务大屏锚点并置比对，结构化回读不可判定",
+      "Usability §1.5 大屏视觉焦点真实落点：需读图"
+    ],
+    "visionObservations": []
+  }
+}
